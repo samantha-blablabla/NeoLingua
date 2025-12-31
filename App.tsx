@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateLesson } from './services/geminiService';
-import { LessonData, VocabularyItem, UserStats } from './types';
+import { LessonData, VocabularyItem, UserStats, Badge } from './types';
+import { checkAndUnlockBadges } from './services/badgeService';
 import GrainOverlay from './components/GrainOverlay';
 import { HomeIcon, LibraryIcon, MedalIcon, FlashIcon, UserIcon, SparklesIcon, HeadphonesIcon, FlameIcon, CloseIcon } from './components/Icons';
 import { lessonsData } from './lessons';
@@ -40,7 +41,7 @@ const App: React.FC = () => {
   const [currentDay, setCurrentDay] = useState<string>("Monday");
   const [view, setView] = useState<ViewType>('home');
   const [showBadgePopup, setShowBadgePopup] = useState(false);
-  const [activeBadge, setActiveBadge] = useState(BADGES[0]);
+  const [activeBadge, setActiveBadge] = useState<Badge | null>(null);
 
   const [userStats, setUserStats] = useState<UserStats>(() => {
     const saved = localStorage.getItem('neolingua_stats');
@@ -48,17 +49,34 @@ const App: React.FC = () => {
       lessonsCompleted: 0,
       streak: 5,
       perfectTests: 0,
+      podcastsCompleted: 0,
       unlockedBadges: []
     };
   });
 
+  // Lưu stats vào localStorage mỗi khi thay đổi
   useEffect(() => {
     localStorage.setItem('neolingua_stats', JSON.stringify(userStats));
   }, [userStats]);
 
-  const randomWord = useMemo(() => {
-    const allWords = lessonsData.flatMap(lesson => lesson.vocab_set);
-    return allWords.length ? allWords[Math.floor(Math.random() * allWords.length)] : null;
+  // Hàm kiểm tra huy hiệu mới một cách chủ động
+  const runBadgeCheck = useCallback((currentStats: UserStats) => {
+    const newlyUnlocked = checkAndUnlockBadges(currentStats);
+    if (newlyUnlocked.length > 0) {
+      // Lấy badge đầu tiên mới mở để show popup
+      const firstBadgeId = newlyUnlocked[0];
+      const badgeData = BADGES.find(b => b.id === firstBadgeId);
+      if (badgeData) {
+        setActiveBadge(badgeData);
+        setShowBadgePopup(true);
+      }
+      
+      // Cập nhật stats với các badge mới
+      setUserStats(prev => ({
+        ...prev,
+        unlockedBadges: Array.from(new Set([...prev.unlockedBadges, ...newlyUnlocked]))
+      }));
+    }
   }, []);
 
   const fetchNewLesson = useCallback(async (day: string) => {
@@ -78,11 +96,23 @@ const App: React.FC = () => {
     fetchNewLesson(currentDay);
   }, [currentDay, fetchNewLesson]);
 
-  const handleTestBadge = () => {
-    // Randomly pick a badge for testing
-    const randomBadge = BADGES[Math.floor(Math.random() * BADGES.length)];
-    setActiveBadge(randomBadge);
-    setShowBadgePopup(true);
+  const handlePodcastFinished = () => {
+    setUserStats(prev => {
+      const newStats = { ...prev, podcastsCompleted: prev.podcastsCompleted + 1 };
+      // Chạy kiểm tra badge ngay khi podcast kết thúc
+      setTimeout(() => runBadgeCheck(newStats), 500);
+      return newStats;
+    });
+  };
+
+  const handleLessonFinished = () => {
+    setUserStats(prev => {
+      const newStats = { ...prev, lessonsCompleted: prev.lessonsCompleted + 1 };
+      // Chạy kiểm tra badge ngay khi bài học kết thúc
+      setTimeout(() => runBadgeCheck(newStats), 500);
+      return newStats;
+    });
+    setView('success');
   };
 
   const navItems: { id: ViewType; icon: any; label: string }[] = [
@@ -96,7 +126,6 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col max-w-md mx-auto relative bg-[#0A0A0A] shadow-2xl border-x border-zinc-900 overflow-hidden text-white font-sans selection:bg-[#CCFF00] selection:text-black">
       <GrainOverlay />
       
-      {/* Badge Notification Popup */}
       <BadgePopup 
         badge={activeBadge} 
         isVisible={showBadgePopup} 
@@ -109,16 +138,14 @@ const App: React.FC = () => {
             key="podcast" 
             lesson={lesson || lessonsData[0]} 
             onBack={() => setView('home')} 
+            onFinished={handlePodcastFinished}
           />
         )}
         {view === 'lessonDetail' && lesson && (
           <LessonDetailScreen 
             key="lessonDetail"
             lesson={lesson} 
-            onFinish={() => {
-              setUserStats(prev => ({ ...prev, lessonsCompleted: prev.lessonsCompleted + 1 }));
-              setView('success');
-            }} 
+            onFinish={handleLessonFinished} 
             onBack={() => setView('home')} 
           />
         )}
@@ -172,7 +199,7 @@ const App: React.FC = () => {
               </div>
             </motion.section>
 
-            {randomWord && <WordOfTheDayWidget word={randomWord} />}
+            {lessonsData[0].vocab_set[0] && <WordOfTheDayWidget word={lessonsData[0].vocab_set[0]} />}
 
             <div className="grid grid-cols-2 gap-4">
               <motion.div 
@@ -229,12 +256,24 @@ const App: React.FC = () => {
             </section>
             
             <div className="bg-zinc-900 rounded-[32px] p-6 border border-zinc-800 space-y-6">
+              <h4 className="text-[10px] font-sans font-black text-zinc-600 uppercase tracking-widest">USER STATS</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-zinc-950 rounded-2xl border border-zinc-900">
+                  <span className="text-[10px] font-bold text-zinc-600 block mb-1">PODCASTS</span>
+                  <span className="text-xl font-black text-[#CCFF00]">{userStats.podcastsCompleted}</span>
+                </div>
+                <div className="p-4 bg-zinc-950 rounded-2xl border border-zinc-900">
+                  <span className="text-[10px] font-bold text-zinc-600 block mb-1">LESSONS</span>
+                  <span className="text-xl font-black text-[#BFA3FF]">{userStats.lessonsCompleted}</span>
+                </div>
+              </div>
+
               <h4 className="text-[10px] font-sans font-black text-zinc-600 uppercase tracking-widest">DEVELOPER ZONE</h4>
               <button 
-                onClick={handleTestBadge}
+                onClick={() => runBadgeCheck({ ...userStats, podcastsCompleted: 5 })}
                 className="w-full flex items-center justify-between p-4 bg-[#CCFF00]/10 border border-[#CCFF00]/30 rounded-2xl group transition-all"
               >
-                <span className="text-sm font-bold text-[#CCFF00]">Test Achievement Popup</span>
+                <span className="text-sm font-bold text-[#CCFF00]">Simulate 5 Podcasts (Unlock Social)</span>
                 <FlashIcon size={18} color="#CCFF00" className="group-hover:translate-x-1 transition-transform" />
               </button>
               

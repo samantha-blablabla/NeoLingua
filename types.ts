@@ -27,10 +27,13 @@ export interface LessonData {
   };
 }
 
+export type CriteriaType = 'LESSON_COUNT' | 'STREAK' | 'PODCAST_COUNT' | 'PERFECT_TESTS' | 'NIGHT_LEARNING';
+
 export interface UserStats {
   lessonsCompleted: number;
   streak: number;
   perfectTests: number;
+  podcastsCompleted: number; // Theo dõi số podcast đã nghe xong
   unlockedBadges: string[];
 }
 
@@ -39,8 +42,11 @@ export interface Badge {
   title: string;
   description: string;
   howToUnlock: string;
-  // Fix: Added 'social' to allow usage in BadgeGallery.tsx
   icon: 'sneaker' | 'headphones' | 'coffee' | 'flash' | 'medal' | 'social';
+  criteria?: {
+    type: CriteriaType;
+    threshold: number;
+  };
 }
 
 export enum ThemeColors {
