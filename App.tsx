@@ -74,6 +74,7 @@ const App: React.FC = () => {
       streak: prev.streak + 1
     }));
     setView('home');
+    // Optional: add a success toast logic here if needed
   };
 
   const navItems: { id: ViewType; icon: any; label: string }[] = [
