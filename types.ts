@@ -1,10 +1,24 @@
 
-export interface LessonData {
-  vocabulary: string;
+export interface VocabularyItem {
+  word: string;
   pronunciation: string;
-  definition: string;
+  meaning: string;
   example: string;
-  challenge: string;
+}
+
+export interface LessonData {
+  week: number;
+  day: string;
+  topic: string;
+  vocab_set: VocabularyItem[];
+  grammar_focus: string;
+  podcast_content: string;
+  interactive_challenge: {
+    type: string;
+    question: string;
+    options?: string[];
+    correct_answer: string;
+  };
 }
 
 export enum ThemeColors {
