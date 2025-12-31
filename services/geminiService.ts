@@ -17,7 +17,11 @@ CẤU TRÚC JSON PHẢI CHÍNH XÁC THEO SCHEMA.
 `;
 
 export const generateLesson = async (level: number): Promise<LessonData> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('VITE_GEMINI_API_KEY is not set. Please add it to your .env.local file.');
+  }
+  const ai = new GoogleGenAI({ apiKey });
   
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
