@@ -142,6 +142,37 @@ NeoLingua/
 
 ---
 
+## 📊 Daily Sync & Reports
+
+NeoLingua includes an automated sync script for daily reporting and code management.
+
+### Quick Commands
+
+```bash
+# Run daily sync (auto-commit & push)
+npm run sync
+
+# Generate report only
+npm run report
+```
+
+### What it does
+
+- ✅ Generates daily project statistics
+- ✅ Updates CHANGELOG.md automatically
+- ✅ Commits all changes with detailed message
+- ✅ Pushes to GitHub
+
+### Reports Location
+
+- **Daily reports:** `reports/report-YYYY-MM-DD.md`
+- **Latest report:** `reports/LATEST.md`
+- **Changelog:** `CHANGELOG.md`
+
+For detailed guide, see [docs/SYNC-GUIDE.md](docs/SYNC-GUIDE.md)
+
+---
+
 ## 🎨 Customization
 
 ### Change Theme Colors
