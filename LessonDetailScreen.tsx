@@ -1,7 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LessonData } from './types';
+import { SoundHighIcon } from './components/Icons';
 
 interface LessonDetailScreenProps {
   lesson: LessonData;
@@ -20,28 +21,36 @@ const LessonDetailScreen: React.FC<LessonDetailScreenProps> = ({ lesson, onFinis
 
   const speak = (text: string) => {
     if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       utterance.rate = 0.9;
-      window.speechSynthesis.cancel(); // Stop any current speech
+      utterance.pitch = 1;
+      
+      const voices = window.speechSynthesis.getVoices();
+      const usVoice = voices.find(v => v.lang.includes('en-US') && v.name.includes('Google')) || 
+                      voices.find(v => v.lang.includes('en-US'));
+      if (usVoice) utterance.voice = usVoice;
+
       window.speechSynthesis.speak(utterance);
     }
   };
 
-  const nextStep = () => {
-    if (step < totalSteps - 1) {
-      setStep(step + 1);
-    } else {
-      onFinish();
+  useEffect(() => {
+    if (currentVocab && !isGrammarStep) {
+      const timer = setTimeout(() => speak(currentVocab.word), 500);
+      return () => clearTimeout(timer);
     }
+  }, [step, currentVocab, isGrammarStep]);
+
+  const nextStep = () => {
+    if (step < totalSteps - 1) setStep(step + 1);
+    else onFinish();
   };
 
   const prevStep = () => {
-    if (step > 0) {
-      setStep(step - 1);
-    } else {
-      onBack();
-    }
+    if (step > 0) setStep(step - 1);
+    else onBack();
   };
 
   return (
@@ -51,77 +60,74 @@ const LessonDetailScreen: React.FC<LessonDetailScreenProps> = ({ lesson, onFinis
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[60] bg-[#0A0A0A] flex flex-col pt-12"
     >
-      {/* Top Progress Indicator */}
-      <div className="px-6 mb-8">
-        <div className="h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
+      {/* Precision Progress Bar */}
+      <div className="px-6 mb-12">
+        <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
-            className="h-full bg-[#CCFF00] shadow-[0_0_15px_rgba(204,255,0,0.5)] transition-all duration-500"
+            transition={{ type: "spring", damping: 20, stiffness: 80 }}
+            className="h-full bg-[#CCFF00] shadow-[0_0_15px_rgba(204,255,0,0.6)]"
           />
         </div>
-        <div className="flex justify-between items-center mt-4">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse"></span>
-            <span className="text-[10px] font-sans font-black text-zinc-500 uppercase tracking-[0.2em]">
-              {isGrammarStep ? 'PHẦN CUỐI' : `TỪ VỰNG ${step + 1}/${totalVocab}`}
-            </span>
-          </div>
+        <div className="flex justify-between items-center mt-5">
+          <span className="text-[10px] font-sans font-black text-zinc-500 uppercase tracking-[0.2em]">
+            {isGrammarStep ? 'MASTERY PHASE' : `MODULE ${step + 1}/${totalVocab}`}
+          </span>
           <button 
             onClick={onBack}
-            className="text-[10px] font-sans font-black text-zinc-500 uppercase tracking-widest hover:text-white transition-colors"
+            className="text-[10px] font-sans font-black text-zinc-600 uppercase tracking-widest hover:text-[#FF6B4A] transition-colors"
           >
-            THOÁT
+            EXIT SESSION
           </button>
         </div>
       </div>
 
-      <main className="flex-1 px-6 flex flex-col justify-center pb-20">
+      <main className="flex-1 px-6 flex flex-col justify-center pb-24">
         <AnimatePresence mode="wait">
           {!isGrammarStep && currentVocab ? (
             <motion.div
               key={`vocab-${step}`}
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -30, scale: 1.05 }}
-              transition={{ type: "spring", damping: 20, stiffness: 100 }}
-              className="space-y-10"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-12"
             >
-              <div className="text-center space-y-4">
-                <h2 className="text-6xl font-heading font-black tracking-tighter text-white leading-[0.85] break-words">
-                  {currentVocab.word}
-                </h2>
-                <div className="flex items-center justify-center gap-3">
-                  <p className="text-zinc-500 font-sans font-medium text-sm tracking-wide">
+              <div className="flex flex-col items-center gap-4">
+                <div 
+                  onClick={() => speak(currentVocab.word)}
+                  className="group flex items-center gap-5 cursor-pointer"
+                >
+                  <h2 className="text-[32px] font-heading font-black tracking-tight text-white leading-none group-hover:text-[#CCFF00] transition-colors">
+                    {currentVocab.word}
+                  </h2>
+                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 group-hover:bg-[#CCFF00] group-hover:text-black transition-all">
+                    <SoundHighIcon size={18} />
+                  </div>
+                </div>
+                <div className="px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-800">
+                  <span className="text-zinc-500 font-sans font-medium text-xs tracking-wider">
                     {currentVocab.pronunciation}
-                  </p>
-                  <button 
-                    onClick={() => speak(currentVocab.word)}
-                    className="w-10 h-10 bg-zinc-900 rounded-2xl flex items-center justify-center text-[#CCFF00] border border-zinc-800 hover:scale-110 active:scale-95 transition-all shadow-lg"
-                  >
-                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 3v18l-6-6H2V9h4l6-6zm4.5 9c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 4.45v.2c0 .38.25.71.61.85C17.18 6.53 19 9.06 19 12s-1.82 5.47-4.39 6.5c-.36.14-.61.47-.61.85v.2c0 .65.73.99 1.24.71C18.44 18.75 21 15.67 21 12s-2.56-6.75-5.76-8.26c-.51-.28-1.24.06-1.24.71z"/>
-                    </svg>
-                  </button>
+                  </span>
                 </div>
               </div>
 
-              <div className="bg-[#1C1C1E] rounded-[40px] p-8 hard-shadow border border-zinc-800/50 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#CCFF00]/5 blur-2xl rounded-full -mr-12 -mt-12" />
+              <div className="bg-[#1C1C1E] rounded-[24px] p-6 hard-shadow border border-zinc-800/50 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-3xl rounded-full -mr-16 -mt-16" />
                 
-                <div className="space-y-6">
-                  <div>
-                    <span className="text-[9px] font-sans font-black text-[#CCFF00] uppercase tracking-[0.2em] mb-2 block opacity-60">Ý NGHĨA</span>
-                    <p className="text-xl font-sans font-bold text-white leading-tight">
+                <div className="space-y-8">
+                  <div className="space-y-2">
+                    <span className="text-[9px] font-sans font-black text-[#CCFF00] uppercase tracking-[0.3em] opacity-50">DEFINITION</span>
+                    <p className="text-[16px] font-sans font-normal text-white leading-relaxed">
                       {currentVocab.meaning}
                     </p>
                   </div>
                   
-                  <div className="h-px w-full bg-zinc-800/50" />
+                  <div className="h-px w-full bg-zinc-800/40" />
                   
-                  <div>
-                    <span className="text-[9px] font-sans font-black text-zinc-500 uppercase tracking-[0.2em] mb-2 block opacity-60">VÍ DỤ</span>
-                    <p className="text-sm font-sans font-medium text-zinc-400 italic leading-relaxed">
+                  <div className="space-y-2">
+                    <span className="text-[9px] font-sans font-black text-zinc-500 uppercase tracking-[0.3em] opacity-50">CONTEXT EXAMPLE</span>
+                    <p className="text-[16px] font-sans font-normal text-zinc-400 italic leading-relaxed">
                       "{currentVocab.example}"
                     </p>
                   </div>
@@ -131,27 +137,25 @@ const LessonDetailScreen: React.FC<LessonDetailScreenProps> = ({ lesson, onFinis
           ) : (
             <motion.div
               key="grammar-step"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
               className="space-y-8"
             >
-              <div className="text-center">
-                <span className="text-[10px] font-sans font-black text-[#BFA3FF] uppercase tracking-[0.4em] block mb-3">GRAMMAR INSIGHT</span>
-                <h2 className="text-5xl font-heading font-black tracking-tighter text-white leading-none">Cấu trúc<br/>Trọng tâm</h2>
+              <div className="text-center space-y-2">
+                <span className="text-[10px] font-sans font-black text-[#BFA3FF] uppercase tracking-[0.4em] block">GRAMMAR FLOW</span>
+                <h2 className="text-[32px] font-heading font-black tracking-tighter text-white">Advanced Structure</h2>
               </div>
               
-              <div className="bg-[#BFA3FF] p-8 rounded-[40px] text-black clay-accent hard-shadow relative overflow-hidden">
-                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 blur-xl rounded-full" />
-                <p className="text-[10px] font-sans font-black uppercase tracking-widest opacity-40 mb-4">MÔ HÌNH NGÔN NGỮ</p>
-                <p className="text-xl font-sans font-black leading-snug tracking-tight">
+              <div className="bg-[#BFA3FF] p-8 rounded-[24px] text-black clay-accent hard-shadow relative overflow-hidden">
+                <p className="text-[18px] font-sans font-bold leading-snug">
                   {lesson.grammar_focus}
                 </p>
               </div>
 
-              <div className="bg-[#1C1C1E] p-8 rounded-[40px] border border-zinc-800 hard-shadow">
-                 <p className="text-xs font-sans font-semibold text-zinc-400 leading-relaxed">
-                   <span className="text-white">Pro Tip:</span> Hãy thử áp dụng cấu trúc này vào phần Pitching của bạn trong các buổi Meetup sắp tới để tạo ấn tượng chuyên nghiệp hơn.
+              <div className="bg-[#1C1C1E] p-6 rounded-[24px] border border-zinc-800 hard-shadow">
+                 <p className="text-[14px] font-sans font-medium text-zinc-400 leading-relaxed">
+                   <span className="text-[#CCFF00] font-black mr-2">PRO TIP:</span> 
+                   Nhớ sử dụng cấu trúc này trong buổi networking sắp tới của bạn nhé!
                  </p>
               </div>
             </motion.div>
@@ -159,21 +163,20 @@ const LessonDetailScreen: React.FC<LessonDetailScreenProps> = ({ lesson, onFinis
         </AnimatePresence>
       </main>
 
-      {/* Bottom Action Bar */}
-      <footer className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A] to-transparent">
+      <footer className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-[#0A0A0A] to-transparent z-50">
         <div className="max-w-md mx-auto flex gap-4">
           <button 
             onClick={prevStep}
-            className="flex-1 py-5 bg-transparent border-2 border-zinc-800 rounded-3xl text-[11px] font-sans font-black uppercase tracking-widest text-zinc-500 hover:text-white hover:border-zinc-600 active:scale-95 transition-all"
+            className="flex-1 py-5 bg-transparent border-2 border-zinc-800 rounded-[20px] text-[11px] font-sans font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-all active:scale-95"
           >
-            Quay lại
+            BACK
           </button>
           <button 
             onClick={nextStep}
-            className="flex-[2] py-5 bg-[#CCFF00] text-black rounded-3xl text-[11px] font-sans font-black uppercase tracking-widest clay-accent hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+            className="flex-[2.5] py-5 bg-[#CCFF00] text-black rounded-[20px] text-[11px] font-sans font-black uppercase tracking-widest clay-accent hover:shadow-[0_0_20px_rgba(204,255,0,0.3)] transition-all flex items-center justify-center gap-3 active:scale-95"
           >
-            {isGrammarStep ? 'Hoàn thành' : 'Tiếp theo'}
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            {isGrammarStep ? 'FINISH SESSION' : 'NEXT STEP'}
+            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
               <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>

@@ -1,48 +1,33 @@
 
 [
   {
-    "week": 1,
-    "day": "Monday",
-    "topic": "Urban Kickstart - Mastering the First Impression",
-    "vocab_set": [
-      {
-        "word": "Elevator Pitch",
-        "pronunciation": "/ˈeləveɪtər pɪtʃ/",
-        "meaning": "Lời giới thiệu ngắn gọn, súc tích về bản thân hoặc ý tưởng.",
-        "example": "I prepared a 30-second elevator pitch for the tech meetup."
-      },
-      {
-        "word": "Network",
-        "pronunciation": "/ˈnetwɜːrk/",
-        "meaning": "Xây dựng mối quan hệ chuyên môn.",
-        "example": "Events like this are great to network with industry leaders."
-      },
-      {
-        "word": "Icebreaker",
-        "pronunciation": "/ˈaɪsbreɪkər/",
-        "meaning": "Câu nói hoặc hoạt động để phá tan bầu không khí ngượng ngùng.",
-        "example": "Asking about their favorite tech stack is a good icebreaker."
-      },
-      {
-        "word": "Insightful",
-        "pronunciation": "/ˈɪnsaɪtfʊl/",
-        "meaning": "Sâu sắc, có nhiều thông tin hữu ích.",
-        "example": "That was an insightful presentation about AI."
-      },
-      {
-        "word": "Follow-up",
-        "pronunciation": "/ˈfɑːloʊ ʌp/",
-        "meaning": "Hành động liên lạc lại sau buổi gặp mặt.",
-        "example": "Don't forget to send a follow-up email after the meetup."
-      }
-    ],
-    "grammar_focus": "Present Perfect vs Past Simple: Dùng Past Simple cho thời điểm cụ thể, Present Perfect cho trải nghiệm không rõ thời điểm.",
-    "podcast_content": "Hey everyone! Welcome to the Urban Tech Meetup. It's so crowded here! I've just met some amazing developers from NeoLingua. I shared my elevator pitch and they seemed really impressed. One of the speakers gave a very insightful talk on neural networks. I'm definitely going to follow up with her on LinkedIn tomorrow. Networking in the city can be tiring, but it's worth it for the connections you make.",
-    "interactive_challenge": {
-      "type": "quiz",
-      "question": "Which word describes a short summary of yourself used at a meeting?",
-      "options": ["Elevator Pitch", "Podcast", "Network", "Icebreaker"],
-      "correct_answer": "Elevator Pitch"
-    }
+    "topic": "Digital Nomad Lifestyle",
+    "vocab": [
+      { "word": "Hustle", "ipa": "/ˈhʌs.əl/", "vi": "Làm việc nỗ lực", "ex": "Daily hustle is key." },
+      { "word": "Aesthetic", "ipa": "/esˈθet.ɪk/", "vi": "Thẩm mỹ", "ex": "Minimalist aesthetic." },
+      { "word": "Catch up", "ipa": "/kætʃ ʌp/", "vi": "Hàn huyên", "ex": "Let's catch up soon." },
+      { "word": "Vibe", "ipa": "/vaɪb/", "vi": "Cảm giác", "ex": "Good vibes only." },
+      { "word": "Grind", "ipa": "/ɡraɪnd/", "vi": "Công việc cần mẫn", "ex": "Back to the grind." }
+    ]
+  },
+  {
+    "topic": "Street Food Adventure",
+    "vocab": [
+      { "word": "Authentic", "ipa": "/ɔːˈθen.tɪk/", "vi": "Đích thực", "ex": "Authentic Pho taste." },
+      { "word": "Savory", "ipa": "/ˈseɪ.vər.i/", "vi": "Đậm đà", "ex": "Savory street food." },
+      { "word": "Fusion", "ipa": "/ˈfjuː.ʒən/", "vi": "Kết hợp", "ex": "Fusion cuisine trend." },
+      { "word": "Hidden gem", "ipa": "/ˈhɪd.ən dʒem/", "vi": "Ngọc quý ẩn giấu", "ex": "A local hidden gem." },
+      { "word": "Mouth-watering", "ipa": "/maʊθˌwɔː.tər.ɪŋ/", "vi": "Thèm chảy nước miếng", "ex": "Mouth-watering aroma." }
+    ]
+  },
+  {
+    "topic": "Tech Meetup Networking",
+    "vocab": [
+      { "word": "Networking", "ipa": "/ˈnet.wɜː.kɪŋ/", "vi": "Kết nối", "ex": "Start networking now." },
+      { "word": "Stack", "ipa": "/stæk/", "vi": "Bộ công nghệ", "ex": "MERN stack developer." },
+      { "word": "Pitch", "ipa": "/pɪtʃ/", "vi": "Bài chào hàng", "ex": "Perfect elevator pitch." },
+      { "word": "Scalable", "ipa": "/ˈskeɪ.lə.bəl/", "vi": "Dễ mở rộng", "ex": "Scalable architecture." },
+      { "word": "Disruptive", "ipa": "/dɪsˈrʌp.tɪv/", "vi": "Đột phá", "ex": "Disruptive innovation." }
+    ]
   }
 ]

@@ -9,8 +9,9 @@ import { lessonsData } from './lessons';
 import PodcastScreen from './PodcastScreen';
 import BadgeGallery from './components/BadgeGallery';
 import LessonDetailScreen from './LessonDetailScreen';
+import SuccessScreen from './SuccessScreen';
 
-type ViewType = 'home' | 'library' | 'badges' | 'profile' | 'podcast' | 'lessonDetail';
+type ViewType = 'home' | 'library' | 'badges' | 'profile' | 'podcast' | 'lessonDetail' | 'success';
 
 const WordOfTheDayWidget: React.FC<{ word: VocabularyItem }> = ({ word }) => (
   <motion.div
@@ -73,8 +74,7 @@ const App: React.FC = () => {
       lessonsCompleted: prev.lessonsCompleted + 1,
       streak: prev.streak + 1
     }));
-    setView('home');
-    // Optional: add a success toast logic here if needed
+    setView('success');
   };
 
   const navItems: { id: ViewType; icon: any; label: string }[] = [
@@ -97,6 +97,12 @@ const App: React.FC = () => {
             lesson={lesson} 
             onFinish={handleCompleteLesson} 
             onBack={() => setView('home')} 
+          />
+        )}
+        {view === 'success' && (
+          <SuccessScreen 
+            streak={userStats.streak} 
+            onReturn={() => setView('home')} 
           />
         )}
       </AnimatePresence>

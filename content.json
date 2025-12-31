@@ -1,0 +1,181 @@
+
+[
+  {
+    "week": 1,
+    "day": "Monday",
+    "topic": "Urban Kickstart - Tech Meetup Networking",
+    "vocab_set": [
+      {
+        "word": "Elevator Pitch",
+        "pronunciation": "/ˈeləveɪtər pɪtʃ/",
+        "meaning": "Lời giới thiệu ngắn gọn, súc tích (thường dưới 60 giây) về bản thân hoặc ý tưởng.",
+        "example": "I nailed my elevator pitch at the networking event and got three business cards."
+      },
+      {
+        "word": "Disruptive",
+        "pronunciation": "/dɪsˈrʌptɪv/",
+        "meaning": "Mang tính đột phá, thay đổi hoàn toàn cách thức hoạt động truyền thống.",
+        "example": "Uber is considered a disruptive technology in the transportation industry."
+      },
+      {
+        "word": "Scalable",
+        "pronunciation": "/ˈskeɪləbl/",
+        "meaning": "Có khả năng mở rộng quy mô mà không làm giảm hiệu quả.",
+        "example": "We need a scalable business model to grow our startup globally."
+      },
+      {
+        "word": "Pivot",
+        "pronunciation": "/ˈpɪvət/",
+        "meaning": "Thay đổi chiến lược kinh doanh cốt lõi khi hướng đi hiện tại không hiệu quả.",
+        "example": "The company decided to pivot from a hardware focus to software services."
+      },
+      {
+        "word": "Feedback loop",
+        "pronunciation": "/ˈfiːdbæk luːp/",
+        "meaning": "Vòng lặp phản hồi để liên tục cải thiện sản phẩm dựa trên ý kiến người dùng.",
+        "example": "Building a tight feedback loop is essential for early-stage startups."
+      }
+    ],
+    "grammar_focus": "Present Perfect (Hiện tại hoàn thành) dùng để nói về trải nghiệm hoặc sự việc vừa mới xảy ra mà không rõ thời điểm cụ thể.",
+    "podcast_segments": [
+      {
+        "en": "Networking at tech events can be intimidating at first.",
+        "vi": "Kết nối tại các sự kiện công nghệ lúc đầu có thể thấy hơi e ngại."
+      },
+      {
+        "en": "But having a solid elevator pitch makes a huge difference.",
+        "vi": "Nhưng có một bài giới thiệu ngắn gọn chắc chắn sẽ tạo nên sự khác biệt lớn."
+      },
+      {
+        "en": "I've just finished a conversation with a VC from Silicon Valley.",
+        "vi": "Mình vừa mới kết thúc cuộc trò chuyện với một nhà đầu tư mạo hiểm từ Thung lũng Silicon."
+      },
+      {
+        "en": "They are looking for disruptive solutions that are highly scalable.",
+        "vi": "Họ đang tìm kiếm những giải pháp đột phá và có khả năng mở rộng cao."
+      }
+    ],
+    "interactive_challenge": {
+      "type": "quiz",
+      "question": "Which word describes a business model that can handle growth easily?",
+      "options": ["Scalable", "Pivot", "Disruptive", "Feedback"],
+      "correct_answer": "Scalable"
+    }
+  },
+  {
+    "week": 1,
+    "day": "Wednesday",
+    "topic": "Digital Nomad Lifestyle & Specialty Coffee",
+    "vocab_set": [
+      {
+        "word": "Specialty Coffee",
+        "pronunciation": "/ˈspeʃəlti ˈkɔːfi/",
+        "meaning": "Cà phê đặc sản, được chấm điểm cao về chất lượng và hương vị.",
+        "example": "This cafe only serves specialty coffee sourced directly from farmers."
+      },
+      {
+        "word": "Remote-friendly",
+        "pronunciation": "/rɪˈmoʊt ˈfrendli/",
+        "meaning": "Môi trường hoặc không gian phù hợp cho việc làm việc từ xa.",
+        "example": "I'm looking for a remote-friendly workspace with fast Wi-Fi and plenty of outlets."
+      },
+      {
+        "word": "Minimalism",
+        "pronunciation": "/ˈmɪnɪməlɪzəm/",
+        "meaning": "Chủ nghĩa tối giản, tập trung vào những thứ thực sự cần thiết.",
+        "example": "Embracing minimalism helped me focus more on my creative projects."
+      },
+      {
+        "word": "Sustainable",
+        "pronunciation": "/səˈsteɪnəbl/",
+        "meaning": "Bền vững, thân thiện với môi trường.",
+        "example": "Choosing sustainable brands is a key part of an urban lifestyle today."
+      },
+      {
+        "word": "Third place",
+        "pronunciation": "/θɜːrd pleɪs/",
+        "meaning": "Không gian thứ ba (ngoài nhà và nơi làm việc) như quán cà phê hay thư viện.",
+        "example": "Local coffee shops often serve as the perfect third place for digital nomads."
+      }
+    ],
+    "grammar_focus": "Conditional Type 1 (Câu điều kiện loại 1) dùng cho những tình huống có thể xảy ra ở hiện tại hoặc tương lai.",
+    "podcast_segments": [
+      {
+        "en": "If I find a quiet cafe, I will work there for the rest of the afternoon.",
+        "vi": "Nếu mình tìm thấy một quán cà phê yên tĩnh, mình sẽ làm việc ở đó suốt buổi chiều."
+      },
+      {
+        "en": "Digital nomads love specialty coffee and remote-friendly environments.",
+        "vi": "Những người làm việc từ xa rất yêu thích cà phê đặc sản và môi trường làm việc linh hoạt."
+      },
+      {
+        "en": "Sustainable living is becoming a trend in modern cities.",
+        "vi": "Sống bền vững đang trở thành một xu hướng ở các thành phố hiện đại."
+      }
+    ],
+    "interactive_challenge": {
+      "type": "quiz",
+      "question": "What is a 'third place' in the context of urban lifestyle?",
+      "options": ["A coffee shop", "Your home", "Your office", "A gym"],
+      "correct_answer": "A coffee shop"
+    }
+  },
+  {
+    "week": 1,
+    "day": "Friday",
+    "topic": "Urban Wellness & Future Proofing",
+    "vocab_set": [
+      {
+        "word": "Burnout",
+        "pronunciation": "/ˈbɜːrnaʊt/",
+        "meaning": "Tình trạng kiệt sức do áp lực công việc kéo dài.",
+        "example": "Taking regular breaks is crucial to avoid burnout in a high-pressure job."
+      },
+      {
+        "word": "Mindfulness",
+        "pronunciation": "/ˈmaɪndflnəs/",
+        "meaning": "Sự tỉnh thức, tập trung vào khoảnh khắc hiện tại.",
+        "example": "Practicing mindfulness for 10 minutes a day can significantly reduce stress."
+      },
+      {
+        "word": "Work-life balance",
+        "pronunciation": "/wɜːrk laɪf ˈbæləns/",
+        "meaning": "Sự cân bằng giữa công việc và cuộc sống cá nhân.",
+        "example": "The company offers flexible hours to help employees maintain a good work-life balance."
+      },
+      {
+        "word": "Resilience",
+        "pronunciation": "/rɪˈzɪliəns/",
+        "meaning": "Khả năng phục hồi, kiên cường sau những khó khăn.",
+        "example": "Urban living requires a certain level of resilience to handle daily challenges."
+      },
+      {
+        "word": "Future-proof",
+        "pronunciation": "/ˈfjuːtʃər pruːf/",
+        "meaning": "Đảm bảo tính hữu dụng hoặc giá trị trong tương lai (thường nói về kỹ năng).",
+        "example": "Learning AI skills is a great way to future-proof your career."
+      }
+    ],
+    "grammar_focus": "Gerunds vs Infinitives (Danh động từ và Động từ nguyên mẫu) sau một số động từ cụ thể như 'avoid', 'suggest', 'want', 'decide'.",
+    "podcast_segments": [
+      {
+        "en": "Many urban professionals struggle with burnout due to the fast-paced lifestyle.",
+        "vi": "Nhiều chuyên gia thành thị phải vật lộn với tình trạng kiệt sức do lối sống gấp gáp."
+      },
+      {
+        "en": "I suggest practicing mindfulness to stay grounded and resilient.",
+        "vi": "Tôi gợi ý việc thực hành tỉnh thức để giữ sự điềm tĩnh và kiên cường."
+      },
+      {
+        "en": "It's important to decide to prioritize your work-life balance.",
+        "vi": "Quan trọng là bạn phải quyết định ưu tiên sự cân bằng giữa công việc và cuộc sống."
+      }
+    ],
+    "interactive_challenge": {
+      "type": "quiz",
+      "question": "What does it mean to 'future-proof' your career?",
+      "options": ["Protect it from becoming obsolete", "Work longer hours", "Quit your job", "Find a hobby"],
+      "correct_answer": "Protect it from becoming obsolete"
+    }
+  }
+]
