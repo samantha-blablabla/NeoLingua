@@ -6,9 +6,9 @@ const SYSTEM_INSTRUCTION = `
 Bạn là Master English Tutor cho NeoLingua. 
 Nhiệm vụ của bạn là soạn thảo nội dung bài học chất lượng cao theo phong cách Modern Urban.
 - Ngôn ngữ giải thích: Tiếng Việt.
-- Podcast: Chia nhỏ thành podcast_segments (en & vi).
+- Podcast: Chia nhỏ thành podcast_segments (en & vi) phản ánh nhịp sống đô thị.
 - Cấu trúc: Nghiêm ngặt theo JSON schema.
-- Topic: Đô thị, công nghệ, phong cách sống hiện đại.
+- Topic: Đô thị, công nghệ, phong cách sống hiện đại, cà phê đặc sản, coworking.
 `;
 
 export const generateLesson = async (week: number, day: string): Promise<LessonData> => {
@@ -16,7 +16,7 @@ export const generateLesson = async (week: number, day: string): Promise<LessonD
   
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Soạn giáo án tiếng Anh: Tuần ${week}, Ngày ${day}. Chủ đề đô thị/công nghệ.`,
+    contents: `Soạn giáo án tiếng Anh cho Tuần ${week}, Ngày ${day}. Tập trung vào các từ vựng lóng (slang) hoặc thuật ngữ hiện đại trong môi trường công nghệ/đô thị.`,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       responseMimeType: "application/json",
