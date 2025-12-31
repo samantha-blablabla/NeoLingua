@@ -4,12 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { generateLesson } from './services/geminiService';
 import { LessonData, VocabularyItem, UserStats } from './types';
 import GrainOverlay from './components/GrainOverlay';
-import { HomeIcon, LibraryIcon, MedalIcon, FlashIcon, UserIcon, SparklesIcon, HeadphonesIcon, FlameIcon } from './components/Icons';
+import { HomeIcon, LibraryIcon, MedalIcon, FlashIcon, UserIcon, SparklesIcon, HeadphonesIcon, FlameIcon, CloseIcon } from './components/Icons';
 import { lessonsData } from './lessons';
 import PodcastScreen from './PodcastScreen';
-import BadgeGallery from './components/BadgeGallery';
+import BadgeGallery, { BADGES } from './components/BadgeGallery';
 import LessonDetailScreen from './LessonDetailScreen';
 import SuccessScreen from './SuccessScreen';
+import BadgePopup from './components/BadgePopup';
 
 type ViewType = 'home' | 'library' | 'badges' | 'profile' | 'podcast' | 'lessonDetail' | 'success';
 
@@ -21,7 +22,6 @@ const WordOfTheDayWidget: React.FC<{ word: VocabularyItem }> = ({ word }) => (
     className="relative overflow-hidden bg-[#BFA3FF] rounded-[32px] p-6 text-black hard-shadow flex flex-col justify-center min-h-[160px]"
   >
     <div className="absolute inset-0 opacity-[0.05] pointer-events-none mix-blend-overlay bg-white"></div>
-    
     <div className="z-10 w-full">
       <span className="text-[10px] font-sans font-black uppercase tracking-[0.25em] opacity-40 block mb-2">DAILY WORD</span>
       <h3 className="text-[2.6rem] font-heading font-black leading-none tracking-tighter whitespace-nowrap overflow-hidden text-ellipsis">
@@ -39,12 +39,22 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [currentDay, setCurrentDay] = useState<string>("Monday");
   const [view, setView] = useState<ViewType>('home');
-  const [userStats, setUserStats] = useState<UserStats>({
-    lessonsCompleted: 0,
-    streak: 5,
-    perfectTests: 0,
-    unlockedBadges: ['newbie']
+  const [showBadgePopup, setShowBadgePopup] = useState(false);
+  const [activeBadge, setActiveBadge] = useState(BADGES[0]);
+
+  const [userStats, setUserStats] = useState<UserStats>(() => {
+    const saved = localStorage.getItem('neolingua_stats');
+    return saved ? JSON.parse(saved) : {
+      lessonsCompleted: 0,
+      streak: 5,
+      perfectTests: 0,
+      unlockedBadges: []
+    };
   });
+
+  useEffect(() => {
+    localStorage.setItem('neolingua_stats', JSON.stringify(userStats));
+  }, [userStats]);
 
   const randomWord = useMemo(() => {
     const allWords = lessonsData.flatMap(lesson => lesson.vocab_set);
@@ -68,13 +78,11 @@ const App: React.FC = () => {
     fetchNewLesson(currentDay);
   }, [currentDay, fetchNewLesson]);
 
-  const handleCompleteLesson = () => {
-    setUserStats(prev => ({
-      ...prev,
-      lessonsCompleted: prev.lessonsCompleted + 1,
-      streak: prev.streak + 1
-    }));
-    setView('success');
+  const handleTestBadge = () => {
+    // Randomly pick a badge for testing
+    const randomBadge = BADGES[Math.floor(Math.random() * BADGES.length)];
+    setActiveBadge(randomBadge);
+    setShowBadgePopup(true);
   };
 
   const navItems: { id: ViewType; icon: any; label: string }[] = [
@@ -88,6 +96,13 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col max-w-md mx-auto relative bg-[#0A0A0A] shadow-2xl border-x border-zinc-900 overflow-hidden text-white font-sans selection:bg-[#CCFF00] selection:text-black">
       <GrainOverlay />
       
+      {/* Badge Notification Popup */}
+      <BadgePopup 
+        badge={activeBadge} 
+        isVisible={showBadgePopup} 
+        onClose={() => setShowBadgePopup(false)} 
+      />
+
       <AnimatePresence mode="wait">
         {view === 'podcast' && (
           <PodcastScreen 
@@ -100,7 +115,10 @@ const App: React.FC = () => {
           <LessonDetailScreen 
             key="lessonDetail"
             lesson={lesson} 
-            onFinish={handleCompleteLesson} 
+            onFinish={() => {
+              setUserStats(prev => ({ ...prev, lessonsCompleted: prev.lessonsCompleted + 1 }));
+              setView('success');
+            }} 
             onBack={() => setView('home')} 
           />
         )}
@@ -140,7 +158,6 @@ const App: React.FC = () => {
               className="relative aspect-[16/10] w-full bg-[#1C1C1E] rounded-[32px] p-8 flex flex-col justify-end overflow-hidden hard-shadow group cursor-pointer active:scale-[0.98] transition-all"
             >
               <div className="absolute top-0 right-0 w-48 h-48 bg-[#CCFF00]/10 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-[#CCFF00]/20 transition-colors" />
-              <div className="absolute inset-0 opacity-[0.02] pointer-events-none mix-blend-overlay bg-white"></div>
               
               <span className="text-[10px] font-sans font-bold text-[#CCFF00] uppercase tracking-[0.2em] mb-2 block">TODAY'S TOPIC</span>
               <h2 className="text-3xl font-heading font-black leading-[0.9] tracking-tighter mb-4 text-white">
@@ -174,7 +191,6 @@ const App: React.FC = () => {
                 <div>
                   <h3 className="text-[9px] font-sans font-bold text-zinc-500 uppercase tracking-widest mb-1">PODCAST</h3>
                   <p className="text-xl font-heading font-black leading-tight text-white group-hover:text-[#CCFF00] transition-colors">Midnight Hustle</p>
-                  <p className="text-[10px] font-sans font-medium text-zinc-500 mt-1">Listening Focus</p>
                 </div>
               </motion.div>
 
@@ -193,25 +209,6 @@ const App: React.FC = () => {
                 </div>
               </motion.div>
             </div>
-            
-            <section className="space-y-4 pt-2">
-               <div className="flex justify-between items-center px-1">
-                  <h3 className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-zinc-600">LIBRARY</h3>
-                  <button onClick={() => setView('library')} className="text-[10px] font-sans font-black text-[#CCFF00] uppercase hover:underline transition-all">View All</button>
-               </div>
-               <div 
-                 onClick={() => setView('lessonDetail')}
-                 className="p-5 bg-zinc-900/50 rounded-3xl border border-zinc-800 flex items-center gap-5 cursor-pointer hover:bg-zinc-900 transition-colors active:scale-[0.99]"
-               >
-                  <div className="w-11 h-11 rounded-2xl bg-zinc-800 flex items-center justify-center text-[#CCFF00] border border-zinc-700">
-                    <FlashIcon size={20} />
-                  </div>
-                  <div className="space-y-0.5">
-                    <h4 className="font-sans font-bold text-sm text-white">Grammar Spotlight</h4>
-                    <p className="text-xs font-sans font-medium text-zinc-500">Urban Essentials</p>
-                  </div>
-               </div>
-            </section>
           </>
         )}
 
@@ -227,19 +224,26 @@ const App: React.FC = () => {
               <div className="w-24 h-24 bg-[#CCFF00] rounded-full mx-auto mb-4 flex items-center justify-center hard-shadow border border-black/10">
                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=ccff00`} alt="Avatar" className="w-20 h-20" />
               </div>
-              <h2 className="text-3xl font-heading font-black tracking-tighter">Alex Urban</h2>
+              <h2 className="text-3xl font-heading font-black tracking-tighter text-white">Alex Urban</h2>
               <p className="text-[11px] font-sans font-medium text-zinc-500 uppercase tracking-widest mt-1">Tech Nomad • Lvl 12</p>
             </section>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-6 bg-zinc-900 rounded-[28px] border border-zinc-800">
-                <p className="text-3xl font-heading font-black text-[#CCFF00]">{userStats.lessonsCompleted}</p>
-                <p className="text-[10px] font-sans font-bold text-zinc-500 uppercase tracking-widest">Lessons</p>
-              </div>
-              <div className="p-6 bg-zinc-900 rounded-[28px] border border-zinc-800">
-                <p className="text-3xl font-heading font-black text-[#BFA3FF]">{userStats.perfectTests}</p>
-                <p className="text-[10px] font-sans font-bold text-zinc-500 uppercase tracking-widest">Mastery</p>
-              </div>
+            <div className="bg-zinc-900 rounded-[32px] p-6 border border-zinc-800 space-y-6">
+              <h4 className="text-[10px] font-sans font-black text-zinc-600 uppercase tracking-widest">DEVELOPER ZONE</h4>
+              <button 
+                onClick={handleTestBadge}
+                className="w-full flex items-center justify-between p-4 bg-[#CCFF00]/10 border border-[#CCFF00]/30 rounded-2xl group transition-all"
+              >
+                <span className="text-sm font-bold text-[#CCFF00]">Test Achievement Popup</span>
+                <FlashIcon size={18} color="#CCFF00" className="group-hover:translate-x-1 transition-transform" />
+              </button>
+              
+              <button 
+                onClick={() => { localStorage.clear(); window.location.reload(); }}
+                className="w-full text-left py-3 text-red-500 text-sm font-bold border-t border-zinc-800 mt-2"
+              >
+                Reset App Data
+              </button>
             </div>
           </div>
         )}
@@ -251,7 +255,6 @@ const App: React.FC = () => {
               <div key={i} className="p-6 bg-zinc-900 rounded-[28px] border border-zinc-800 flex justify-between items-center opacity-40">
                 <div className="space-y-1">
                    <h4 className="font-sans font-bold text-white">Topic {i+1} Coming Soon</h4>
-                   <p className="text-xs font-sans font-medium text-zinc-500">Urban Essentials</p>
                 </div>
                 <LibraryIcon size={20} color="#333" />
               </div>
@@ -277,7 +280,6 @@ const App: React.FC = () => {
                   <motion.div 
                     layoutId="nav-dot"
                     className="absolute -bottom-1.5 w-1 h-1 bg-[#CCFF00] rounded-full shadow-[0_0_8px_#CCFF00]"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}
                 <span className={`text-[8px] font-sans font-bold uppercase mt-1.5 tracking-widest transition-colors duration-300 ${isActive ? 'text-[#CCFF00]' : 'text-zinc-700'}`}>
