@@ -9,6 +9,7 @@ export interface VocabularyItem {
 export interface PodcastSegment {
   en: string;
   vi: string;
+  startTime?: number; // Giây bắt đầu của câu
 }
 
 export interface LessonData {
@@ -38,4 +39,13 @@ export interface Badge {
   title: string;
   description: string;
   icon: 'sneaker' | 'headphones' | 'coffee';
+}
+
+export enum ThemeColors {
+  BACKGROUND = '#0A0A0A',
+  ACCENT = '#CCFF00',
+  SECONDARY_PURPLE = '#BFA3FF',
+  SECONDARY_CORAL = '#FF6B4A',
+  TEXT_PRIMARY = '#FFFFFF',
+  TEXT_SECONDARY = '#A0A0A0'
 }
