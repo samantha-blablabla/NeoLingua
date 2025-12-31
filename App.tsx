@@ -1,16 +1,57 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateLesson } from './services/geminiService';
-import { LessonData, ThemeColors } from './types';
+import { LessonData, ThemeColors, VocabularyItem } from './types';
 import GrainOverlay from './components/GrainOverlay';
-import { HomeIcon, BookIcon, FlashIcon, UserIcon, MoreIcon } from './components/Icons';
+import { HomeIcon, BookIcon, FlashIcon, UserIcon, MoreIcon, SparklesIcon } from './components/Icons';
+import { lessonsData } from './lessons';
+
+const WordOfTheDayWidget: React.FC<{ word: VocabularyItem }> = ({ word }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.9, y: 10 }}
+    animate={{ opacity: 1, scale: 1, y: 0 }}
+    transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+    className="relative overflow-hidden bg-[#1C1C1E] rounded-[24px] p-5 border-[#CCFF00]/30 border-[0.5px] clay-card"
+  >
+    {/* Local Noise Overlay */}
+    <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay bg-white"></div>
+    
+    <div className="flex items-center gap-2 mb-3">
+      <SparklesIcon size={14} color="#BFA3FF" />
+      <span className="text-[10px] font-heading font-black text-[#BFA3FF] uppercase tracking-[0.15em]">
+        Word of the Day
+      </span>
+    </div>
+
+    <div className="flex flex-col gap-1">
+      <div className="flex items-baseline gap-2">
+        <h3 className="text-3xl font-heading font-black text-white tracking-tighter">
+          {word.word}
+        </h3>
+        <span className="text-xs text-zinc-500 font-medium italic">
+          {word.pronunciation}
+        </span>
+      </div>
+      <p className="text-sm font-medium text-[#CCFF00] mt-1 leading-tight">
+        {word.meaning}
+      </p>
+    </div>
+  </motion.div>
+);
 
 const App: React.FC = () => {
   const [lesson, setLesson] = useState<LessonData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentDay, setCurrentDay] = useState<string>("Monday");
+
+  // Logic to get a random word from the existing lessons data
+  const randomWord = useMemo(() => {
+    const allWords = lessonsData.flatMap(lesson => lesson.vocab_set);
+    if (allWords.length === 0) return null;
+    return allWords[Math.floor(Math.random() * allWords.length)];
+  }, []);
 
   const fetchNewLesson = useCallback(async (day: string) => {
     try {
@@ -76,6 +117,9 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto px-6 pb-28 space-y-8 no-scrollbar">
         
+        {/* Word of the Day Widget */}
+        {randomWord && <WordOfTheDayWidget word={randomWord} />}
+
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.div 

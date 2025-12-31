@@ -42,3 +42,11 @@ export const MoreIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor
     <circle cx="12" cy="19" r="1" />
   </svg>
 );
+
+export const SparklesIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" className={className}>
+    <path d="M12 3L14.5 9L21 11.5L14.5 14L12 21L9.5 14L3 11.5L9.5 9L12 3Z" />
+    <path d="M20 16L21 18L23 19L21 20L20 22L19 20L17 19L19 18L20 16Z" />
+    <path d="M5 4L6 6L8 7L6 8L5 10L4 8L2 7L4 6L5 4Z" />
+  </svg>
+);
