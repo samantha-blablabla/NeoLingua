@@ -16,7 +16,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
             overflow-x: hidden;
-            line-height: 1.6; /* Tăng khoảng cách dòng mặc định */
+            line-height: 1.6;
         }
         h1, h2, h3, h4, .font-heading {
             font-family: 'Bricolage Grotesque', sans-serif;
@@ -25,41 +25,32 @@
         .font-sans {
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        /* Custom scrollbar */
+        
+        /* Smooth Scrollbar */
         ::-webkit-scrollbar {
-            width: 4px;
+            width: 3px;
         }
         ::-webkit-scrollbar-track {
-            background: #0A0A0A;
+            background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background: #1C1C1E;
+            background: rgba(204, 255, 0, 0.1);
             border-radius: 10px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #CCFF00;
-        }
 
-        /* Glassmorphism Classes */
+        /* Tối ưu hóa Glassmorphism: Không còn cảm giác bị phân cách */
         .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(40px) saturate(150%);
+            -webkit-backdrop-filter: blur(40px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .clay-card {
-            box-shadow: 
-                20px 20px 60px #050505,
-                -20px -20px 60px #0f0f0f,
-                inset 6px 6px 12px rgba(255,255,255,0.02),
-                inset -6px -6px 12px rgba(0,0,0,0.5);
-        }
         .clay-accent {
             box-shadow: 
-                10px 10px 20px rgba(0,0,0,0.2),
-                inset 4px 4px 8px rgba(255,255,255,0.3),
-                inset -4px -4px 8px rgba(0,0,0,0.2);
+                0 10px 40px rgba(204, 255, 0, 0.15),
+                inset 0 2px 4px rgba(255, 255, 255, 0.4),
+                inset 0 -4px 8px rgba(0, 0, 0, 0.1);
         }
         
         .no-scrollbar::-webkit-scrollbar {
@@ -70,18 +61,18 @@
             scrollbar-width: none;
         }
 
-        /* Floating Nav Styling */
+        /* Floating Nav: Hòa quyện hơn */
         .floating-dock {
-            background: rgba(28, 28, 30, 0.85);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 15, 17, 0.7);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
 
-        /* Text Stroke for Urban Aesthetics */
-        .text-outline {
-            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
-            color: transparent;
+        /* Loại bỏ hiện tượng banding cho Gradient */
+        .gradient-mask-bottom {
+            mask-image: linear-gradient(to top, black 0%, black 60%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to top, black 0%, black 60%, transparent 100%);
         }
     </style>
 <script type="importmap">

@@ -1,19 +1,21 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LessonData } from './types';
-import { SoundHighIcon, CloseIcon, SparklesIcon, FlashIcon } from './components/Icons';
+import { LessonData, VocabularyItem } from './types';
+import { SoundHighIcon, CloseIcon, SparklesIcon, FlashIcon, LibraryIcon } from './components/Icons';
 import { playNaturalSpeech } from './services/speechService';
 
 interface Props {
   lesson: LessonData;
+  savedVocabIds: string[];
+  onToggleSaveVocab: (item: VocabularyItem) => void;
   onFinish: () => void;
   onBack: () => void;
 }
 
 type SprintType = 'WARMUP' | 'LOGIC' | 'LISTENING' | 'GRAMMAR' | 'SPOTLIGHT' | 'CHALLENGE' | 'MISSION';
 
-const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
+const LessonDetailScreen: React.FC<Props> = ({ lesson, savedVocabIds, onToggleSaveVocab, onFinish, onBack }) => {
   const [sprint, setSprint] = useState<SprintType>('WARMUP');
   const [vocabIdx, setVocabIdx] = useState(0);
 
@@ -77,21 +79,14 @@ const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
 
               <div className="p-10 bg-[#CCFF00] rounded-[56px] shadow-[0_40px_80px_-15px_rgba(204,255,0,0.3)] relative overflow-hidden flex flex-col gap-8 transition-transform">
                  <div className="absolute -top-10 -right-10 w-48 h-48 bg-white/30 blur-[70px] rounded-full pointer-events-none" />
-                 
                  <div className="space-y-4">
-                   <p className="text-black/40 text-[10px] font-sans font-black uppercase tracking-widest">EN LOGIC (Heading)</p>
-                   <p className="text-black text-[1.8rem] font-heading font-black leading-[1.1] tracking-tight">
-                     {lesson.urban_logic?.en}
-                   </p>
+                   <p className="text-black/40 text-[10px] font-sans font-black uppercase tracking-widest">EN LOGIC</p>
+                   <p className="text-black text-[1.8rem] font-heading font-black leading-[1.1] tracking-tight">{lesson.urban_logic?.en}</p>
                  </div>
-
                  <div className="h-px w-20 bg-black/10" />
-
                  <div className="space-y-4">
-                   <p className="text-black/40 text-[10px] font-sans font-black uppercase tracking-widest">VI CHI TIẾT (Paragraph)</p>
-                   <p className="text-black/80 text-[1.1rem] font-sans font-bold leading-relaxed">
-                     {lesson.urban_logic?.vi}
-                   </p>
+                   <p className="text-black/40 text-[10px] font-sans font-black uppercase tracking-widest">VI CHI TIẾT</p>
+                   <p className="text-black/80 text-[1.1rem] font-sans font-bold leading-relaxed">{lesson.urban_logic?.vi}</p>
                  </div>
               </div>
             </motion.div>
@@ -105,18 +100,8 @@ const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
                       <SoundHighIcon size={32} />
                    </div>
                 </div>
-                <div className="space-y-4">
-                   <h3 className="text-3xl font-heading font-black uppercase tracking-tight">Immersive Listen</h3>
-                   <p className="text-zinc-500 font-sans font-bold text-base px-6 leading-relaxed italic opacity-80">
-                      "Cảm nhận từng âm thanh nhỏ nhất trong bối cảnh thực tế tại đô thị."
-                   </p>
-                </div>
-                <button 
-                  onClick={() => speak((lesson.podcast_segments || []).map(s => s.en).join('. '))} 
-                  className="w-full py-6 bg-zinc-900 border border-white/5 rounded-[28px] text-[#CCFF00] font-sans font-black uppercase tracking-widest text-[11px] active:scale-95 transition-all shadow-xl"
-                >
-                   PLAY FULL SCENE
-                </button>
+                <h3 className="text-3xl font-heading font-black uppercase tracking-tight">Immersive Listen</h3>
+                <button onClick={() => speak((lesson.podcast_segments || []).map(s => s.en).join('. '))} className="w-full py-6 bg-zinc-900 border border-white/5 rounded-[28px] text-[#CCFF00] font-sans font-black uppercase tracking-widest text-[11px] active:scale-95 transition-all shadow-xl">PLAY FULL SCENE</button>
              </motion.div>
           )}
 
@@ -135,7 +120,16 @@ const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
 
           {sprint === 'SPOTLIGHT' && lesson.vocab_spotlight[vocabIdx] && (
             <motion.div key={`spot-${vocabIdx}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-              <span className="text-[#CCFF00] font-sans font-black tracking-[0.4em] text-[11px] uppercase">Sprint 05 • VOCAB {vocabIdx + 1}/{(lesson.vocab_spotlight || []).length}</span>
+              <div className="flex justify-between items-end">
+                <span className="text-[#CCFF00] font-sans font-black tracking-[0.4em] text-[11px] uppercase">Sprint 05 • VOCAB {vocabIdx + 1}/{(lesson.vocab_spotlight || []).length}</span>
+                <button 
+                  onClick={() => onToggleSaveVocab(lesson.vocab_spotlight[vocabIdx])}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${savedVocabIds.includes(lesson.vocab_spotlight[vocabIdx].id) ? 'bg-[#CCFF00] text-black border-[#CCFF00]' : 'bg-white/5 border-white/10 text-white'}`}
+                >
+                  <LibraryIcon size={14} />
+                  <span className="text-[9px] font-black uppercase tracking-widest">{savedVocabIds.includes(lesson.vocab_spotlight[vocabIdx].id) ? 'SAVED' : 'SAVE TO VAULT'}</span>
+                </button>
+              </div>
               <div className="flex items-center gap-6">
                  <h2 className="text-6xl font-heading font-black text-[#CCFF00] tracking-tighter leading-none">{lesson.vocab_spotlight[vocabIdx].word}</h2>
                  <button onClick={() => speak(lesson.vocab_spotlight[vocabIdx].word)} className="w-14 h-14 bg-zinc-900 border border-white/5 rounded-[20px] text-[#CCFF00] flex items-center justify-center active:scale-90 transition-transform shadow-lg"><SoundHighIcon size={24} /></button>
@@ -174,15 +168,12 @@ const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
             <motion.div key="mission" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-12 text-center">
                <span className="text-[#FF6B4A] font-sans font-black tracking-[0.4em] text-[11px] uppercase">Sprint 07 • FINAL MISSION</span>
                <div className="flex flex-col items-center">
-                  <div className="inline-block p-7 bg-[#FF6B4A] rounded-[40px] mb-8 text-black clay-accent shadow-[0_20px_40px_rgba(255,107,74,0.3)]">
+                  <div className="inline-block p-7 bg-[#FF6B4A] rounded-[40px] mb-8 text-black shadow-xl">
                      <SparklesIcon size={56} />
                   </div>
                   <h3 className="text-5xl font-heading font-black tracking-tighter uppercase text-[#FF6B4A] leading-none mb-4">{lesson.real_world_mission?.task}</h3>
-                  <p className="text-zinc-600 font-sans font-black uppercase text-[10px] tracking-widest">GO LIVE ON SOCIALS</p>
                </div>
-               
-               <div className="p-10 bg-zinc-900 rounded-[56px] border-2 border-dashed border-[#FF6B4A]/30 relative overflow-hidden shadow-2xl">
-                  <div className="inline-block px-5 py-2 bg-[#FF6B4A]/10 rounded-full text-[10px] font-sans font-black text-[#FF6B4A] uppercase tracking-widest mb-6">PLATFORM: {lesson.real_world_mission?.platform}</div>
+               <div className="p-10 bg-zinc-900 rounded-[56px] border-2 border-dashed border-[#FF6B4A]/30 relative shadow-2xl">
                   <p className="text-zinc-200 font-sans font-bold text-xl leading-relaxed">{lesson.real_world_mission?.description}</p>
                </div>
             </motion.div>
@@ -190,7 +181,6 @@ const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
         </AnimatePresence>
       </main>
 
-      {/* Footer Controls */}
       <footer className="p-8 pb-12 bg-[#0A0A0A]/80 backdrop-blur-xl border-t border-white/5">
         <button 
           onClick={next} 
