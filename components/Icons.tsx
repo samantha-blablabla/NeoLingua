@@ -50,3 +50,27 @@ export const SparklesIcon: React.FC<IconProps> = ({ size = 24, color = "currentC
     <path d="M5 4L6 6L8 7L6 8L5 10L4 8L2 7L4 6L5 4Z" />
   </svg>
 );
+
+export const SneakerIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M3 17h13.5l3-4h2.5v4H3z" />
+    <path d="M16.5 13V9a2 2 0 00-2-2h-3.5L8 13" />
+    <circle cx="6" cy="19" r="2" />
+    <circle cx="16" cy="19" r="2" />
+  </svg>
+);
+
+export const HeadphonesIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M3 14v-3a9 9 0 0118 0v3" />
+    <path d="M3 14h4v6H3v-6zM17 14h4v6h-4v-6z" />
+  </svg>
+);
+
+export const CoffeeIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M18 8h1a4 4 0 010 8h-1" />
+    <path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" />
+    <path d="M6 1v3M10 1v3M14 1v3" />
+  </svg>
+);

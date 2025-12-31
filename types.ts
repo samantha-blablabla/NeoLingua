@@ -26,6 +26,20 @@ export interface LessonData {
   };
 }
 
+export interface UserStats {
+  lessonsCompleted: number;
+  streak: number;
+  perfectTests: number;
+  unlockedBadges: string[];
+}
+
+export interface Badge {
+  id: string;
+  title: string;
+  description: string;
+  icon: 'sneaker' | 'headphones' | 'coffee';
+}
+
 export enum ThemeColors {
   BACKGROUND = '#0A0A0A',
   ACCENT = '#CCFF00',
