@@ -38,8 +38,7 @@ const App: React.FC = () => {
   const [lesson, setLesson] = useState<LessonData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentDay, setCurrentDay] = useState<string>("Monday");
-  // Temporarily set to 'success' for UI review as requested
-  const [view, setView] = useState<ViewType>('success');
+  const [view, setView] = useState<ViewType>('home');
   const [userStats, setUserStats] = useState<UserStats>({
     lessonsCompleted: 0,
     streak: 5,
@@ -58,7 +57,7 @@ const App: React.FC = () => {
       const data = await generateLesson(1, day);
       setLesson(data);
     } catch (err) {
-      console.error(err);
+      console.error("AI Lesson generation failed, using fallback:", err);
       setLesson(lessonsData[0]);
     } finally {
       setLoading(false);

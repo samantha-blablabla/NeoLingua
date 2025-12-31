@@ -6,9 +6,10 @@ const SYSTEM_INSTRUCTION = `
 Bạn là Master English Tutor cho NeoLingua. 
 Nhiệm vụ của bạn là soạn thảo nội dung bài học chất lượng cao theo phong cách Modern Urban.
 - Ngôn ngữ giải thích: Tiếng Việt.
-- Topic: Thực tế, đô thị, công nghệ.
+- Topic: Thực tế, đô thị, công nghệ, phong cách sống hiện đại.
 - Podcast: Chia nhỏ nội dung podcast thành các câu ngắn (segments), mỗi câu gồm bản gốc tiếng Anh (en) và bản dịch tiếng Việt (vi) sát nghĩa nhưng tự nhiên.
-- Cấu trúc: Nghiêm ngặt theo JSON schema.
+- Cấu trúc: Nghiêm ngặt theo JSON schema được cung cấp.
+- Đảm bảo từ vựng có phiên âm chuẩn IPA.
 `;
 
 export const generateLesson = async (week: number, day: string): Promise<LessonData> => {
@@ -16,13 +17,11 @@ export const generateLesson = async (week: number, day: string): Promise<LessonD
   
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Soạn giáo án cho Tuần ${week}, Ngày ${day}. 
-    Thứ 2: Urban Kickstart (Meetup công nghệ). 
-    Thứ 4: Fintech & Cafe Culture. 
-    Thứ 6: Review.`,
+    contents: `Hãy soạn giáo án tiếng Anh cho Tuần ${week}, Ngày ${day}. Chủ đề phải xoay quanh văn hóa đô thị hiện đại hoặc công nghệ.`,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       responseMimeType: "application/json",
+      thinkingConfig: { thinkingBudget: 0 },
       responseSchema: {
         type: Type.OBJECT,
         properties: {
@@ -38,7 +37,8 @@ export const generateLesson = async (week: number, day: string): Promise<LessonD
                 pronunciation: { type: Type.STRING },
                 meaning: { type: Type.STRING },
                 example: { type: Type.STRING }
-              }
+              },
+              required: ["word", "pronunciation", "meaning", "example"]
             }
           },
           grammar_focus: { type: Type.STRING },
@@ -60,7 +60,8 @@ export const generateLesson = async (week: number, day: string): Promise<LessonD
               question: { type: Type.STRING },
               options: { type: Type.ARRAY, items: { type: Type.STRING } },
               correct_answer: { type: Type.STRING }
-            }
+            },
+            required: ["type", "question", "correct_answer"]
           }
         },
         required: ["week", "day", "topic", "vocab_set", "grammar_focus", "podcast_segments", "interactive_challenge"]
@@ -68,8 +69,18 @@ export const generateLesson = async (week: number, day: string): Promise<LessonD
     }
   });
 
-  const text = response.text;
-  if (!text) throw new Error("No response from AI");
+  let text = response.text;
+  if (!text) {
+    throw new Error("No response from AI");
+  }
+
+  // Làm sạch text nếu model trả về markdown blocks
+  text = text.replace(/```json/g, "").replace(/```/g, "").trim();
   
-  return JSON.parse(text) as LessonData;
+  try {
+    return JSON.parse(text) as LessonData;
+  } catch (e) {
+    console.error("Failed to parse AI response:", text);
+    throw new Error("Invalid AI response format");
+  }
 };
