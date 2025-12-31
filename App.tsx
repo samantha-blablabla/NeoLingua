@@ -1,404 +1,307 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LessonData, UserStats, RoadmapStage } from './types';
 import { generateLesson } from './services/geminiService';
-import { LessonData, VocabularyItem, UserStats, Badge } from './types';
-import { checkAndUnlockBadges, syncUserStats } from './services/badgeService';
-import { playNaturalSpeech } from './services/speechService';
-import GrainOverlay from './components/GrainOverlay';
-import { HomeIcon, LibraryIcon, MedalIcon, UserIcon, SparklesIcon, HeadphonesIcon, FlameIcon, SoundHighIcon } from './components/Icons';
 import { lessonsData } from './lessons';
-import PodcastScreen from './PodcastScreen';
-import BadgeGallery, { BADGES } from './components/BadgeGallery';
+import GrainOverlay from './components/GrainOverlay';
+import { 
+  HomeIcon, LibraryIcon, MedalIcon, UserIcon, 
+  SparklesIcon, FlameIcon, SoundHighIcon, FlashIcon, 
+  HeadphonesIcon, SparklesIcon as StarIcon, CloseIcon 
+} from './components/Icons';
 import LessonDetailScreen from './LessonDetailScreen';
 import SuccessScreen from './SuccessScreen';
-import BadgePopup from './components/BadgePopup';
+import PodcastScreen from './PodcastScreen';
+import BadgeGallery from './components/BadgeGallery';
 
-type ViewType = 'home' | 'library' | 'badges' | 'profile' | 'podcast' | 'lessonDetail' | 'success';
+type ViewType = 'home' | 'roadmap' | 'lessonDetail' | 'success' | 'profile' | 'podcast' | 'badges';
 
-const WordOfTheDayWidget: React.FC<{ word: VocabularyItem }> = ({ word }) => {
-  const [isSpeaking, setIsSpeaking] = useState(false);
-
-  const handlePronounce = async (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    if (isSpeaking) return;
-    
-    setIsSpeaking(true);
-    // Haptic Feedback (Web surrogate for Haptics.impactAsync)
-    if ("vibrate" in navigator) {
-      navigator.vibrate(10);
-    }
-    
-    await playNaturalSpeech(word.word);
-    setIsSpeaking(false);
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      whileHover={{ scale: 1.02, y: -4 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-      onClick={() => handlePronounce()}
-      className="relative overflow-hidden bg-[#BFA3FF] rounded-[32px] p-6 text-black hard-shadow flex flex-col justify-center min-h-[160px] cursor-pointer transition-all group"
-    >
-      <div className="absolute inset-0 opacity-[0.05] pointer-events-none mix-blend-overlay bg-white"></div>
-      
-      {/* High-end Volume Icon */}
-      <div className="absolute top-6 right-6 p-2 rounded-xl bg-black/5 group-hover:bg-black/10 transition-colors">
-        <SoundHighIcon size={18} color={isSpeaking ? "#CCFF00" : "black"} className={isSpeaking ? "animate-pulse" : ""} />
-      </div>
-
-      <div className="z-10 w-full">
-        <span className="text-[10px] font-sans font-black uppercase tracking-[0.25em] opacity-40 block mb-2">DAILY WORD</span>
-        <h3 className="text-[2.6rem] font-heading font-black leading-none tracking-tighter whitespace-nowrap overflow-hidden text-ellipsis">
-          {word.word}
-        </h3>
-        <p className="text-[14px] font-sans font-semibold leading-relaxed opacity-80 mt-3 max-w-[90%]">
-          {word.meaning}
-        </p>
-      </div>
-    </motion.div>
-  );
-};
+const ROADMAP_STEPS = [
+  { id: 1, stage: 'Urban Newbie' as RoadmapStage, title: 'Survival Mode', desc: 'Cafe, Streets & Basics' },
+  { id: 2, stage: 'Urban Newbie' as RoadmapStage, title: 'City Explorer', desc: 'Shopping & Transit' },
+  { id: 3, stage: 'Street Smart' as RoadmapStage, title: 'Social Butterfly', desc: 'Making Connections' },
+  { id: 4, stage: 'Street Smart' as RoadmapStage, title: 'Vibe Master', desc: 'Daily Urban Life' },
+  { id: 5, stage: 'Professional Hustler' as RoadmapStage, title: 'Career Starter', desc: 'Office & Networking' },
+  { id: 6, stage: 'Professional Hustler' as RoadmapStage, title: 'Tech Guru', desc: 'Trends & Innovation' },
+  { id: 7, stage: 'Urban Legend' as RoadmapStage, title: 'Deep Thinker', desc: 'Critical Discussions' },
+  { id: 8, stage: 'Urban Legend' as RoadmapStage, title: 'Grandmaster', desc: 'Final Mastery' },
+];
 
 const App: React.FC = () => {
-  const [lesson, setLesson] = useState<LessonData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const [view, setView] = useState<ViewType>('home');
-  const [showBadgePopup, setShowBadgePopup] = useState(false);
-  const [activeBadge, setActiveBadge] = useState<Badge | null>(null);
-
-  const [userStats, setUserStats] = useState<UserStats>(() => {
-    const saved = localStorage.getItem('neolingua_stats');
+  const [loading, setLoading] = useState(false);
+  const [currentLesson, setCurrentLesson] = useState<LessonData | null>(null);
+  const [stats, setStats] = useState<UserStats>(() => {
+    const saved = localStorage.getItem('neo_stats');
     return saved ? JSON.parse(saved) : {
+      currentLevel: 1,
       lessonsCompleted: 0,
       streak: 5,
+      unlockedBadges: ['newbie'],
+      savedVocab: [],
+      xp: 450,
       perfectTests: 0,
-      podcastsCompleted: 0,
-      unlockedBadges: []
+      podcastsCompleted: 0
     };
   });
 
-  useEffect(() => {
-    syncUserStats(userStats);
-  }, [userStats]);
-
-  const checkAndReward = useCallback(async (updatedStats: UserStats) => {
-    const newlyUnlockedIds = checkAndUnlockBadges(updatedStats);
-    
-    if (newlyUnlockedIds.length > 0) {
-      const badgeId = newlyUnlockedIds[0];
-      const badgeData = BADGES.find(b => b.id === badgeId);
-      
-      if (badgeData) {
-        setActiveBadge(badgeData);
-        setShowBadgePopup(true);
-        
-        let voiceMessage = `Congratulations! You've unlocked the ${badgeData.title} badge!`;
-        if (badgeId === 'newbie') {
-          voiceMessage = "Congrats! You just earned the Urban Newbie badge";
-        } else if (badgeId === 'street-smart') {
-          voiceMessage = "Boom! Street Smart status unlocked. Keep that streak alive!";
-        }
-
-        await playNaturalSpeech(voiceMessage);
-      }
-      
-      setUserStats(prev => ({
-        ...prev,
-        unlockedBadges: Array.from(new Set([...prev.unlockedBadges, ...newlyUnlockedIds]))
-      }));
-    }
-  }, []);
-
-  const fetchNewLesson = useCallback(async () => {
+  const startLevel = async (lvl: number) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const data = await generateLesson(1, "Monday");
-      setLesson(data);
-    } catch (err) {
-      console.error("AI Lesson generation failed, using fallback:", err);
-      setLesson(lessonsData[0]);
+      let lesson = lessonsData.find(l => l.level === lvl && !stats.unlockedBadges.includes(l.id));
+      if (!lesson) {
+        lesson = await generateLesson(lvl);
+      }
+      setCurrentLesson(lesson);
+      setView('lessonDetail');
+    } catch (e) {
+      alert("AI đang soạn giáo án, hãy thử lại sau!");
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    fetchNewLesson();
-  }, [fetchNewLesson]);
-
-  const handlePodcastFinished = () => {
-    playNaturalSpeech("Amazing job! You finished the lesson.");
-    
-    setUserStats(prev => {
-      const updated = { ...prev, podcastsCompleted: prev.podcastsCompleted + 1 };
-      setTimeout(() => checkAndReward(updated), 1500);
-      return updated;
-    });
   };
 
-  const handleLessonFinished = () => {
-    playNaturalSpeech("Amazing job! You finished the lesson.");
-
-    setUserStats(prev => {
-      const updated = { ...prev, lessonsCompleted: prev.lessonsCompleted + 1 };
-      setTimeout(() => checkAndReward(updated), 1500);
-      return updated;
-    });
-    setView('success');
-  };
-
-  const navItems: { id: ViewType; icon: any; label: string }[] = [
-    { id: 'home', icon: HomeIcon, label: 'Home' },
-    { id: 'library', icon: LibraryIcon, label: 'Library' },
-    { id: 'badges', icon: MedalIcon, label: 'Badges' },
-    { id: 'profile', icon: UserIcon, label: 'Profile' }
-  ];
+  const currentStep = useMemo(() => 
+    ROADMAP_STEPS.find(s => s.id === stats.currentLevel) || ROADMAP_STEPS[0]
+  , [stats.currentLevel]);
 
   return (
-    <div className="min-h-screen flex flex-col max-w-md mx-auto relative bg-[#0A0A0A] shadow-2xl border-x border-zinc-900 overflow-hidden text-white font-sans selection:bg-[#CCFF00] selection:text-black">
+    <div className="min-h-screen max-w-md mx-auto relative bg-[#0A0A0A] text-white font-sans overflow-hidden border-x border-zinc-900">
       <GrainOverlay />
-      
-      <BadgePopup 
-        badge={activeBadge} 
-        isVisible={showBadgePopup} 
-        onClose={() => setShowBadgePopup(false)} 
-      />
 
       <AnimatePresence mode="wait">
-        {view === 'podcast' && (
-          <PodcastScreen 
-            key="podcast" 
-            lesson={lesson || lessonsData[0]} 
-            onBack={() => setView('home')} 
-            onFinished={handlePodcastFinished}
-          />
-        )}
-        {view === 'lessonDetail' && lesson && (
-          <LessonDetailScreen 
-            key="lessonDetail"
-            lesson={lesson} 
-            onFinish={handleLessonFinished} 
-            onBack={() => setView('home')} 
-          />
-        )}
-        {view === 'success' && (
-          <SuccessScreen 
-            key="success"
-            streak={userStats.streak} 
-            onReturn={() => setView('home')} 
-          />
-        )}
-      </AnimatePresence>
-
-      <header className="px-6 pt-12 pb-4 flex justify-between items-center z-10">
-        <div className="flex items-center gap-4">
-          <motion.div 
-            whileHover={{ rotate: 5, scale: 1.1 }}
-            className="w-11 h-11 rounded-2xl bg-[#CCFF00] flex items-center justify-center hard-shadow overflow-hidden border border-black/10 cursor-pointer"
-          >
-             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&backgroundColor=ccff00`} alt="Avatar" className="w-10 h-10 mt-1" />
-          </motion.div>
-          <div>
-            <h2 className="text-[10px] font-sans font-bold uppercase tracking-widest opacity-30 tracking-[0.1em]">LEVEL 12</h2>
-            <h1 className="text-xl font-heading font-black -mt-1 tracking-tighter">Yo, Alex!</h1>
-          </div>
-        </div>
-        <motion.div 
-          whileHover={{ scale: 1.05 }}
-          className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 rounded-full border border-zinc-800 hard-shadow cursor-default"
-        >
-          <SparklesIcon size={14} color="#CCFF00" />
-          <span className="text-[11px] font-sans font-black text-[#CCFF00]">{userStats.streak} DAYS</span>
-        </motion.div>
-      </header>
-
-      <main className="flex-1 overflow-y-auto px-6 pb-32 no-scrollbar space-y-4 pt-2">
-        
         {view === 'home' && (
-          <>
-            <motion.section 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.02, y: -4 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => !loading && setView('lessonDetail')}
-              className="relative aspect-[16/10] w-full bg-[#1C1C1E] rounded-[32px] p-8 flex flex-col justify-end overflow-hidden hard-shadow group cursor-pointer transition-all"
-            >
-              <div className="absolute top-0 right-0 w-48 h-48 bg-[#CCFF00]/10 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-[#CCFF00]/20 transition-colors" />
-              
-              <span className="text-[10px] font-sans font-bold text-[#CCFF00] uppercase tracking-[0.2em] mb-2 block">TODAY'S TOPIC</span>
-              <h2 className="text-3xl font-heading font-black leading-[0.9] tracking-tighter mb-4 text-white">
-                {loading ? "ĐANG SOẠN..." : (lesson?.topic || "URBAN FLOW")}
-              </h2>
-              
-              <div className="flex items-center gap-4">
-                <motion.button 
-                  animate={!loading ? { y: [0, -5, 0] } : {}}
-                  transition={!loading ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" } : {}}
-                  className="px-5 py-2.5 bg-[#CCFF00] text-black rounded-xl text-[11px] font-sans font-black uppercase clay-accent hover:scale-105 transition-transform active:scale-95"
-                >
-                  {loading ? "Đợi chút..." : "Bắt đầu học"}
-                </motion.button>
-                <span className="text-[10px] font-sans font-medium text-zinc-500 uppercase tracking-widest">12 MINS</span>
-              </div>
-            </motion.section>
-
-            {lessonsData[0].vocab_set[0] && <WordOfTheDayWidget word={lessonsData[0].vocab_set[0]} />}
-
-            <div className="grid grid-cols-2 gap-4">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.05, y: -4 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setView('podcast')}
-                className="bg-[#1C1C1E] rounded-[28px] p-5 border border-zinc-800 hard-shadow flex flex-col justify-between aspect-square cursor-pointer hover:border-[#CCFF00]/30 transition-all group"
-              >
-                <div className="flex justify-between items-start">
-                  <HeadphonesIcon size={20} color="#CCFF00" />
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#CCFF00]/10 rounded-full">
-                    <div className="w-1 h-1 rounded-full bg-[#CCFF00] animate-pulse"></div>
-                    <span className="text-[8px] font-black text-[#CCFF00] uppercase tracking-widest">LIVE</span>
+          <motion.main 
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}
+            className="flex flex-col h-full pt-12 px-6 pb-32 overflow-y-auto no-scrollbar"
+          >
+            {/* Minimal Header */}
+            <header className="flex justify-between items-center mb-10">
+               <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[#CCFF00] flex items-center justify-center text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]">
+                     <UserIcon size={16} />
                   </div>
-                </div>
-                <div>
-                  <h3 className="text-[9px] font-sans font-bold text-zinc-500 uppercase tracking-widest mb-1">PODCAST</h3>
-                  <p className="text-xl font-heading font-black leading-tight text-white group-hover:text-[#CCFF00] transition-colors">Midnight Hustle</p>
-                </div>
-              </motion.div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Hub / Central</span>
+               </div>
+               <div className="flex gap-3">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/50 rounded-full border border-white/5">
+                     <FlameIcon size={14} color="#FF6B4A" />
+                     <span className="text-[10px] font-black">{stats.streak}d</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/50 rounded-full border border-white/5">
+                     <StarIcon size={14} color="#CCFF00" />
+                     <span className="text-[10px] font-black">{stats.xp}xp</span>
+                  </div>
+               </div>
+            </header>
 
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.05, y: -4 }}
-                className="bg-[#1C1C1E] rounded-[28px] p-5 border border-zinc-800 hard-shadow flex flex-col justify-between aspect-square transition-all"
-              >
-                <div className="flex justify-between items-start">
-                  <FlameIcon size={20} color="#FF6B4A" />
-                  <div className="text-[9px] font-sans font-bold text-zinc-500 uppercase tracking-widest">Active</div>
-                </div>
-                <div>
-                  <p className="text-3xl font-heading font-black leading-tight text-[#FF6B4A]">{userStats.streak}</p>
-                  <p className="text-[10px] font-sans font-medium text-zinc-500 uppercase mt-1">Day Streak</p>
-                </div>
-              </motion.div>
+            {/* Hero Section: Active Mission with Glassmorphism */}
+            <section className="mb-10">
+               <div className="flex justify-between items-end mb-4 px-2">
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">Active Mission</h2>
+                  <span className="text-[8px] font-black text-[#CCFF00] uppercase tracking-widest bg-[#CCFF00]/10 px-2 py-0.5 rounded-full">Sprinting</span>
+               </div>
+               
+               <motion.div 
+                 whileTap={{ scale: 0.98 }}
+                 onClick={() => startLevel(stats.currentLevel)}
+                 className="glass-card relative p-8 rounded-[48px] overflow-hidden group shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]"
+               >
+                  {/* Glowing background elements */}
+                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#CCFF00]/5 blur-[60px] rounded-full group-hover:bg-[#CCFF00]/10 transition-all duration-700" />
+                  <div className="absolute -bottom-20 -left-10 w-40 h-40 bg-[#BFA3FF]/5 blur-[60px] rounded-full" />
+                  
+                  <div className="relative z-10">
+                     <div className="flex items-center gap-3 mb-3">
+                        <div className="w-6 h-6 bg-[#CCFF00] rounded-lg flex items-center justify-center">
+                           <FlashIcon size={14} color="black" />
+                        </div>
+                        <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">
+                           {currentStep.stage} • 0{stats.currentLevel}
+                        </span>
+                     </div>
+
+                     <h3 className="text-[2.6rem] font-heading font-black tracking-tighter leading-[0.9] mb-3 text-white">
+                        {currentStep.title}
+                     </h3>
+                     
+                     <p className="text-zinc-500 text-xs font-medium mb-8 pr-10 leading-relaxed">
+                        {currentStep.desc}. Complete this to unlock next urban tier.
+                     </p>
+                     
+                     <div className="flex items-center justify-between">
+                        <button className="px-8 py-3.5 bg-[#CCFF00] text-black rounded-2xl font-black text-[11px] uppercase tracking-widest clay-accent hover:scale-105 active:scale-95 transition-all">
+                           RESUME MISSION
+                        </button>
+                        <div className="flex flex-col items-end">
+                           <span className="text-[18px] font-heading font-black text-white leading-none">40%</span>
+                           <span className="text-[7px] font-black text-zinc-600 uppercase tracking-widest">Progress</span>
+                        </div>
+                     </div>
+                  </div>
+               </motion.div>
+            </section>
+
+            {/* Quick Access Grid */}
+            <section className="grid grid-cols-2 gap-4 mb-10">
+               <motion.div 
+                 whileTap={{ scale: 0.95 }}
+                 onClick={() => setView('podcast')}
+                 className="p-6 rounded-[40px] bg-zinc-900/30 border border-white/5 flex flex-col justify-between aspect-square group relative overflow-hidden"
+               >
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#BFA3FF]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-800/50 flex items-center justify-center text-[#BFA3FF] relative z-10">
+                     <HeadphonesIcon size={24} />
+                  </div>
+                  <div className="relative z-10">
+                     <h4 className="font-heading font-black text-xl leading-tight uppercase tracking-tighter">Neo<br/>Radio</h4>
+                     <p className="text-[9px] font-black text-zinc-600 uppercase mt-1 tracking-widest group-hover:text-[#BFA3FF] transition-colors">Ambient Flow</p>
+                  </div>
+               </motion.div>
+
+               <motion.div 
+                 whileTap={{ scale: 0.95 }}
+                 onClick={() => setView('badges')}
+                 className="p-6 rounded-[40px] bg-zinc-900/30 border border-white/5 flex flex-col justify-between aspect-square group relative overflow-hidden"
+               >
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#CCFF00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-800/50 flex items-center justify-center text-[#CCFF00] relative z-10">
+                     <MedalIcon size={24} />
+                  </div>
+                  <div className="relative z-10">
+                     <h4 className="font-heading font-black text-xl leading-tight uppercase tracking-tighter">Urban<br/>Trophy</h4>
+                     <p className="text-[9px] font-black text-zinc-600 uppercase mt-1 tracking-widest group-hover:text-[#CCFF00] transition-colors">{stats.unlockedBadges.length} UNLOCKED</p>
+                  </div>
+               </motion.div>
+            </section>
+
+            {/* Placement Test Promo - Simplified */}
+            <section className="px-1 text-center">
+               <button className="w-full p-6 rounded-[32px] bg-white/5 border border-white/10 flex items-center justify-center gap-4 hover:bg-white/10 transition-all group">
+                  <div className="text-left">
+                     <h4 className="font-heading font-black text-sm uppercase tracking-tight text-white group-hover:text-[#CCFF00] transition-colors">Jump to Street Smart?</h4>
+                     <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Take the 15-min placement test</p>
+                  </div>
+                  <FlashIcon size={16} color="#444" className="group-hover:text-[#CCFF00] transition-colors" />
+               </button>
+            </section>
+          </motion.main>
+        )}
+
+        {view === 'roadmap' && (
+          <motion.main 
+            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+            className="flex flex-col h-full pt-16 px-6 pb-32 overflow-y-auto no-scrollbar"
+          >
+            <header className="mb-10">
+               <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-[0.4em] mb-2 block">The Master Plan</span>
+               <h1 className="text-[3.5rem] font-heading font-black tracking-tighter uppercase leading-[0.85]">The Hustle<br/><span className="text-[#CCFF00]">Path</span></h1>
+            </header>
+
+            <div className="space-y-4">
+              {ROADMAP_STEPS.map((step, idx) => {
+                const isLocked = step.id > stats.currentLevel;
+                const isCurrent = step.id === stats.currentLevel;
+                const isCompleted = step.id < stats.currentLevel;
+                
+                return (
+                  <motion.div 
+                    key={step.id}
+                    whileTap={!isLocked ? { scale: 0.98 } : {}}
+                    onClick={() => startLevel(step.id)}
+                    className={`relative p-7 rounded-[36px] border transition-all cursor-pointer ${
+                      isCurrent ? 'bg-[#1C1C1E] border-[#CCFF00]/50 shadow-[0_20px_40px_-10px_rgba(204,255,0,0.1)]' : 
+                      isLocked ? 'bg-zinc-900/20 border-white/5 opacity-40 grayscale' : 'bg-zinc-900/50 border-white/10'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                       <div>
+                          <div className="flex items-center gap-2 mb-1">
+                             <span className={`text-[8px] font-black uppercase tracking-[0.2em] ${isCurrent ? 'text-[#CCFF00]' : 'text-zinc-600'}`}>
+                               STAGE 0{step.id}
+                             </span>
+                             {isCompleted && <StarIcon size={10} color="#CCFF00" />}
+                          </div>
+                          <h3 className={`text-2xl font-heading font-black tracking-tighter leading-none ${isLocked ? 'text-zinc-700' : 'text-white'}`}>{step.title}</h3>
+                       </div>
+                       <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${isCurrent ? 'bg-[#CCFF00] text-black shadow-lg shadow-[#CCFF00]/20' : 'bg-zinc-800/50 text-zinc-600'}`}>
+                          {isLocked ? <FlashIcon size={16} /> : <MedalIcon size={18} />}
+                       </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
-          </>
+          </motion.main>
         )}
 
         {view === 'badges' && (
-          <div className="pt-4">
-            <BadgeGallery unlockedBadges={userStats.unlockedBadges} />
-          </div>
-        )}
-
-        {view === 'profile' && (
-          <div className="pt-4 space-y-8">
-            <motion.section 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-zinc-900 rounded-[32px] p-8 hard-shadow border border-zinc-800 text-center"
-            >
-              <motion.div 
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.8, ease: "anticipate" }}
-                className="w-24 h-24 bg-[#CCFF00] rounded-full mx-auto mb-4 flex items-center justify-center hard-shadow border border-black/10 cursor-pointer"
-              >
-                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&backgroundColor=ccff00`} alt="Avatar" className="w-20 h-20" />
-              </motion.div>
-              <h2 className="text-3xl font-heading font-black tracking-tighter text-white">Alex Urban</h2>
-              <p className="text-[11px] font-sans font-medium text-zinc-500 uppercase tracking-widest mt-1">Tech Nomad • Lvl 12</p>
-            </motion.section>
-            
-            <div className="bg-zinc-900 rounded-[32px] p-6 border border-zinc-800 space-y-6">
-              <h4 className="text-[10px] font-sans font-black text-zinc-600 uppercase tracking-widest">USER STATS</h4>
-              <div className="grid grid-cols-2 gap-4">
-                <motion.div whileHover={{ scale: 1.05 }} className="p-4 bg-zinc-950 rounded-2xl border border-zinc-900 transition-all">
-                  <span className="text-[10px] font-bold text-zinc-600 block mb-1">PODCASTS</span>
-                  <span className="text-xl font-black text-[#CCFF00]">{userStats.podcastsCompleted}</span>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} className="p-4 bg-zinc-950 rounded-2xl border border-zinc-900 transition-all">
-                  <span className="text-[10px] font-bold text-zinc-600 block mb-1">LESSONS</span>
-                  <span className="text-xl font-black text-[#BFA3FF]">{userStats.lessonsCompleted}</span>
-                </motion.div>
-              </div>
-
-              <h4 className="text-[10px] font-sans font-black text-zinc-600 uppercase tracking-widest">DEVELOPER ZONE</h4>
-              <motion.button 
-                whileHover={{ scale: 1.02, backgroundColor: "rgba(204, 255, 0, 0.15)" }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleLessonFinished()}
-                className="w-full flex items-center justify-between p-4 bg-[#CCFF00]/10 border border-[#CCFF00]/30 rounded-2xl group transition-all"
-              >
-                <span className="text-sm font-bold text-[#CCFF00]">Simulate Lesson Finish (Trigger Badge)</span>
-                <MedalIcon size={18} color="#CCFF00" className="group-hover:rotate-12 transition-transform" />
-              </motion.button>
-              
-              <button 
-                onClick={() => { localStorage.clear(); window.location.reload(); }}
-                className="w-full text-left py-3 text-red-500 text-sm font-bold border-t border-zinc-800 mt-2 hover:opacity-70 transition-opacity"
-              >
-                Reset App Data
+           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-16 px-6 pb-32 h-full overflow-y-auto no-scrollbar">
+              <button onClick={() => setView('home')} className="mb-8 text-zinc-500 hover:text-white flex items-center gap-2 transition-colors">
+                 <CloseIcon size={20} /> <span className="text-[10px] font-black uppercase tracking-widest">Back to Hub</span>
               </button>
-            </div>
-          </div>
+              <BadgeGallery unlockedBadges={stats.unlockedBadges} />
+           </motion.div>
         )}
 
-        {view === 'library' && (
-          <div className="pt-4 space-y-4">
-            <h3 className="text-3xl font-heading font-black tracking-tighter mb-6">Archive</h3>
-            {[...Array(3)].map((_, i) => (
-              <motion.div 
-                key={i} 
-                whileHover={{ x: 8, opacity: 0.6 }}
-                className="p-6 bg-zinc-900 rounded-[28px] border border-zinc-800 flex justify-between items-center opacity-40 cursor-default transition-all"
-              >
-                <div className="space-y-1">
-                   <h4 className="font-sans font-bold text-white">Topic {i+1} Coming Soon</h4>
-                </div>
-                <LibraryIcon size={20} color="#333" />
-              </motion.div>
-            ))}
-          </div>
+        {view === 'podcast' && currentLesson && (
+          <PodcastScreen 
+            lesson={currentLesson} 
+            onBack={() => setView('home')} 
+          />
         )}
 
-      </main>
+        {view === 'lessonDetail' && currentLesson && (
+          <LessonDetailScreen 
+            lesson={currentLesson} 
+            onFinish={() => setView('success')} 
+            onBack={() => setView('home')} 
+          />
+        )}
 
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-[100]">
-        <div className="floating-dock h-20 rounded-[40px] px-8 flex justify-between items-center shadow-2xl">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = view === item.id || (view === 'podcast' && item.id === 'home');
-            return (
-              <button 
-                key={item.id}
-                onClick={() => setView(item.id)}
-                className="relative flex flex-col items-center justify-center w-12 h-12 transition-all group"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <Icon size={22} color={isActive ? "#CCFF00" : "#444"} className="transition-colors duration-300" />
-                </motion.div>
-                {isActive && (
-                  <motion.div 
-                    layoutId="nav-dot"
-                    className="absolute -bottom-1.5 w-1 h-1 bg-[#CCFF00] rounded-full shadow-[0_0_8px_#CCFF00]"
-                  />
-                )}
-                <span className={`text-[8px] font-sans font-bold uppercase mt-1.5 tracking-widest transition-colors duration-300 ${isActive ? 'text-[#CCFF00]' : 'text-zinc-700'}`}>
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
+        {view === 'success' && (
+          <SuccessScreen streak={stats.streak} onReturn={() => setView('home')} />
+        )}
+      </AnimatePresence>
+
+      {/* Navigation Dock - Glassmorphism style */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] z-[100]">
+        <div className="floating-dock h-20 rounded-[40px] px-10 flex justify-between items-center shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]">
+          <button onClick={() => setView('home')} className="group flex flex-col items-center gap-1">
+            <motion.div animate={{ y: view === 'home' ? -2 : 0 }}>
+               <HomeIcon size={22} color={view === 'home' ? '#CCFF00' : '#555'} />
+            </motion.div>
+            <span className={`text-[7px] font-black uppercase tracking-widest ${view === 'home' ? 'text-[#CCFF00]' : 'text-zinc-700'}`}>HUB</span>
+          </button>
+          <button onClick={() => setView('roadmap')} className="group flex flex-col items-center gap-1">
+            <motion.div animate={{ y: view === 'roadmap' ? -2 : 0 }}>
+               <MedalIcon size={22} color={view === 'roadmap' ? '#CCFF00' : '#555'} />
+            </motion.div>
+            <span className={`text-[7px] font-black uppercase tracking-widest ${view === 'roadmap' ? 'text-[#CCFF00]' : 'text-zinc-700'}`}>PATH</span>
+          </button>
+          <button className="group flex flex-col items-center gap-1 opacity-30">
+            <LibraryIcon size={22} color="#555" />
+            <span className="text-[7px] font-black uppercase tracking-widest text-zinc-700">VAULT</span>
+          </button>
+          <button className="group flex flex-col items-center gap-1">
+            <UserIcon size={22} color={view === 'profile' ? '#CCFF00' : '#555'} />
+            <span className={`text-[7px] font-black uppercase tracking-widest ${view === 'profile' ? 'text-[#CCFF00]' : 'text-zinc-700'}`}>ME</span>
+          </button>
         </div>
       </div>
+
+      {loading && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[1000] flex items-center justify-center">
+           <div className="text-center">
+              <div className="relative w-16 h-16 mx-auto mb-6">
+                 <div className="absolute inset-0 border-4 border-[#CCFF00]/10 rounded-full" />
+                 <div className="absolute inset-0 border-4 border-[#CCFF00] border-t-transparent rounded-full animate-spin" />
+              </div>
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#CCFF00] animate-pulse">Architecting...</p>
+           </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -35,7 +35,14 @@
             background: #CCFF00;
         }
 
-        /* Modern Urban Dashboard Styles */
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
         .clay-card {
             box-shadow: 
                 20px 20px 60px #050505,
@@ -68,9 +75,16 @@
 
         /* Floating Nav Styling */
         .floating-dock {
-            background: rgba(28, 28, 30, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(28, 28, 30, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Text Stroke for Urban Aesthetics */
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
+            color: transparent;
         }
     </style>
 <script type="importmap">

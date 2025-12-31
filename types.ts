@@ -4,57 +4,58 @@ export interface VocabularyItem {
   pronunciation: string;
   meaning: string;
   example: string;
+  id: string;
 }
 
 export interface PodcastSegment {
   en: string;
   vi: string;
-  startTime?: number;
+  emotion?: string; // SSML-like hint: 'cheerful', 'serious', 'whisper'
 }
+
+export type RoadmapStage = 'Urban Newbie' | 'Street Smart' | 'Professional Hustler' | 'Urban Legend';
 
 export interface LessonData {
-  week: number;
-  day: string;
+  id: string;
+  level: number; // 1 to 8
+  roadmapStage: RoadmapStage;
+  tags: string[];
   topic: string;
-  vocab_set: VocabularyItem[];
-  grammar_focus: string;
-  grammar_example_vi: string;
-  podcast_segments: PodcastSegment[];
-  interactive_challenge: {
-    type: string;
-    question: string;
-    options?: string[];
-    correct_answer: string;
+  warmup: {
+    intro: string;
+    keywords: string[];
   };
-}
-
-export type CriteriaType = 'LESSON_COUNT' | 'STREAK' | 'PODCAST_COUNT' | 'PERFECT_TESTS' | 'NIGHT_LEARNING';
-
-export interface UserStats {
-  lessonsCompleted: number;
-  streak: number;
-  perfectTests: number;
-  podcastsCompleted: number; // Theo dõi số podcast đã nghe xong
-  unlockedBadges: string[];
+  podcast_segments: PodcastSegment[];
+  vocab_spotlight: VocabularyItem[];
+  daily_challenge: {
+    question: string;
+    options: string[];
+    correct_answer: string;
+    urban_context: string;
+  };
+  real_world_mission: {
+    task: string;
+    platform: 'LinkedIn' | 'Twitter' | 'Slack' | 'Tinder' | 'Email' | 'IRL';
+    description: string;
+  };
 }
 
 export interface Badge {
   id: string;
   title: string;
   description: string;
-  howToUnlock: string;
-  icon: 'sneaker' | 'headphones' | 'coffee' | 'flash' | 'medal' | 'social';
-  criteria?: {
-    type: CriteriaType;
-    threshold: number;
-  };
+  icon: string;
+  howToUnlock: string; // Added to resolve errors in BadgeGallery.tsx
+  levelRequired?: number; // Made optional as it's not provided in the BadgeGallery static data
 }
 
-export enum ThemeColors {
-  BACKGROUND = '#0A0A0A',
-  ACCENT = '#CCFF00',
-  SECONDARY_PURPLE = '#BFA3FF',
-  SECONDARY_CORAL = '#FF6B4A',
-  TEXT_PRIMARY = '#FFFFFF',
-  TEXT_SECONDARY = '#A0A0A0'
+export interface UserStats {
+  currentLevel: number;
+  lessonsCompleted: number;
+  streak: number;
+  unlockedBadges: string[];
+  savedVocab: any[];
+  xp: number;
+  perfectTests: number; // Added to resolve errors in badgeService.ts
+  podcastsCompleted: number; // Added to resolve errors in badgeService.ts
 }
