@@ -1,0 +1,35 @@
+
+{
+  "expo": {
+    "name": "NeoLingua",
+    "slug": "neolingua-urban",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "https://api.dicebear.com/7.x/shapes/svg?seed=neolingua&backgroundColor=ccff00",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0A0A0A",
+    "primaryColor": "#CCFF00",
+    "splash": {
+      "image": "https://api.dicebear.com/7.x/shapes/svg?seed=splash&backgroundColor=0a0a0a",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A0A0A"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.neolingua.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "https://api.dicebear.com/7.x/shapes/svg?seed=adaptive&backgroundColor=ccff00",
+        "backgroundColor": "#0A0A0A"
+      },
+      "package": "com.neolingua.app"
+    },
+    "web": {
+      "favicon": "https://api.dicebear.com/7.x/shapes/svg?seed=favicon&backgroundColor=ccff00"
+    }
+  }
+}
