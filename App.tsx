@@ -14,10 +14,11 @@ import LessonDetailScreen from './LessonDetailScreen';
 import SuccessScreen from './SuccessScreen';
 import PodcastScreen from './PodcastScreen';
 import BadgeGallery from './components/BadgeGallery';
+import UrbanChat from './components/UrbanChat';
 import { playNaturalSpeech } from './services/speechService';
 import { syncUserStats } from './services/badgeService';
 
-type ViewType = 'home' | 'roadmap' | 'lessonDetail' | 'success' | 'profile' | 'podcast' | 'badges';
+type ViewType = 'home' | 'roadmap' | 'lessonDetail' | 'success' | 'profile' | 'podcast' | 'badges' | 'chat';
 
 const ROADMAP_STEPS = [
   { id: 1, stage: 'Urban Newbie', title: 'Survival Mode', vi_title: 'Chế độ Sinh tồn', desc: 'Cafe, Streets & Basics', vi_desc: 'Cà phê, Đường phố & Cơ bản' },
@@ -123,146 +124,150 @@ const App: React.FC = () => {
             initial={{ opacity: 0, y: 10 }} 
             animate={{ opacity: 1, y: 0 }} 
             exit={{ opacity: 0, x: -20 }}
-            className="flex flex-col h-full pt-12 px-6 pb-32 overflow-y-auto no-scrollbar"
+            className="flex flex-col h-full pt-16 px-6 pb-48 overflow-y-auto no-scrollbar"
           >
-            {/* Header - Spacing: px-2 */}
+            {/* Header */}
             <header className="flex justify-between items-center mb-10 px-2">
                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-[#CCFF00] flex items-center justify-center text-black shadow-[0_0_20px_rgba(204,255,0,0.2)]">
-                     <UserIcon size={24} />
+                  <div className="w-14 h-14 rounded-2xl bg-[#CCFF00] flex items-center justify-center text-black shadow-[0_10px_30px_rgba(204,255,0,0.2)]">
+                     <UserIcon size={28} />
                   </div>
                   <div>
-                    <h1 className="text-xs font-sans font-black uppercase tracking-[0.2em] leading-none">Neo.Hustler</h1>
-                    <p className="text-[10px] font-sans font-bold text-zinc-600 uppercase mt-1">Level {stats.currentLevel} Stage</p>
+                    <h1 className="text-sm font-sans font-black uppercase tracking-[0.2em] leading-none">Neo.Hustler</h1>
+                    <p className="text-[10px] font-sans font-bold text-zinc-600 uppercase mt-1.5">Level {stats.currentLevel} Stage</p>
                   </div>
                </div>
-               <div className="flex gap-2">
-                  <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/80 rounded-full border border-white/5">
-                     <FlameIcon size={14} color="#FF6B4A" />
-                     <span className="text-[10px] font-sans font-black">{stats.streak}</span>
-                  </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/80 rounded-full border border-white/5">
-                     <SparklesIcon size={14} color="#CCFF00" />
-                     <span className="text-[10px] font-sans font-black">{stats.xp}</span>
+               <div className="flex gap-2.5">
+                  <div className="flex items-center gap-2 px-5 py-3 bg-zinc-900/80 rounded-full border border-white/5">
+                     <FlameIcon size={16} color="#FF6B4A" />
+                     <span className="text-xs font-sans font-black">{stats.streak}</span>
                   </div>
                </div>
             </header>
 
-            {/* Active Mission Card - Spacing: p-8 (32px) */}
+            {/* Active Mission Card */}
             <section className="mb-8">
                <motion.div 
-                 whileTap={{ scale: 0.98 }}
+                 whileTap={{ scale: 0.97 }}
                  onClick={() => startLevel(stats.currentLevel)}
-                 className="glass-card relative p-8 rounded-[48px] overflow-hidden group cursor-pointer transition-shadow hover:shadow-[0_0_40px_rgba(204,255,0,0.05)]"
+                 className="glass-card relative p-10 rounded-[56px] overflow-hidden group cursor-pointer transition-shadow hover:shadow-[0_0_50px_rgba(204,255,0,0.08)]"
                >
-                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#CCFF00]/5 blur-[60px] rounded-full" />
+                  <div className="absolute -top-10 -right-10 w-48 h-48 bg-[#CCFF00]/5 blur-[70px] rounded-full" />
                   <div className="relative z-10">
-                     <div className="flex items-center gap-2 mb-4">
-                        <span className="text-[9px] font-sans font-black uppercase text-[#CCFF00] tracking-[0.3em] bg-[#CCFF00]/10 px-2 py-1 rounded-md">ACTIVE MISSION • 0{stats.currentLevel}</span>
+                     <div className="flex items-center gap-2 mb-5">
+                        <span className="text-[10px] font-sans font-black uppercase text-[#CCFF00] tracking-[0.3em] bg-[#CCFF00]/10 px-3 py-1.5 rounded-md">MISSION • 0{stats.currentLevel}</span>
                      </div>
-                     <h3 className="text-[2.8rem] font-heading font-black tracking-tighter leading-[0.85] mb-2">{currentStep.title}</h3>
-                     <h4 className="text-xl font-heading font-black text-white/40 tracking-tight leading-none mb-6">{currentStep.vi_title}</h4>
-                     <p className="text-zinc-500 font-sans font-bold text-xs mb-8 leading-relaxed pr-8">
+                     <h3 className="text-[3.2rem] font-heading font-black tracking-tighter leading-[0.8] mb-2">{currentStep.title}</h3>
+                     <h4 className="text-2xl font-heading font-black text-white/30 tracking-tight leading-none mb-8">{currentStep.vi_title}</h4>
+                     <p className="text-zinc-500 font-sans font-bold text-sm mb-10 leading-relaxed pr-6">
                        {currentStep.desc} • <span className="italic">{currentStep.vi_desc}</span>
                      </p>
-                     <button className="px-8 py-4 bg-[#CCFF00] text-black rounded-2xl font-sans font-black text-[11px] uppercase tracking-[0.2em] clay-accent transition-transform hover:scale-105">
-                        RESUME SPRINT
+                     <button className="w-full py-5 bg-[#CCFF00] text-black rounded-[24px] font-sans font-black text-xs uppercase tracking-[0.2em] clay-accent transition-transform">
+                        START SPRINT
                      </button>
                   </div>
                </motion.div>
             </section>
 
-            {/* Daily Word Section - Spacing: p-6 (24px) */}
-            <section className="mb-8 px-2">
-               <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-zinc-600">Daily Urban Word</h2>
-                  <SparklesIcon size={14} color="#FF6B4A" />
-               </div>
+            {/* Street Talk Sandbox Card */}
+            <section className="mb-8 px-1">
                <motion.div 
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => playNaturalSpeech(dailyWord.word)}
-                  className="p-6 rounded-[32px] bg-zinc-900/40 border border-[#FF6B4A]/20 flex items-center justify-between group cursor-pointer relative overflow-hidden"
+                 whileTap={{ scale: 0.97 }}
+                 onClick={() => setView('chat')}
+                 className="p-10 rounded-[48px] bg-zinc-900/40 border border-[#CCFF00]/20 flex items-center justify-between group shadow-xl cursor-pointer overflow-hidden relative"
                >
-                  <div className="absolute -top-10 -left-10 w-24 h-24 bg-[#FF6B4A]/5 blur-2xl rounded-full" />
-                  <div className="flex-1 relative z-10">
-                     <div className="flex items-center gap-3 mb-2">
-                        <h4 className="text-2xl font-heading font-black tracking-tighter text-white group-hover:text-[#FF6B4A] transition-colors">{dailyWord.word}</h4>
-                        <span className="text-[11px] font-sans font-bold text-zinc-600 italic tracking-tighter">{dailyWord.pronunciation}</span>
+                  <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#CCFF00]/10 blur-3xl rounded-full pointer-events-none" />
+                  <div className="relative z-10">
+                     <div className="flex items-center gap-2 mb-4">
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#CCFF00] animate-pulse" />
+                        <span className="text-[10px] font-sans font-black uppercase tracking-widest text-[#CCFF00]">Live AI Coaching</span>
                      </div>
-                     <p className="text-zinc-500 font-sans font-bold text-xs">{dailyWord.meaning}</p>
+                     <h4 className="text-3xl font-heading font-black tracking-tighter leading-[0.85] mb-2">STREET TALK<br/>SANDBOX</h4>
+                     <p className="text-xs font-sans font-bold text-zinc-600 mt-2 italic">Luyện Slang đô thị cùng chuyên gia AI</p>
                   </div>
-                  <div className="w-14 h-14 rounded-2xl bg-zinc-800/50 flex items-center justify-center text-[#FF6B4A] shadow-[0_0_15px_rgba(255,107,74,0.1)] relative z-10">
-                     <SoundHighIcon size={24} />
+                  <div className="w-20 h-20 bg-[#CCFF00] rounded-[32px] flex items-center justify-center text-black shadow-[0_15px_35px_rgba(204,255,0,0.25)] group-hover:rotate-6 transition-transform">
+                     <FlashIcon size={32} />
                   </div>
                </motion.div>
             </section>
 
-            {/* Radio Flow - Spacing: p-6 (24px) */}
+            {/* Daily Word Section */}
             <section className="mb-8 px-2">
-               <h2 className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-zinc-600 mb-6">Radio Flow</h2>
+               <div className="flex justify-between items-center mb-6 px-2">
+                  <h2 className="text-[11px] font-sans font-black uppercase tracking-[0.4em] text-zinc-700">Daily Urban Word</h2>
+                  <SparklesIcon size={16} color="#FF6B4A" />
+               </div>
+               <motion.div 
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => playNaturalSpeech(dailyWord.word)}
+                  className="p-8 rounded-[40px] bg-zinc-900/40 border border-[#FF6B4A]/20 flex items-center justify-between group cursor-pointer relative overflow-hidden"
+               >
+                  <div className="flex-1 relative z-10">
+                     <div className="flex items-center gap-4 mb-3">
+                        <h4 className="text-3xl font-heading font-black tracking-tighter text-white group-hover:text-[#FF6B4A] transition-colors">{dailyWord.word}</h4>
+                        <span className="text-xs font-sans font-bold text-zinc-600 italic tracking-tighter">{dailyWord.pronunciation}</span>
+                     </div>
+                     <p className="text-zinc-500 font-sans font-bold text-sm leading-snug pr-4">{dailyWord.meaning}</p>
+                  </div>
+                  <div className="w-16 h-16 rounded-[24px] bg-zinc-800/50 flex items-center justify-center text-[#FF6B4A] shadow-[0_0_15px_rgba(255,107,74,0.1)] relative z-10">
+                     <SoundHighIcon size={28} />
+                  </div>
+               </motion.div>
+            </section>
+
+            {/* Radio Flow */}
+            <section className="mb-10 px-2">
+               <h2 className="text-[11px] font-sans font-black uppercase tracking-[0.4em] text-zinc-700 mb-6 px-2">Ambient Radio</h2>
                <div 
                   onClick={() => openPodcast()}
-                  className="relative p-6 rounded-[40px] bg-[#BFA3FF] text-black overflow-hidden flex items-center justify-between group shadow-xl cursor-pointer"
+                  className="relative p-8 rounded-[48px] bg-[#BFA3FF] text-black overflow-hidden flex items-center justify-between group shadow-xl cursor-pointer"
                >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-3xl rounded-full translate-x-10 -translate-y-10" />
                   <div className="relative z-10 flex-1">
-                     <h4 className="text-2xl font-heading font-black tracking-tighter leading-none mb-2">Neo Radio FM</h4>
-                     <p className="text-[10px] font-sans font-black opacity-60 uppercase tracking-[0.2em]">Ambient Learning Flow</p>
-                     
-                     <div className="flex items-center gap-1.5 mt-4 h-4">
-                        {[1, 2, 3, 4, 3, 2, 5, 2, 3, 4, 1].map((h, i) => (
-                           <motion.div 
-                              key={i}
-                              animate={{ height: ["4px", `${h*4}px`, "4px"] }}
-                              transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.1 }}
-                              className="w-1 bg-black/40 rounded-full"
-                           />
-                        ))}
-                        <span className="text-[9px] font-sans font-black ml-2 uppercase opacity-40">Streaming Now</span>
-                     </div>
+                     <h4 className="text-3xl font-heading font-black tracking-tighter leading-none mb-3">Neo Radio FM</h4>
+                     <p className="text-[11px] font-sans font-black opacity-60 uppercase tracking-[0.2em]">Bilingual Flow Session</p>
                   </div>
-                  <div className="w-16 h-16 bg-black rounded-[24px] flex items-center justify-center text-[#CCFF00] shadow-lg relative z-10 transition-transform duration-300 group-hover:scale-105">
-                     <HeadphonesIcon size={28} />
+                  <div className="w-20 h-20 bg-black rounded-[32px] flex items-center justify-center text-[#CCFF00] shadow-lg relative z-10 transition-transform duration-300 group-hover:scale-110">
+                     <HeadphonesIcon size={32} />
                   </div>
                </div>
             </section>
 
-            {/* Action Grid - Spacing: p-6 (24px) */}
-            <section className="grid grid-cols-2 gap-6 mb-10 px-2">
+            {/* Action Grid */}
+            <section className="grid grid-cols-2 gap-6 mb-12 px-2">
                <motion.div 
                  whileTap={{ scale: 0.95 }}
                  onClick={() => setView('badges')}
-                 className="p-6 rounded-[36px] bg-zinc-900/30 border border-[#FF6B4A]/10 flex flex-col justify-between aspect-square cursor-pointer group"
+                 className="p-8 rounded-[40px] bg-zinc-900/30 border border-[#FF6B4A]/10 flex flex-col justify-between aspect-square cursor-pointer group"
                >
-                  <div className="w-12 h-12 rounded-2xl bg-[#FF6B4A]/10 flex items-center justify-center text-[#FF6B4A] group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,107,74,0.1)]">
-                     <MedalIcon size={24} />
+                  <div className="w-16 h-16 rounded-[24px] bg-[#FF6B4A]/10 flex items-center justify-center text-[#FF6B4A] group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,107,74,0.1)]">
+                     <MedalIcon size={32} />
                   </div>
                   <div>
-                     <h4 className="font-heading font-black text-xl uppercase leading-none tracking-tighter">Trophy<br/>Room</h4>
-                     <p className="text-[9px] font-sans font-black text-zinc-600 uppercase mt-2 tracking-widest">Achievements</p>
+                     <h4 className="font-heading font-black text-2xl uppercase leading-none tracking-tighter">Trophy<br/>Room</h4>
+                     <p className="text-[10px] font-sans font-black text-zinc-700 uppercase mt-3 tracking-widest">Achievements</p>
                   </div>
                </motion.div>
 
                <motion.div 
-                 className="p-6 rounded-[36px] bg-zinc-900/30 border border-white/5 flex flex-col justify-between aspect-square opacity-40 grayscale cursor-not-allowed"
+                 className="p-8 rounded-[40px] bg-zinc-900/30 border border-white/5 flex flex-col justify-between aspect-square opacity-40 grayscale cursor-not-allowed"
                >
-                  <div className="w-12 h-12 rounded-2xl bg-zinc-800/50 flex items-center justify-center text-zinc-500">
-                     <LibraryIcon size={24} />
+                  <div className="w-16 h-16 rounded-[24px] bg-zinc-800/50 flex items-center justify-center text-zinc-500">
+                     <LibraryIcon size={32} />
                   </div>
                   <div>
-                     <h4 className="font-heading font-black text-xl uppercase leading-none tracking-tighter">Vocab<br/>Vault</h4>
-                     <p className="text-[9px] font-sans font-black text-zinc-600 uppercase mt-2 tracking-widest">Library</p>
+                     <h4 className="font-heading font-black text-2xl uppercase leading-none tracking-tighter">Vocab<br/>Vault</h4>
+                     <p className="text-[10px] font-sans font-black text-zinc-700 uppercase mt-3 tracking-widest">Library</p>
                   </div>
                </motion.div>
             </section>
           </motion.main>
         )}
         
-        {/* roadmap, badges, podcast, lessonDetail views remain largely same but benefit from typography classes in index.html */}
         {view === 'badges' && (
-           <motion.div key="badges" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-16 px-6 pb-32 h-full overflow-y-auto no-scrollbar">
-              <button onClick={() => setView('home')} className="mb-8 text-zinc-500 hover:text-white flex items-center gap-2 transition-colors">
-                 <CloseIcon size={20} /> <span className="text-[10px] font-sans font-black uppercase tracking-[0.2em]">Back to Hub</span>
+           <motion.div key="badges" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-20 px-6 pb-40 h-full overflow-y-auto no-scrollbar">
+              <button onClick={() => setView('home')} className="mb-10 w-full h-14 rounded-2xl bg-zinc-900 border border-white/5 flex items-center justify-center gap-4 transition-colors active:scale-95">
+                 <CloseIcon size={24} color="#666" /> 
+                 <span className="text-[11px] font-sans font-black uppercase tracking-[0.2em] text-zinc-400">Back to Hub</span>
               </button>
               <BadgeGallery unlockedBadges={stats.unlockedBadges || []} />
            </motion.div>
@@ -278,6 +283,14 @@ const App: React.FC = () => {
           />
         )}
 
+        {view === 'chat' && (
+          <UrbanChat 
+            scenario="Ordering a complex custom coffee at a busy Quận 1 specialty cafe." 
+            context_vi="Bạn đang đứng tại quầy một quán cà phê Specialty cực đông khách ở trung tâm Quận 1. Hãy thử gọi một món thật 'vibe' và xử lý các câu hỏi của Barista nhé!"
+            onBack={() => setView('home')} 
+          />
+        )}
+
         {view === 'lessonDetail' && currentLesson && (
           <LessonDetailScreen lesson={currentLesson} onFinish={handleLessonFinish} onBack={() => setView('home')} />
         )}
@@ -287,39 +300,45 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] z-[100]">
-        <div className="floating-dock h-20 rounded-[40px] px-10 flex justify-between items-center shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]">
-          <button onClick={() => setView('home')} className="group flex flex-col items-center gap-1">
-            <motion.div animate={{ y: view === 'home' ? -2 : 0 }}>
-               <HomeIcon size={24} color={view === 'home' ? '#CCFF00' : '#555'} />
+      {/* 🟢 BOTTOM FADE OVERLAY: Tránh cảm giác bị cắt cụt thô ở gần Dock */}
+      <div className="fixed bottom-0 left-0 right-0 h-44 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/90 to-transparent pointer-events-none z-[80]" />
+
+      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[92%] z-[100]">
+        <div className="floating-dock h-24 rounded-[48px] px-8 flex justify-between items-center shadow-[0_30px_60px_-12px_rgba(0,0,0,0.8)]">
+          <button onClick={() => setView('home')} className="flex-1 flex flex-col items-center justify-center h-full gap-2 active:scale-90 transition-transform">
+            <motion.div animate={{ y: view === 'home' ? -3 : 0 }}>
+               <HomeIcon size={28} color={view === 'home' ? '#CCFF00' : '#555'} />
             </motion.div>
-            <span className={`text-[8px] font-sans font-black uppercase tracking-widest ${view === 'home' ? 'text-[#CCFF00]' : 'text-zinc-700'}`}>HUB</span>
+            <span className={`text-[9px] font-sans font-black uppercase tracking-widest ${view === 'home' ? 'text-[#CCFF00]' : 'text-zinc-700'}`}>HUB</span>
           </button>
-          <button onClick={() => setView('roadmap')} className="group flex flex-col items-center gap-1">
-            <motion.div animate={{ y: view === 'roadmap' ? -2 : 0 }}>
-               <MedalIcon size={24} color={view === 'roadmap' ? '#CCFF00' : '#555'} />
+          
+          <button onClick={() => setView('roadmap')} className="flex-1 flex flex-col items-center justify-center h-full gap-2 active:scale-90 transition-transform">
+            <motion.div animate={{ y: view === 'roadmap' ? -3 : 0 }}>
+               <MedalIcon size={28} color={view === 'roadmap' ? '#CCFF00' : '#555'} />
             </motion.div>
-            <span className={`text-[8px] font-sans font-black uppercase tracking-widest ${view === 'roadmap' ? 'text-[#CCFF00]' : 'text-zinc-700'}`}>PATH</span>
+            <span className={`text-[9px] font-sans font-black uppercase tracking-widest ${view === 'roadmap' ? 'text-[#CCFF00]' : 'text-zinc-700'}`}>PATH</span>
           </button>
-          <button className="group flex flex-col items-center gap-1 opacity-30 cursor-not-allowed">
-            <LibraryIcon size={24} color="#555" />
-            <span className="text-[8px] font-sans font-black uppercase tracking-widest text-zinc-700">VAULT</span>
+
+          <button className="flex-1 flex flex-col items-center justify-center h-full gap-2 opacity-30 grayscale cursor-not-allowed">
+            <LibraryIcon size={28} color="#444" />
+            <span className="text-[9px] font-sans font-black uppercase tracking-widest text-zinc-800">VAULT</span>
           </button>
-          <button className="group flex flex-col items-center gap-1 opacity-30 cursor-not-allowed">
-            <UserIcon size={24} color="#555" />
-            <span className="text-[8px] font-sans font-black uppercase tracking-widest text-zinc-700">ME</span>
+
+          <button className="flex-1 flex flex-col items-center justify-center h-full gap-2 opacity-30 grayscale cursor-not-allowed">
+            <UserIcon size={28} color="#444" />
+            <span className="text-[9px] font-sans font-black uppercase tracking-widest text-zinc-800">PROFILE</span>
           </button>
         </div>
       </div>
       
       {loading && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[1000] flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[1000] flex items-center justify-center">
            <div className="text-center">
-              <div className="relative w-16 h-16 mx-auto mb-8">
-                 <div className="absolute inset-0 border-4 border-[#CCFF00]/10 rounded-full" />
-                 <div className="absolute inset-0 border-4 border-[#CCFF00] border-t-transparent rounded-full animate-spin" />
+              <div className="relative w-20 h-20 mx-auto mb-10">
+                 <div className="absolute inset-0 border-[5px] border-[#CCFF00]/10 rounded-full" />
+                 <div className="absolute inset-0 border-[5px] border-[#CCFF00] border-t-transparent rounded-full animate-spin" />
               </div>
-              <p className="text-[11px] font-sans font-black uppercase tracking-[0.4em] text-[#CCFF00] animate-pulse">Architecting Course...</p>
+              <p className="text-[12px] font-sans font-black uppercase tracking-[0.5em] text-[#CCFF00] animate-pulse">Designing Vibe...</p>
            </div>
         </div>
       )}

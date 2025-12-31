@@ -36,55 +36,67 @@ async function decodeAudioData(
   return buffer;
 }
 
+// SINGLETON: Only one context for the entire life of the app to minimize latency
+let sharedAudioContext: AudioContext | null = null;
+
+const getAudioContext = () => {
+  if (!sharedAudioContext) {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    sharedAudioContext = new AudioContextClass({ sampleRate: 24000 });
+  }
+  return sharedAudioContext;
+};
+
 /**
  * Service to play natural native-sounding speech using Gemini 2.5 Flash TTS.
  */
 export const playNaturalSpeech = async (text: string) => {
+  const ctx = getAudioContext();
+  
+  // Eagerly resume to avoid browser-imposed silence delays
+  if (ctx.state === 'suspended') {
+    ctx.resume();
+  }
+
   try {
-    // Fix: Using process.env.API_KEY directly for initialization as per GenAI guidelines
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
-    // Using Zephyr voice for high-end native prosody
+    // Using an ultra-lean prompt to reduce generation time overhead
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `Say this naturally as a native urban professional: ${text}` }] }],
+      contents: [{ parts: [{ text: `TTS: ${text}` }] }], // Lean prompt
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Kore' }, // Kore or Zephyr are expressive and modern
+            // Zephyr/Kore are best for speed & prosody
+            prebuiltVoiceConfig: { voiceName: 'Zephyr' }, 
           },
         },
       },
     });
 
     const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    if (!base64Audio) throw new Error("No audio returned");
+    if (!base64Audio) throw new Error("No data");
 
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    const outputAudioContext = new AudioContextClass({ sampleRate: 24000 });
-    
     const audioBuffer = await decodeAudioData(
       decode(base64Audio),
-      outputAudioContext,
+      ctx,
       24000,
       1
     );
 
-    const source = outputAudioContext.createBufferSource();
+    const source = ctx.createBufferSource();
     source.buffer = audioBuffer;
-    source.connect(outputAudioContext.destination);
+    source.connect(ctx.destination);
+    source.start(0); // Start immediately
     
-    if (outputAudioContext.state === 'suspended') {
-      await outputAudioContext.resume();
-    }
-    
-    source.start();
   } catch (error: any) {
-    console.warn(`[TTS] Gemini failed: ${error?.message}. Falling back to Browser TTS.`);
+    console.warn(`[TTS] Gemini latency/error, falling back.`, error);
+    // Instant fallback to local browser TTS
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
-    utterance.rate = 0.9;
+    utterance.rate = 1.0;
     window.speechSynthesis.speak(utterance);
   }
 };
