@@ -41,10 +41,8 @@ async function decodeAudioData(
  */
 export const playNaturalSpeech = async (text: string) => {
   try {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) throw new Error("API Key is missing");
-
-    const ai = new GoogleGenAI({ apiKey });
+    // Fix: Using process.env.API_KEY directly for initialization as per GenAI guidelines
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
     // Using Zephyr voice for high-end native prosody
     const response = await ai.models.generateContent({
@@ -54,7 +52,7 @@ export const playNaturalSpeech = async (text: string) => {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Zephyr' }, // Zephyr is more expressive and modern
+            prebuiltVoiceConfig: { voiceName: 'Kore' }, // Kore or Zephyr are expressive and modern
           },
         },
       },
