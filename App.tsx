@@ -1,11 +1,12 @@
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateLesson } from './services/geminiService';
 import { LessonData, VocabularyItem, UserStats, Badge } from './types';
-import { checkAndUnlockBadges } from './services/badgeService';
+import { checkAndUnlockBadges, syncUserStats } from './services/badgeService';
+import { playNaturalSpeech } from './services/speechService';
 import GrainOverlay from './components/GrainOverlay';
-import { HomeIcon, LibraryIcon, MedalIcon, FlashIcon, UserIcon, SparklesIcon, HeadphonesIcon, FlameIcon, CloseIcon } from './components/Icons';
+import { HomeIcon, LibraryIcon, MedalIcon, UserIcon, SparklesIcon, HeadphonesIcon, FlameIcon } from './components/Icons';
 import { lessonsData } from './lessons';
 import PodcastScreen from './PodcastScreen';
 import BadgeGallery, { BADGES } from './components/BadgeGallery';
@@ -38,7 +39,6 @@ const WordOfTheDayWidget: React.FC<{ word: VocabularyItem }> = ({ word }) => (
 const App: React.FC = () => {
   const [lesson, setLesson] = useState<LessonData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [currentDay, setCurrentDay] = useState<string>("Monday");
   const [view, setView] = useState<ViewType>('home');
   const [showBadgePopup, setShowBadgePopup] = useState(false);
   const [activeBadge, setActiveBadge] = useState<Badge | null>(null);
@@ -54,35 +54,47 @@ const App: React.FC = () => {
     };
   });
 
-  // Lưu stats vào localStorage mỗi khi thay đổi
   useEffect(() => {
-    localStorage.setItem('neolingua_stats', JSON.stringify(userStats));
+    syncUserStats(userStats);
   }, [userStats]);
 
-  // Hàm kiểm tra huy hiệu mới một cách chủ động
-  const runBadgeCheck = useCallback((currentStats: UserStats) => {
-    const newlyUnlocked = checkAndUnlockBadges(currentStats);
-    if (newlyUnlocked.length > 0) {
-      // Lấy badge đầu tiên mới mở để show popup
-      const firstBadgeId = newlyUnlocked[0];
-      const badgeData = BADGES.find(b => b.id === firstBadgeId);
+  /**
+   * Task: checkAndReward logic
+   * Triggered when a lesson or podcast ends to evaluate achievements.
+   */
+  const checkAndReward = useCallback(async (updatedStats: UserStats) => {
+    const newlyUnlockedIds = checkAndUnlockBadges(updatedStats);
+    
+    if (newlyUnlockedIds.length > 0) {
+      const badgeId = newlyUnlockedIds[0];
+      const badgeData = BADGES.find(b => b.id === badgeId);
+      
       if (badgeData) {
         setActiveBadge(badgeData);
         setShowBadgePopup(true);
+        
+        // Use the high-quality Neural voice for the reward announcement
+        let voiceMessage = `Congratulations! You've unlocked the ${badgeData.title} badge!`;
+        if (badgeId === 'newbie') {
+          voiceMessage = "Congrats! You just earned the Urban Newbie badge";
+        } else if (badgeId === 'street-smart') {
+          voiceMessage = "Boom! Street Smart status unlocked. Keep that streak alive!";
+        }
+
+        await playNaturalSpeech(voiceMessage);
       }
       
-      // Cập nhật stats với các badge mới
       setUserStats(prev => ({
         ...prev,
-        unlockedBadges: Array.from(new Set([...prev.unlockedBadges, ...newlyUnlocked]))
+        unlockedBadges: Array.from(new Set([...prev.unlockedBadges, ...newlyUnlockedIds]))
       }));
     }
   }, []);
 
-  const fetchNewLesson = useCallback(async (day: string) => {
+  const fetchNewLesson = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await generateLesson(1, day);
+      const data = await generateLesson(1, "Monday");
       setLesson(data);
     } catch (err) {
       console.error("AI Lesson generation failed, using fallback:", err);
@@ -93,24 +105,28 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchNewLesson(currentDay);
-  }, [currentDay, fetchNewLesson]);
+    fetchNewLesson();
+  }, [fetchNewLesson]);
 
   const handlePodcastFinished = () => {
+    // 1. Play celebratory finish voice
+    playNaturalSpeech("Amazing job! You finished the lesson.");
+    
     setUserStats(prev => {
-      const newStats = { ...prev, podcastsCompleted: prev.podcastsCompleted + 1 };
-      // Chạy kiểm tra badge ngay khi podcast kết thúc
-      setTimeout(() => runBadgeCheck(newStats), 500);
-      return newStats;
+      const updated = { ...prev, podcastsCompleted: prev.podcastsCompleted + 1 };
+      setTimeout(() => checkAndReward(updated), 1500); // Wait for first speech to end
+      return updated;
     });
   };
 
   const handleLessonFinished = () => {
+    // 1. Play celebratory finish voice
+    playNaturalSpeech("Amazing job! You finished the lesson.");
+
     setUserStats(prev => {
-      const newStats = { ...prev, lessonsCompleted: prev.lessonsCompleted + 1 };
-      // Chạy kiểm tra badge ngay khi bài học kết thúc
-      setTimeout(() => runBadgeCheck(newStats), 500);
-      return newStats;
+      const updated = { ...prev, lessonsCompleted: prev.lessonsCompleted + 1 };
+      setTimeout(() => checkAndReward(updated), 1500);
+      return updated;
     });
     setView('success');
   };
@@ -161,7 +177,7 @@ const App: React.FC = () => {
       <header className="px-6 pt-12 pb-4 flex justify-between items-center z-10">
         <div className="flex items-center gap-4">
           <div className="w-11 h-11 rounded-2xl bg-[#CCFF00] flex items-center justify-center hard-shadow overflow-hidden border border-black/10">
-             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=ccff00`} alt="Avatar" className="w-10 h-10 mt-1" />
+             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&backgroundColor=ccff00`} alt="Avatar" className="w-10 h-10 mt-1" />
           </div>
           <div>
             <h2 className="text-[10px] font-sans font-bold uppercase tracking-widest opacity-30 tracking-[0.1em]">LEVEL 12</h2>
@@ -249,7 +265,7 @@ const App: React.FC = () => {
           <div className="pt-4 space-y-8">
             <section className="bg-zinc-900 rounded-[32px] p-8 hard-shadow border border-zinc-800 text-center">
               <div className="w-24 h-24 bg-[#CCFF00] rounded-full mx-auto mb-4 flex items-center justify-center hard-shadow border border-black/10">
-                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=ccff00`} alt="Avatar" className="w-20 h-20" />
+                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&backgroundColor=ccff00`} alt="Avatar" className="w-20 h-20" />
               </div>
               <h2 className="text-3xl font-heading font-black tracking-tighter text-white">Alex Urban</h2>
               <p className="text-[11px] font-sans font-medium text-zinc-500 uppercase tracking-widest mt-1">Tech Nomad • Lvl 12</p>
@@ -270,11 +286,11 @@ const App: React.FC = () => {
 
               <h4 className="text-[10px] font-sans font-black text-zinc-600 uppercase tracking-widest">DEVELOPER ZONE</h4>
               <button 
-                onClick={() => runBadgeCheck({ ...userStats, podcastsCompleted: 5 })}
+                onClick={() => handleLessonFinished()}
                 className="w-full flex items-center justify-between p-4 bg-[#CCFF00]/10 border border-[#CCFF00]/30 rounded-2xl group transition-all"
               >
-                <span className="text-sm font-bold text-[#CCFF00]">Simulate 5 Podcasts (Unlock Social)</span>
-                <FlashIcon size={18} color="#CCFF00" className="group-hover:translate-x-1 transition-transform" />
+                <span className="text-sm font-bold text-[#CCFF00]">Simulate Lesson Finish (Trigger Badge)</span>
+                <MedalIcon size={18} color="#CCFF00" className="group-hover:rotate-12 transition-transform" />
               </button>
               
               <button 

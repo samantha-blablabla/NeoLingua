@@ -1,35 +1,40 @@
 
-import { UserStats, CriteriaType, Badge } from '../types';
+import { UserStats, Badge } from '../types';
 import { BADGES } from '../components/BadgeGallery';
 
 /**
- * Kiểm tra xem người dùng có đủ điều kiện mở khóa huy hiệu mới không.
- * Trả về danh sách các huy hiệu vừa được mở khóa.
+ * Checks for newly unlocked badges based on the latest user stats.
+ * Returns an array of IDs for badges that were JUST unlocked in this check.
  */
 export const checkAndUnlockBadges = (stats: UserStats): string[] => {
   const newlyUnlocked: string[] = [];
 
   BADGES.forEach(badge => {
-    // Nếu đã mở khóa rồi thì bỏ qua
+    // Skip if already unlocked
     if (stats.unlockedBadges.includes(badge.id)) return;
 
     let isEligible = false;
 
     switch (badge.id) {
       case 'newbie':
+        // Task: Check if user completed their 1st Lesson
         isEligible = stats.lessonsCompleted >= 1;
         break;
       case 'urban-legend':
         isEligible = stats.streak >= 7;
         break;
+      case 'midnight-hustle':
+        // Logic for night time study could be added here
+        break;
       case 'perfectionist':
         isEligible = stats.perfectTests >= 10;
         break;
-      case 'social-butterfly':
-        isEligible = stats.podcastsCompleted >= 5;
+      case 'street-smart':
+        // Task: Listen continuously 5 days or 5 podcasts
+        isEligible = stats.streak >= 5 || stats.podcastsCompleted >= 5;
         break;
-      // Các huy hiệu khác như 'midnight-hustle' hoặc 'fast-learner' 
-      // sẽ cần logic đặc thù hơn khi thực hiện hành động.
+      case 'fast-learner':
+        break;
     }
 
     if (isEligible) {
@@ -41,13 +46,9 @@ export const checkAndUnlockBadges = (stats: UserStats): string[] => {
 };
 
 /**
- * Lưu trạng thái huy hiệu vào localStorage
+ * Persist user stats to local storage.
+ * Equivalent to AsyncStorage in React Native for web.
  */
-export const saveUnlockedBadges = (badgeIds: string[]) => {
-  const stats = JSON.parse(localStorage.getItem('neolingua_stats') || '{}');
-  const updatedStats = {
-    ...stats,
-    unlockedBadges: Array.from(new Set([...(stats.unlockedBadges || []), ...badgeIds]))
-  };
-  localStorage.setItem('neolingua_stats', JSON.stringify(updatedStats));
+export const syncUserStats = (stats: UserStats) => {
+  localStorage.setItem('neolingua_stats', JSON.stringify(stats));
 };

@@ -2,23 +2,25 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '../types';
+// Corrected import: BadgeSocialIcon was changed to BadgeRamenIcon
 import { 
   BadgeRookieIcon, 
   BadgeLegendIcon, 
   BadgeOwlIcon, 
   BadgeSonicIcon, 
   BadgeMasterIcon, 
-  BadgeSocialIcon,
+  BadgeRamenIcon,
   SparklesIcon 
 } from './Icons';
 
+// Corrected mapping: badge 'social' now maps to BadgeRamenIcon
 const ICON_MAP: Record<string, any> = {
   sneaker: BadgeRookieIcon,
   headphones: BadgeLegendIcon,
   coffee: BadgeOwlIcon,
   flash: BadgeSonicIcon,
   medal: BadgeMasterIcon,
-  social: BadgeSocialIcon
+  social: BadgeRamenIcon
 };
 
 interface BadgePopupProps {
@@ -108,7 +110,7 @@ const BadgePopup: React.FC<BadgePopupProps> = ({ badge, isVisible, onClose }) =>
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onClose}
-              className="mt-12 w-full py-5 bg-[#CCFF00] text-black rounded-3xl font-sans font-black text-[13px] tracking-[0.2em] uppercase clay-accent shadow-[0_20px_40px_rgba(204,255,0,0.2)]"
+              className="mt-12 w-full py-5 bg-[#CCFF00] text-black rounded-3xl font-sans font-black text-[13px] tracking-[0.2em] uppercase clay-accent shadow-[0_20px_40_rgba(204,255,0,0.2)]"
             >
               HELL YEAH!
             </motion.button>

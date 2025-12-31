@@ -8,7 +8,7 @@ import {
   BadgeOwlIcon, 
   BadgeSonicIcon, 
   BadgeMasterIcon, 
-  BadgeSocialIcon,
+  BadgeRamenIcon,
   CloseIcon 
 } from './Icons';
 
@@ -18,7 +18,7 @@ const ICON_MAP: Record<string, any> = {
   coffee: BadgeOwlIcon,
   flash: BadgeSonicIcon,
   medal: BadgeMasterIcon,
-  social: BadgeSocialIcon
+  social: BadgeRamenIcon
 };
 
 interface BadgeGalleryProps {
@@ -26,12 +26,12 @@ interface BadgeGalleryProps {
 }
 
 export const BADGES: Badge[] = [
-  { id: 'newbie', title: 'Urban Rookie', description: 'Hoàn thành bài học đầu tiên.', howToUnlock: 'Bắt đầu hành trình bằng việc hoàn thành 01 bài học bất kỳ.', icon: 'sneaker' },
+  { id: 'newbie', title: 'Urban Newbie', description: 'Hoàn thành bài học đầu tiên.', howToUnlock: 'Bắt đầu hành trình bằng việc hoàn thành 01 bài học bất kỳ.', icon: 'sneaker' },
   { id: 'urban-legend', title: 'Urban Legend', description: 'Duy trì 7 ngày liên tiếp.', howToUnlock: 'Học tiếng Anh mỗi ngày trong suốt 1 tuần không nghỉ.', icon: 'headphones' },
   { id: 'midnight-hustle', title: 'Night Owl', description: 'Học sau 10 giờ đêm.', howToUnlock: 'Hoàn thành một bài học trong khung giờ từ 22h - 04h sáng.', icon: 'coffee' },
   { id: 'fast-learner', title: 'Sonic Wave', description: 'Hoàn thành bài học dưới 5 phút.', howToUnlock: 'Tốc độ là chìa khóa. Hoàn thành bài học thật nhanh và chính xác.', icon: 'flash' },
   { id: 'perfectionist', title: 'Master Mind', description: '10 bài học đạt điểm tuyệt đối.', howToUnlock: 'Hoàn thành 10 thử thách mà không sai một câu nào.', icon: 'medal' },
-  { id: 'social-butterfly', title: 'District 1 Star', description: 'Nghe 5 tập Podcast.', howToUnlock: 'Đắm mình trong văn hóa đô thị qua 05 tập Podcast Radio.', icon: 'social' },
+  { id: 'street-smart', title: 'Street Smart', description: 'Duy trì học tập liên tục 5 ngày.', howToUnlock: 'Trở nên sành sỏi đường phố qua việc duy trì streak đủ 05 ngày.', icon: 'social' },
 ];
 
 const BadgeModal: React.FC<{ badge: Badge; isUnlocked: boolean; onClose: () => void }> = ({ badge, isUnlocked, onClose }) => {
