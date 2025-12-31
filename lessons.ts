@@ -39,7 +39,37 @@ export const lessonsData: LessonData[] = [
       }
     ],
     "grammar_focus": "Present Perfect vs Past Simple: Dùng Past Simple cho thời điểm cụ thể, Present Perfect cho trải nghiệm không rõ thời điểm.",
-    "podcast_content": "Hey everyone! Welcome to the Urban Tech Meetup. It's so crowded here! I've just met some amazing developers from NeoLingua. I shared my elevator pitch and they seemed really impressed. One of the speakers gave a very insightful talk on neural networks. I'm definitely going to follow up with her on LinkedIn tomorrow. Networking in the city can be tiring, but it's worth it for the connections you make.",
+    /* Fix: Replaced podcast_content string with podcast_segments array to match LessonData interface */
+    "podcast_segments": [
+      {
+        "en": "Hey everyone! Welcome to the Urban Tech Meetup.",
+        "vi": "Chào mọi người! Chào mừng bạn đến với Urban Tech Meetup."
+      },
+      {
+        "en": "It's so crowded here!",
+        "vi": "Ở đây đông đúc quá!"
+      },
+      {
+        "en": "I've just met some amazing developers from NeoLingua.",
+        "vi": "Mình vừa gặp một vài lập trình viên tuyệt vời từ NeoLingua."
+      },
+      {
+        "en": "I shared my elevator pitch and they seemed really impressed.",
+        "vi": "Mình đã chia sẻ bài giới thiệu ngắn của mình và họ có vẻ rất ấn tượng."
+      },
+      {
+        "en": "One of the speakers gave a very insightful talk on neural networks.",
+        "vi": "Một trong những diễn giả đã có một bài nói chuyện rất sâu sắc về mạng nơ-ron."
+      },
+      {
+        "en": "I'm definitely going to follow up with her on LinkedIn tomorrow.",
+        "vi": "Mình chắc chắn sẽ liên lạc lại với cô ấy trên LinkedIn vào ngày mai."
+      },
+      {
+        "en": "Networking in the city can be tiring, but it's worth it for the connections you make.",
+        "vi": "Xây dựng mạng lưới quan hệ trong thành phố có thể mệt mỏi, nhưng nó xứng đáng với những kết nối bạn tạo ra."
+      }
+    ],
     "interactive_challenge": {
       "type": "quiz",
       "question": "Which word describes a short summary of yourself used at a meeting?",

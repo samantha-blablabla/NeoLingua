@@ -7,9 +7,8 @@ Bạn là Master English Tutor cho NeoLingua.
 Nhiệm vụ của bạn là soạn thảo nội dung bài học chất lượng cao theo phong cách Modern Urban.
 - Ngôn ngữ giải thích: Tiếng Việt.
 - Topic: Thực tế, đô thị, công nghệ.
+- Podcast: Chia nhỏ nội dung podcast thành các câu ngắn (segments), mỗi câu gồm bản gốc tiếng Anh (en) và bản dịch tiếng Việt (vi) sát nghĩa nhưng tự nhiên.
 - Cấu trúc: Nghiêm ngặt theo JSON schema.
-- Đối tượng: Người đi làm, sinh viên hiện đại tại Việt Nam.
-- Thứ 2 & 4: Kiến thức mới. Thứ 6: Kiểm tra tổng hợp.
 `;
 
 export const generateLesson = async (week: number, day: string): Promise<LessonData> => {
@@ -18,9 +17,9 @@ export const generateLesson = async (week: number, day: string): Promise<LessonD
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: `Soạn giáo án cho Tuần ${week}, Ngày ${day}. 
-    Nếu là Thứ 2: "Urban Kickstart - Mastering the First Impression" tại Meetup công nghệ.
-    Nếu là Thứ 4: Order cafe qua app/thanh toán không tiền mặt.
-    Nếu là Thứ 6: Bài kiểm tra tổng hợp.`,
+    Thứ 2: Urban Kickstart (Meetup công nghệ). 
+    Thứ 4: Fintech & Cafe Culture. 
+    Thứ 6: Review.`,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       responseMimeType: "application/json",
@@ -39,12 +38,21 @@ export const generateLesson = async (week: number, day: string): Promise<LessonD
                 pronunciation: { type: Type.STRING },
                 meaning: { type: Type.STRING },
                 example: { type: Type.STRING }
-              },
-              required: ["word", "pronunciation", "meaning", "example"]
+              }
             }
           },
           grammar_focus: { type: Type.STRING },
-          podcast_content: { type: Type.STRING },
+          podcast_segments: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                en: { type: Type.STRING },
+                vi: { type: Type.STRING }
+              },
+              required: ["en", "vi"]
+            }
+          },
           interactive_challenge: {
             type: Type.OBJECT,
             properties: {
@@ -52,11 +60,10 @@ export const generateLesson = async (week: number, day: string): Promise<LessonD
               question: { type: Type.STRING },
               options: { type: Type.ARRAY, items: { type: Type.STRING } },
               correct_answer: { type: Type.STRING }
-            },
-            required: ["type", "question", "correct_answer"]
+            }
           }
         },
-        required: ["week", "day", "topic", "vocab_set", "grammar_focus", "podcast_content", "interactive_challenge"]
+        required: ["week", "day", "topic", "vocab_set", "grammar_focus", "podcast_segments", "interactive_challenge"]
       }
     }
   });

@@ -6,13 +6,18 @@ export interface VocabularyItem {
   example: string;
 }
 
+export interface PodcastSegment {
+  en: string;
+  vi: string;
+}
+
 export interface LessonData {
   week: number;
   day: string;
   topic: string;
   vocab_set: VocabularyItem[];
   grammar_focus: string;
-  podcast_content: string;
+  podcast_segments: PodcastSegment[];
   interactive_challenge: {
     type: string;
     question: string;
