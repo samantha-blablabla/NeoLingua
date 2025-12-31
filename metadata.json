@@ -1,0 +1,7 @@
+{
+  "name": "NeoLingua",
+  "description": "A high-end modern urban English learning application with AI-powered personalized lessons.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
