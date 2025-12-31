@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync": "node sync-docs.mjs",
+    "report": "node sync-docs.mjs"
   },
   "dependencies": {
     "react": "^19.2.3",
