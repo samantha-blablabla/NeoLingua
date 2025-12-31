@@ -10,6 +10,7 @@ Nhiệm vụ của bạn là soạn thảo nội dung bài học chất lượng
 - Podcast: Chia nhỏ nội dung podcast thành các câu ngắn (segments), mỗi câu gồm bản gốc tiếng Anh (en) và bản dịch tiếng Việt (vi) sát nghĩa nhưng tự nhiên.
 - Cấu trúc: Nghiêm ngặt theo JSON schema được cung cấp.
 - Đảm bảo từ vựng có phiên âm chuẩn IPA.
+- Cung cấp một ví dụ minh họa bằng tiếng Việt (grammar_example_vi) cho phần điểm ngữ pháp.
 `;
 
 export const generateLesson = async (week: number, day: string): Promise<LessonData> => {
@@ -42,6 +43,7 @@ export const generateLesson = async (week: number, day: string): Promise<LessonD
             }
           },
           grammar_focus: { type: Type.STRING },
+          grammar_example_vi: { type: Type.STRING },
           podcast_segments: {
             type: Type.ARRAY,
             items: {
@@ -64,7 +66,7 @@ export const generateLesson = async (week: number, day: string): Promise<LessonD
             required: ["type", "question", "correct_answer"]
           }
         },
-        required: ["week", "day", "topic", "vocab_set", "grammar_focus", "podcast_segments", "interactive_challenge"]
+        required: ["week", "day", "topic", "vocab_set", "grammar_focus", "grammar_example_vi", "podcast_segments", "interactive_challenge"]
       }
     }
   });

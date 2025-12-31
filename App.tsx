@@ -6,7 +6,7 @@ import { LessonData, VocabularyItem, UserStats, Badge } from './types';
 import { checkAndUnlockBadges, syncUserStats } from './services/badgeService';
 import { playNaturalSpeech } from './services/speechService';
 import GrainOverlay from './components/GrainOverlay';
-import { HomeIcon, LibraryIcon, MedalIcon, UserIcon, SparklesIcon, HeadphonesIcon, FlameIcon } from './components/Icons';
+import { HomeIcon, LibraryIcon, MedalIcon, UserIcon, SparklesIcon, HeadphonesIcon, FlameIcon, SoundHighIcon } from './components/Icons';
 import { lessonsData } from './lessons';
 import PodcastScreen from './PodcastScreen';
 import BadgeGallery, { BADGES } from './components/BadgeGallery';
@@ -16,25 +16,52 @@ import BadgePopup from './components/BadgePopup';
 
 type ViewType = 'home' | 'library' | 'badges' | 'profile' | 'podcast' | 'lessonDetail' | 'success';
 
-const WordOfTheDayWidget: React.FC<{ word: VocabularyItem }> = ({ word }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-    animate={{ opacity: 1, scale: 1, y: 0 }}
-    transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-    className="relative overflow-hidden bg-[#BFA3FF] rounded-[32px] p-6 text-black hard-shadow flex flex-col justify-center min-h-[160px]"
-  >
-    <div className="absolute inset-0 opacity-[0.05] pointer-events-none mix-blend-overlay bg-white"></div>
-    <div className="z-10 w-full">
-      <span className="text-[10px] font-sans font-black uppercase tracking-[0.25em] opacity-40 block mb-2">DAILY WORD</span>
-      <h3 className="text-[2.6rem] font-heading font-black leading-none tracking-tighter whitespace-nowrap overflow-hidden text-ellipsis">
-        {word.word}
-      </h3>
-      <p className="text-[14px] font-sans font-semibold leading-relaxed opacity-80 mt-3 max-w-[95%]">
-        {word.meaning}
-      </p>
-    </div>
-  </motion.div>
-);
+const WordOfTheDayWidget: React.FC<{ word: VocabularyItem }> = ({ word }) => {
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  const handlePronounce = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (isSpeaking) return;
+    
+    setIsSpeaking(true);
+    // Haptic Feedback (Web surrogate for Haptics.impactAsync)
+    if ("vibrate" in navigator) {
+      navigator.vibrate(10);
+    }
+    
+    await playNaturalSpeech(word.word);
+    setIsSpeaking(false);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      whileHover={{ scale: 1.02, y: -4 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+      onClick={() => handlePronounce()}
+      className="relative overflow-hidden bg-[#BFA3FF] rounded-[32px] p-6 text-black hard-shadow flex flex-col justify-center min-h-[160px] cursor-pointer transition-all group"
+    >
+      <div className="absolute inset-0 opacity-[0.05] pointer-events-none mix-blend-overlay bg-white"></div>
+      
+      {/* High-end Volume Icon */}
+      <div className="absolute top-6 right-6 p-2 rounded-xl bg-black/5 group-hover:bg-black/10 transition-colors">
+        <SoundHighIcon size={18} color={isSpeaking ? "#CCFF00" : "black"} className={isSpeaking ? "animate-pulse" : ""} />
+      </div>
+
+      <div className="z-10 w-full">
+        <span className="text-[10px] font-sans font-black uppercase tracking-[0.25em] opacity-40 block mb-2">DAILY WORD</span>
+        <h3 className="text-[2.6rem] font-heading font-black leading-none tracking-tighter whitespace-nowrap overflow-hidden text-ellipsis">
+          {word.word}
+        </h3>
+        <p className="text-[14px] font-sans font-semibold leading-relaxed opacity-80 mt-3 max-w-[90%]">
+          {word.meaning}
+        </p>
+      </div>
+    </motion.div>
+  );
+};
 
 const App: React.FC = () => {
   const [lesson, setLesson] = useState<LessonData | null>(null);
@@ -58,10 +85,6 @@ const App: React.FC = () => {
     syncUserStats(userStats);
   }, [userStats]);
 
-  /**
-   * Task: checkAndReward logic
-   * Triggered when a lesson or podcast ends to evaluate achievements.
-   */
   const checkAndReward = useCallback(async (updatedStats: UserStats) => {
     const newlyUnlockedIds = checkAndUnlockBadges(updatedStats);
     
@@ -73,7 +96,6 @@ const App: React.FC = () => {
         setActiveBadge(badgeData);
         setShowBadgePopup(true);
         
-        // Use the high-quality Neural voice for the reward announcement
         let voiceMessage = `Congratulations! You've unlocked the ${badgeData.title} badge!`;
         if (badgeId === 'newbie') {
           voiceMessage = "Congrats! You just earned the Urban Newbie badge";
@@ -109,18 +131,16 @@ const App: React.FC = () => {
   }, [fetchNewLesson]);
 
   const handlePodcastFinished = () => {
-    // 1. Play celebratory finish voice
     playNaturalSpeech("Amazing job! You finished the lesson.");
     
     setUserStats(prev => {
       const updated = { ...prev, podcastsCompleted: prev.podcastsCompleted + 1 };
-      setTimeout(() => checkAndReward(updated), 1500); // Wait for first speech to end
+      setTimeout(() => checkAndReward(updated), 1500);
       return updated;
     });
   };
 
   const handleLessonFinished = () => {
-    // 1. Play celebratory finish voice
     playNaturalSpeech("Amazing job! You finished the lesson.");
 
     setUserStats(prev => {
@@ -176,18 +196,24 @@ const App: React.FC = () => {
 
       <header className="px-6 pt-12 pb-4 flex justify-between items-center z-10">
         <div className="flex items-center gap-4">
-          <div className="w-11 h-11 rounded-2xl bg-[#CCFF00] flex items-center justify-center hard-shadow overflow-hidden border border-black/10">
+          <motion.div 
+            whileHover={{ rotate: 5, scale: 1.1 }}
+            className="w-11 h-11 rounded-2xl bg-[#CCFF00] flex items-center justify-center hard-shadow overflow-hidden border border-black/10 cursor-pointer"
+          >
              <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&backgroundColor=ccff00`} alt="Avatar" className="w-10 h-10 mt-1" />
-          </div>
+          </motion.div>
           <div>
             <h2 className="text-[10px] font-sans font-bold uppercase tracking-widest opacity-30 tracking-[0.1em]">LEVEL 12</h2>
             <h1 className="text-xl font-heading font-black -mt-1 tracking-tighter">Yo, Alex!</h1>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 rounded-full border border-zinc-800 hard-shadow">
+        <motion.div 
+          whileHover={{ scale: 1.05 }}
+          className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 rounded-full border border-zinc-800 hard-shadow cursor-default"
+        >
           <SparklesIcon size={14} color="#CCFF00" />
           <span className="text-[11px] font-sans font-black text-[#CCFF00]">{userStats.streak} DAYS</span>
-        </div>
+        </motion.div>
       </header>
 
       <main className="flex-1 overflow-y-auto px-6 pb-32 no-scrollbar space-y-4 pt-2">
@@ -197,8 +223,10 @@ const App: React.FC = () => {
             <motion.section 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.02, y: -4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => !loading && setView('lessonDetail')}
-              className="relative aspect-[16/10] w-full bg-[#1C1C1E] rounded-[32px] p-8 flex flex-col justify-end overflow-hidden hard-shadow group cursor-pointer active:scale-[0.98] transition-all"
+              className="relative aspect-[16/10] w-full bg-[#1C1C1E] rounded-[32px] p-8 flex flex-col justify-end overflow-hidden hard-shadow group cursor-pointer transition-all"
             >
               <div className="absolute top-0 right-0 w-48 h-48 bg-[#CCFF00]/10 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-[#CCFF00]/20 transition-colors" />
               
@@ -208,9 +236,13 @@ const App: React.FC = () => {
               </h2>
               
               <div className="flex items-center gap-4">
-                <button className="px-5 py-2.5 bg-[#CCFF00] text-black rounded-xl text-[11px] font-sans font-black uppercase clay-accent group-hover:scale-105 transition-transform">
+                <motion.button 
+                  animate={!loading ? { y: [0, -5, 0] } : {}}
+                  transition={!loading ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" } : {}}
+                  className="px-5 py-2.5 bg-[#CCFF00] text-black rounded-xl text-[11px] font-sans font-black uppercase clay-accent hover:scale-105 transition-transform active:scale-95"
+                >
                   {loading ? "Đợi chút..." : "Bắt đầu học"}
-                </button>
+                </motion.button>
                 <span className="text-[10px] font-sans font-medium text-zinc-500 uppercase tracking-widest">12 MINS</span>
               </div>
             </motion.section>
@@ -221,8 +253,10 @@ const App: React.FC = () => {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.05, y: -4 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setView('podcast')}
-                className="bg-[#1C1C1E] rounded-[28px] p-5 border border-zinc-800 hard-shadow flex flex-col justify-between aspect-square cursor-pointer hover:border-zinc-600 transition-colors active:scale-95 group"
+                className="bg-[#1C1C1E] rounded-[28px] p-5 border border-zinc-800 hard-shadow flex flex-col justify-between aspect-square cursor-pointer hover:border-[#CCFF00]/30 transition-all group"
               >
                 <div className="flex justify-between items-start">
                   <HeadphonesIcon size={20} color="#CCFF00" />
@@ -240,7 +274,8 @@ const App: React.FC = () => {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-[#1C1C1E] rounded-[28px] p-5 border border-zinc-800 hard-shadow flex flex-col justify-between aspect-square"
+                whileHover={{ scale: 1.05, y: -4 }}
+                className="bg-[#1C1C1E] rounded-[28px] p-5 border border-zinc-800 hard-shadow flex flex-col justify-between aspect-square transition-all"
               >
                 <div className="flex justify-between items-start">
                   <FlameIcon size={20} color="#FF6B4A" />
@@ -263,39 +298,49 @@ const App: React.FC = () => {
 
         {view === 'profile' && (
           <div className="pt-4 space-y-8">
-            <section className="bg-zinc-900 rounded-[32px] p-8 hard-shadow border border-zinc-800 text-center">
-              <div className="w-24 h-24 bg-[#CCFF00] rounded-full mx-auto mb-4 flex items-center justify-center hard-shadow border border-black/10">
+            <motion.section 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-zinc-900 rounded-[32px] p-8 hard-shadow border border-zinc-800 text-center"
+            >
+              <motion.div 
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.8, ease: "anticipate" }}
+                className="w-24 h-24 bg-[#CCFF00] rounded-full mx-auto mb-4 flex items-center justify-center hard-shadow border border-black/10 cursor-pointer"
+              >
                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&backgroundColor=ccff00`} alt="Avatar" className="w-20 h-20" />
-              </div>
+              </motion.div>
               <h2 className="text-3xl font-heading font-black tracking-tighter text-white">Alex Urban</h2>
               <p className="text-[11px] font-sans font-medium text-zinc-500 uppercase tracking-widest mt-1">Tech Nomad • Lvl 12</p>
-            </section>
+            </motion.section>
             
             <div className="bg-zinc-900 rounded-[32px] p-6 border border-zinc-800 space-y-6">
               <h4 className="text-[10px] font-sans font-black text-zinc-600 uppercase tracking-widest">USER STATS</h4>
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-zinc-950 rounded-2xl border border-zinc-900">
+                <motion.div whileHover={{ scale: 1.05 }} className="p-4 bg-zinc-950 rounded-2xl border border-zinc-900 transition-all">
                   <span className="text-[10px] font-bold text-zinc-600 block mb-1">PODCASTS</span>
                   <span className="text-xl font-black text-[#CCFF00]">{userStats.podcastsCompleted}</span>
-                </div>
-                <div className="p-4 bg-zinc-950 rounded-2xl border border-zinc-900">
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} className="p-4 bg-zinc-950 rounded-2xl border border-zinc-900 transition-all">
                   <span className="text-[10px] font-bold text-zinc-600 block mb-1">LESSONS</span>
                   <span className="text-xl font-black text-[#BFA3FF]">{userStats.lessonsCompleted}</span>
-                </div>
+                </motion.div>
               </div>
 
               <h4 className="text-[10px] font-sans font-black text-zinc-600 uppercase tracking-widest">DEVELOPER ZONE</h4>
-              <button 
+              <motion.button 
+                whileHover={{ scale: 1.02, backgroundColor: "rgba(204, 255, 0, 0.15)" }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => handleLessonFinished()}
                 className="w-full flex items-center justify-between p-4 bg-[#CCFF00]/10 border border-[#CCFF00]/30 rounded-2xl group transition-all"
               >
                 <span className="text-sm font-bold text-[#CCFF00]">Simulate Lesson Finish (Trigger Badge)</span>
                 <MedalIcon size={18} color="#CCFF00" className="group-hover:rotate-12 transition-transform" />
-              </button>
+              </motion.button>
               
               <button 
                 onClick={() => { localStorage.clear(); window.location.reload(); }}
-                className="w-full text-left py-3 text-red-500 text-sm font-bold border-t border-zinc-800 mt-2"
+                className="w-full text-left py-3 text-red-500 text-sm font-bold border-t border-zinc-800 mt-2 hover:opacity-70 transition-opacity"
               >
                 Reset App Data
               </button>
@@ -307,12 +352,16 @@ const App: React.FC = () => {
           <div className="pt-4 space-y-4">
             <h3 className="text-3xl font-heading font-black tracking-tighter mb-6">Archive</h3>
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="p-6 bg-zinc-900 rounded-[28px] border border-zinc-800 flex justify-between items-center opacity-40">
+              <motion.div 
+                key={i} 
+                whileHover={{ x: 8, opacity: 0.6 }}
+                className="p-6 bg-zinc-900 rounded-[28px] border border-zinc-800 flex justify-between items-center opacity-40 cursor-default transition-all"
+              >
                 <div className="space-y-1">
                    <h4 className="font-sans font-bold text-white">Topic {i+1} Coming Soon</h4>
                 </div>
                 <LibraryIcon size={20} color="#333" />
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
@@ -328,9 +377,14 @@ const App: React.FC = () => {
               <button 
                 key={item.id}
                 onClick={() => setView(item.id)}
-                className="relative flex flex-col items-center justify-center w-12 h-12 transition-all"
+                className="relative flex flex-col items-center justify-center w-12 h-12 transition-all group"
               >
-                <Icon size={22} color={isActive ? "#CCFF00" : "#444"} className="transition-colors duration-300" />
+                <motion.div
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Icon size={22} color={isActive ? "#CCFF00" : "#444"} className="transition-colors duration-300" />
+                </motion.div>
                 {isActive && (
                   <motion.div 
                     layoutId="nav-dot"

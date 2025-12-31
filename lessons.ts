@@ -34,11 +34,12 @@ export const lessonsData: LessonData[] = [
       {
         "word": "Grind",
         "pronunciation": "/ɡraɪnd/",
-        "meaning": "Công việc lặp đi lặp lại nhưng cần thiết để thành công.",
+        "meaning": "Công việc lặp đi lặp đi lặp lại nhưng cần thiết để thành công.",
         "example": "Back to the daily grind after a week in Bali."
       }
     ],
     "grammar_focus": "Dùng 'Used to' để nói về thói quen trong quá khứ của một người du mục kỹ thuật số.",
+    "grammar_example_vi": "Ví dụ: 'I used to work in a stuffy office, but now I work from cafes in Chiang Mai.' (Tôi từng làm việc trong văn phòng ngột ngạt, nhưng giờ tôi làm việc ở quán cà phê tại Chiang Mai.)",
     "podcast_segments": [],
     "interactive_challenge": {
       "type": "quiz",
@@ -84,6 +85,7 @@ export const lessonsData: LessonData[] = [
       }
     ],
     "grammar_focus": "Cách dùng tính từ ghép (Compound Adjectives) như 'mouth-watering' để miêu tả món ăn.",
+    "grammar_example_vi": "Ví dụ: 'This home-cooked meal reminds me of my grandmother.' (Bữa cơm nấu tại gia này làm tôi nhớ về bà của mình.)",
     "podcast_segments": [],
     "interactive_challenge": {
       "type": "quiz",
@@ -129,6 +131,7 @@ export const lessonsData: LessonData[] = [
       }
     ],
     "grammar_focus": "Sử dụng 'Will' vs 'Going to' khi nói về kế hoạch phát triển dự án công nghệ.",
+    "grammar_example_vi": "Ví dụ: 'I'm going to attend the React conference next week.' (Tôi dự định sẽ tham gia hội thảo React vào tuần tới.)",
     "podcast_segments": [],
     "interactive_challenge": {
       "type": "quiz",

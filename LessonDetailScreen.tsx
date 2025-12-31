@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LessonData } from './types';
-import { SoundHighIcon, CloseIcon } from './components/Icons';
+import { SoundHighIcon, CloseIcon, SparklesIcon } from './components/Icons';
+import { playNaturalSpeech } from './services/speechService';
 
 interface LessonDetailScreenProps {
   lesson: LessonData;
@@ -12,6 +13,7 @@ interface LessonDetailScreenProps {
 
 const LessonDetailScreen: React.FC<LessonDetailScreenProps> = ({ lesson, onFinish, onBack }) => {
   const [step, setStep] = useState(0);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const totalVocab = lesson.vocab_set.length;
   const totalSteps = totalVocab + 1; // Vocabs + 1 Grammar step
   const progress = ((step + 1) / totalSteps) * 100;
@@ -19,29 +21,25 @@ const LessonDetailScreen: React.FC<LessonDetailScreenProps> = ({ lesson, onFinis
   const currentVocab = step < totalVocab ? lesson.vocab_set[step] : null;
   const isGrammarStep = step === totalVocab;
 
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      
-      const voices = window.speechSynthesis.getVoices();
-      const usVoice = voices.find(v => v.lang.includes('en-US') && v.name.includes('Google')) || 
-                      voices.find(v => v.lang.includes('en-US'));
-      if (usVoice) utterance.voice = usVoice;
-
-      window.speechSynthesis.speak(utterance);
+  const handleSpeak = async (text: string) => {
+    if (isSpeaking) return;
+    setIsSpeaking(true);
+    
+    // Haptic Feedback
+    if ("vibrate" in navigator) {
+      navigator.vibrate(10);
     }
+    
+    await playNaturalSpeech(text);
+    setIsSpeaking(false);
   };
 
   useEffect(() => {
     if (currentVocab && !isGrammarStep) {
-      const timer = setTimeout(() => speak(currentVocab.word), 500);
+      const timer = setTimeout(() => handleSpeak(currentVocab.word), 500);
       return () => clearTimeout(timer);
     }
-  }, [step, currentVocab, isGrammarStep]);
+  }, [step, isGrammarStep]);
 
   const nextStep = () => {
     if (step < totalSteps - 1) setStep(step + 1);
@@ -102,14 +100,14 @@ const LessonDetailScreen: React.FC<LessonDetailScreenProps> = ({ lesson, onFinis
             >
               <div className="flex flex-col items-center gap-4">
                 <div 
-                  onClick={() => speak(currentVocab.word)}
+                  onClick={() => handleSpeak(currentVocab.word)}
                   className="group flex items-center gap-5 cursor-pointer"
                 >
-                  <h2 className="text-[32px] font-heading font-black tracking-tight text-white leading-none group-hover:text-[#CCFF00] transition-colors">
+                  <h2 className={`text-[32px] font-heading font-black tracking-tight leading-none transition-colors ${isSpeaking ? 'text-[#CCFF00]' : 'text-white'}`}>
                     {currentVocab.word}
                   </h2>
-                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 group-hover:bg-[#CCFF00] group-hover:text-black transition-all">
-                    <SoundHighIcon size={18} />
+                  <div className={`p-3 rounded-xl border transition-all ${isSpeaking ? 'bg-[#CCFF00] text-black border-[#CCFF00]' : 'bg-zinc-900 border-zinc-800 text-zinc-400 group-hover:bg-[#CCFF00] group-hover:text-black group-hover:border-[#CCFF00]'}`}>
+                    <SoundHighIcon size={18} className={isSpeaking ? "animate-pulse" : ""} />
                   </div>
                 </div>
                 <div className="px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-800">
@@ -144,25 +142,50 @@ const LessonDetailScreen: React.FC<LessonDetailScreenProps> = ({ lesson, onFinis
           ) : (
             <motion.div
               key="grammar-step"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               className="space-y-8"
             >
-              <div className="text-center space-y-2">
-                <span className="text-[10px] font-sans font-black text-[#BFA3FF] uppercase tracking-[0.4em] block">GRAMMAR FLOW</span>
-                <h2 className="text-[32px] font-heading font-black tracking-tighter text-white">Advanced Structure</h2>
+              <div className="text-center space-y-3">
+                <div className="flex justify-center mb-2">
+                  <div className="bg-[#BFA3FF]/20 px-3 py-1 rounded-full border border-[#BFA3FF]/30">
+                    <span className="text-[9px] font-sans font-black text-[#BFA3FF] uppercase tracking-[0.4em]">GRAMMAR FLOW</span>
+                  </div>
+                </div>
+                <h2 className="text-[36px] font-heading font-black tracking-tighter text-white leading-[0.9]">Master the Structure</h2>
               </div>
               
-              <div className="bg-[#BFA3FF] p-8 rounded-[24px] text-black clay-accent hard-shadow relative overflow-hidden">
-                <p className="text-[18px] font-sans font-bold leading-snug">
-                  {lesson.grammar_focus}
-                </p>
+              <div className="bg-[#BFA3FF] p-8 rounded-[32px] text-black clay-accent hard-shadow relative overflow-hidden flex flex-col gap-6 group">
+                {/* Decorative Element */}
+                <div className="absolute top-[-20px] right-[-20px] opacity-10">
+                  <SparklesIcon size={120} color="black" />
+                </div>
+
+                <div className="space-y-2 relative z-10">
+                  <span className="text-[10px] font-sans font-black text-black/40 uppercase tracking-[0.2em] block">THE RULE</span>
+                  <p className="text-[19px] font-sans font-extrabold leading-snug">
+                    {lesson.grammar_focus}
+                  </p>
+                </div>
+                
+                <div className="pt-6 border-t border-black/10 relative z-10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-1 w-4 bg-black/20 rounded-full" />
+                    <span className="text-[10px] font-sans font-black uppercase tracking-[0.2em] text-black/50">VÍ DỤ MINH HỌA</span>
+                  </div>
+                  <p className="text-[16px] font-sans font-semibold leading-relaxed text-black/90 italic bg-white/20 p-4 rounded-2xl border border-white/10 shadow-sm">
+                    {lesson.grammar_example_vi}
+                  </p>
+                </div>
               </div>
 
-              <div className="bg-[#1C1C1E] p-6 rounded-[24px] border border-zinc-800 hard-shadow">
-                 <p className="text-[14px] font-sans font-medium text-zinc-400 leading-relaxed">
-                   <span className="text-[#CCFF00] font-black mr-2">PRO TIP:</span> 
-                   Nhớ sử dụng cấu trúc này trong buổi networking sắp tới của bạn nhé!
+              <div className="bg-zinc-900/50 p-6 rounded-[24px] border border-zinc-800 hard-shadow flex items-start gap-4">
+                 <div className="mt-1">
+                   <SparklesIcon size={16} color="#CCFF00" />
+                 </div>
+                 <p className="text-[13px] font-sans font-medium text-zinc-400 leading-relaxed">
+                   <span className="text-[#CCFF00] font-black mr-1 uppercase">PRO TIP:</span> 
+                   Nhớ sử dụng cấu trúc này trong buổi networking sắp tới của bạn để tạo ấn tượng chuyên nghiệp hơn nhé!
                  </p>
               </div>
             </motion.div>

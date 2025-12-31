@@ -18,6 +18,7 @@ export interface LessonData {
   topic: string;
   vocab_set: VocabularyItem[];
   grammar_focus: string;
+  grammar_example_vi: string;
   podcast_segments: PodcastSegment[];
   interactive_challenge: {
     type: string;
