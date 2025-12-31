@@ -21,7 +21,8 @@ const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
     if (sprint === 'WARMUP') setSprint('LISTENING');
     else if (sprint === 'LISTENING') setSprint('SPOTLIGHT');
     else if (sprint === 'SPOTLIGHT') {
-      if (vocabIdx < lesson.vocab_spotlight.length - 1) setVocabIdx(v => v + 1);
+      const vocabCount = (lesson.vocab_spotlight || []).length;
+      if (vocabIdx < vocabCount - 1) setVocabIdx(v => v + 1);
       else setSprint('CHALLENGE');
     } else if (sprint === 'CHALLENGE') setSprint('MISSION');
     else onFinish();
@@ -34,7 +35,7 @@ const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
       <div className="px-6 flex justify-between items-center mb-8">
          <div className="flex gap-2">
             {['WARMUP', 'LISTENING', 'SPOTLIGHT', 'CHALLENGE', 'MISSION'].map(s => (
-              <div key={s} className={`h-1 w-6 rounded-full ${sprint === s ? 'bg-[#CCFF00]' : 'bg-white/10'}`} />
+              <div key={s} className={`h-1 w-6 rounded-full ${sprint === s ? (s === 'MISSION' ? 'bg-[#FF6B4A]' : (s === 'CHALLENGE' ? 'bg-[#BFA3FF]' : 'bg-[#CCFF00]')) : 'bg-white/10'}`} />
             ))}
          </div>
          <button onClick={onBack} className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800 shadow-xl">
@@ -47,9 +48,9 @@ const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
           {sprint === 'WARMUP' && (
             <motion.div key="warmup" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-10">
               <span className="text-[#CCFF00] font-black tracking-widest text-[10px] uppercase">Sprint 01 / Intro</span>
-              <h2 className="text-4xl font-heading font-black tracking-tighter leading-none">{lesson.warmup.intro}</h2>
+              <h2 className="text-4xl font-heading font-black tracking-tighter leading-none">{lesson.warmup?.intro || "Ready to hustle?"}</h2>
               <div className="flex flex-wrap gap-3">
-                {lesson.warmup.keywords.map(k => (
+                {(lesson.warmup?.keywords || []).map(k => (
                   <button key={k} onClick={() => speak(k)} className="px-6 py-4 bg-zinc-900 border border-zinc-800 rounded-3xl font-black text-[#CCFF00] hover:border-[#CCFF00] transition-colors">
                     {k}
                   </button>
@@ -70,11 +71,11 @@ const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
                 </div>
                 <h3 className="text-2xl font-heading font-black">Deep Listening</h3>
                 <p className="text-zinc-500 text-sm px-4">Lắng nghe hội thoại và chú ý đến cách nhấn nhá (intonation) trong ngữ cảnh đô thị.</p>
-                <button onClick={() => speak(lesson.podcast_segments.map(s => s.en).join('. '))} className="text-[#CCFF00] font-black uppercase tracking-widest text-[10px] p-4 bg-[#CCFF00]/10 rounded-2xl">Start Audio Flow</button>
+                <button onClick={() => speak((lesson.podcast_segments || []).map(s => s.en).join('. '))} className="text-[#CCFF00] font-black uppercase tracking-widest text-[10px] p-4 bg-[#CCFF00]/10 rounded-2xl">Start Audio Flow</button>
              </motion.div>
           )}
 
-          {sprint === 'SPOTLIGHT' && (
+          {sprint === 'SPOTLIGHT' && lesson.vocab_spotlight && lesson.vocab_spotlight[vocabIdx] && (
             <motion.div key={`spot-${vocabIdx}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
               <div className="flex items-center gap-4">
                  <h2 className="text-4xl font-heading font-black text-[#CCFF00]">{lesson.vocab_spotlight[vocabIdx].word}</h2>
@@ -90,14 +91,15 @@ const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
 
           {sprint === 'CHALLENGE' && (
             <motion.div key="challenge" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-              <div className="p-5 bg-[#BFA3FF] text-black rounded-3xl hard-shadow-accent">
+              <div className="p-5 bg-[#BFA3FF] text-black rounded-3xl shadow-lg relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-16 h-16 bg-white/20 blur-2xl rounded-full" />
                  <span className="text-[10px] font-black uppercase opacity-60">CONTEXT</span>
-                 <p className="font-bold text-base leading-tight mt-1">{lesson.daily_challenge.urban_context}</p>
+                 <p className="font-bold text-base leading-tight mt-1 relative z-10">{lesson.daily_challenge?.urban_context || "Urban scenario"}</p>
               </div>
-              <h3 className="text-2xl font-heading font-black">{lesson.daily_challenge.question}</h3>
+              <h3 className="text-2xl font-heading font-black">{lesson.daily_challenge?.question || "What's the right choice?"}</h3>
               <div className="space-y-3">
-                 {lesson.daily_challenge.options.map(opt => (
-                   <button key={opt} onClick={next} className="w-full p-6 bg-zinc-900 border border-zinc-800 rounded-[24px] text-left font-bold active:bg-[#CCFF00] active:text-black transition-all">
+                 {(lesson.daily_challenge?.options || []).map(opt => (
+                   <button key={opt} onClick={next} className="w-full p-6 bg-zinc-900 border border-zinc-800 rounded-[24px] text-left font-bold active:bg-[#BFA3FF] active:text-black transition-all">
                      {opt}
                    </button>
                  ))}
@@ -108,15 +110,16 @@ const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
           {sprint === 'MISSION' && (
             <motion.div key="mission" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-10">
                <div className="text-center">
-                  <div className="inline-block p-4 bg-[#CCFF00] rounded-[30px] mb-6 text-black clay-accent">
+                  <div className="inline-block p-4 bg-[#FF6B4A] rounded-[30px] mb-6 text-black clay-accent shadow-[0_15px_30px_rgba(255,107,74,0.2)]">
                      <SparklesIcon size={32} />
                   </div>
-                  <h3 className="text-3xl font-heading font-black tracking-tighter uppercase">{lesson.real_world_mission.task}</h3>
+                  <h3 className="text-3xl font-heading font-black tracking-tighter uppercase text-[#FF6B4A]">{lesson.real_world_mission?.task || "Urban Mission"}</h3>
                </div>
                
-               <div className="p-8 bg-zinc-900 rounded-[40px] border-2 border-dashed border-zinc-800 text-center">
-                  <span className="px-4 py-1 bg-white/5 rounded-full text-[10px] font-black text-zinc-500 uppercase tracking-widest border border-white/10">PLATFORM: {lesson.real_world_mission.platform}</span>
-                  <p className="mt-6 text-zinc-300 font-medium leading-relaxed">{lesson.real_world_mission.description}</p>
+               <div className="p-8 bg-zinc-900 rounded-[40px] border-2 border-dashed border-[#FF6B4A]/20 text-center relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-32 h-32 bg-[#FF6B4A]/5 blur-[60px] rounded-full" />
+                  <span className="px-4 py-1 bg-[#FF6B4A]/10 rounded-full text-[10px] font-black text-[#FF6B4A] uppercase tracking-widest border border-[#FF6B4A]/10 relative z-10">PLATFORM: {lesson.real_world_mission?.platform || "Anywhere"}</span>
+                  <p className="mt-6 text-zinc-300 font-medium leading-relaxed relative z-10">{lesson.real_world_mission?.description || "Complete the challenge."}</p>
                </div>
                
                <p className="text-center text-[10px] text-zinc-600 font-black uppercase tracking-[0.2em]">Hoàn thành thử thách này để nâng Level!</p>
@@ -126,7 +129,10 @@ const LessonDetailScreen: React.FC<Props> = ({ lesson, onFinish, onBack }) => {
       </main>
 
       <footer className="p-8">
-        <button onClick={next} className="w-full py-6 bg-[#CCFF00] text-black rounded-[28px] font-black uppercase tracking-[0.2em] clay-accent active:scale-95 transition-transform shadow-2xl">
+        <button 
+          onClick={next} 
+          className={`w-full py-6 rounded-[28px] font-black uppercase tracking-[0.2em] clay-accent active:scale-95 transition-transform shadow-2xl ${sprint === 'MISSION' ? 'bg-[#FF6B4A] text-white shadow-[0_20px_40px_rgba(255,107,74,0.3)]' : 'bg-[#CCFF00] text-black'}`}
+        >
           {sprint === 'MISSION' ? 'FINISH LEVEL' : 'NEXT SPRINT'}
         </button>
       </footer>

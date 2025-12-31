@@ -45,8 +45,8 @@ export interface Badge {
   title: string;
   description: string;
   icon: string;
-  howToUnlock: string; // Added to resolve errors in BadgeGallery.tsx
-  levelRequired?: number; // Made optional as it's not provided in the BadgeGallery static data
+  howToUnlock: string;
+  levelRequired?: number;
 }
 
 export interface UserStats {
@@ -55,7 +55,8 @@ export interface UserStats {
   streak: number;
   unlockedBadges: string[];
   savedVocab: any[];
+  favoriteLessons: string[]; // Lưu ID của các bài học yêu thích
   xp: number;
-  perfectTests: number; // Added to resolve errors in badgeService.ts
-  podcastsCompleted: number; // Added to resolve errors in badgeService.ts
+  perfectTests: number;
+  podcastsCompleted: number;
 }

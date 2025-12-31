@@ -36,12 +36,20 @@ const App: React.FC = () => {
   const [currentLesson, setCurrentLesson] = useState<LessonData | null>(null);
   const [stats, setStats] = useState<UserStats>(() => {
     const saved = localStorage.getItem('neolingua_stats');
-    return saved ? JSON.parse(saved) : {
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return {
+        ...parsed,
+        favoriteLessons: parsed.favoriteLessons || []
+      };
+    }
+    return {
       currentLevel: 1,
       lessonsCompleted: 0,
       streak: 5,
       unlockedBadges: ['newbie'],
       savedVocab: [],
+      favoriteLessons: [],
       xp: 450,
       perfectTests: 0,
       podcastsCompleted: 0
@@ -55,7 +63,7 @@ const App: React.FC = () => {
   const startLevel = async (lvl: number) => {
     setLoading(true);
     try {
-      let lesson = lessonsData.find(l => l.level === lvl);
+      let lesson = (lessonsData || []).find(l => l.level === lvl);
       if (!lesson) {
         lesson = await generateLesson(lvl);
       }
@@ -72,10 +80,20 @@ const App: React.FC = () => {
     if (lesson) {
       setCurrentLesson(lesson);
     } else {
-      const defaultLesson = lessonsData.find(l => l.level === stats.currentLevel) || lessonsData[0];
+      const defaultLesson = (lessonsData || []).find(l => l.level === stats.currentLevel) || (lessonsData || [])[0];
       setCurrentLesson(defaultLesson);
     }
     setView('podcast');
+  };
+
+  const handleToggleFavorite = (lessonId: string) => {
+    setStats(prev => {
+      const isFav = (prev.favoriteLessons || []).includes(lessonId);
+      const newFavs = isFav 
+        ? (prev.favoriteLessons || []).filter(id => id !== lessonId)
+        : [...(prev.favoriteLessons || []), lessonId];
+      return { ...prev, favoriteLessons: newFavs };
+    });
   };
 
   const currentStep = useMemo(() => 
@@ -83,8 +101,8 @@ const App: React.FC = () => {
   , [stats.currentLevel]);
 
   const dailyWord = useMemo(() => {
-    const lesson = lessonsData.find(l => l.level === stats.currentLevel);
-    return lesson?.vocab_spotlight[0] || { word: 'Hustle', meaning: 'Nỗ lực không ngừng', pronunciation: '/ˈhʌs.əl/' };
+    const lesson = (lessonsData || []).find(l => l.level === stats.currentLevel);
+    return (lesson?.vocab_spotlight && lesson.vocab_spotlight[0]) || { word: 'Hustle', meaning: 'Nỗ lực không ngừng', pronunciation: '/ˈhʌs.əl/' };
   }, [stats.currentLevel]);
 
   const handleLessonFinish = () => {
@@ -156,21 +174,22 @@ const App: React.FC = () => {
             <section className="mb-8 px-2">
                <div className="flex justify-between items-center mb-4">
                   <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">Daily Urban Word</h2>
-                  <SparklesIcon size={14} color="#CCFF00" />
+                  <SparklesIcon size={14} color="#FF6B4A" />
                </div>
                <motion.div 
                   whileTap={{ scale: 0.98 }}
                   onClick={() => playNaturalSpeech(dailyWord.word)}
-                  className="p-6 rounded-[32px] bg-zinc-900/40 border border-white/5 flex items-center justify-between group cursor-pointer"
+                  className="p-6 rounded-[32px] bg-zinc-900/40 border border-[#FF6B4A]/20 flex items-center justify-between group cursor-pointer relative overflow-hidden"
                >
-                  <div className="flex-1">
+                  <div className="absolute -top-10 -left-10 w-24 h-24 bg-[#FF6B4A]/5 blur-2xl rounded-full" />
+                  <div className="flex-1 relative z-10">
                      <div className="flex items-center gap-3 mb-1">
-                        <h4 className="text-2xl font-heading font-black tracking-tighter text-white group-hover:text-[#CCFF00] transition-colors">{dailyWord.word}</h4>
+                        <h4 className="text-2xl font-heading font-black tracking-tighter text-white group-hover:text-[#FF6B4A] transition-colors">{dailyWord.word}</h4>
                         <span className="text-[10px] font-medium text-zinc-600 italic">{dailyWord.pronunciation}</span>
                      </div>
                      <p className="text-zinc-500 text-xs font-medium">{dailyWord.meaning}</p>
                   </div>
-                  <div className="w-12 h-12 rounded-2xl bg-zinc-800/50 flex items-center justify-center text-[#CCFF00]">
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-800/50 flex items-center justify-center text-[#FF6B4A] shadow-[0_0_15px_rgba(255,107,74,0.1)] relative z-10">
                      <SoundHighIcon size={20} />
                   </div>
                </motion.div>
@@ -187,7 +206,6 @@ const App: React.FC = () => {
                      <h4 className="text-2xl font-heading font-black tracking-tighter leading-none mb-1">Neo Radio FM</h4>
                      <p className="text-[10px] font-black opacity-60 uppercase tracking-widest">Ambient Learning Flow</p>
                      
-                     {/* Visualizer stays, but card doesn't move */}
                      <div className="flex items-center gap-1 mt-4 h-4">
                         {[1, 2, 3, 4, 3, 2, 5, 2, 3, 4, 1].map((h, i) => (
                            <motion.div 
@@ -200,7 +218,7 @@ const App: React.FC = () => {
                         <span className="text-[9px] font-black ml-2 uppercase opacity-40">Ready to play</span>
                      </div>
                   </div>
-                  <div className="w-16 h-16 bg-black rounded-[24px] flex items-center justify-center text-[#CCFF00] shadow-lg relative z-10 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-16 h-16 bg-black rounded-[24px] flex items-center justify-center text-[#CCFF00] shadow-lg relative z-10 transition-transform duration-300 group-hover:scale-105">
                      <HeadphonesIcon size={28} />
                   </div>
                </div>
@@ -210,20 +228,19 @@ const App: React.FC = () => {
                <motion.div 
                  whileTap={{ scale: 0.95 }}
                  onClick={() => setView('badges')}
-                 className="p-6 rounded-[36px] bg-zinc-900/30 border border-white/5 flex flex-col justify-between aspect-square cursor-pointer"
+                 className="p-6 rounded-[36px] bg-zinc-900/30 border border-[#FF6B4A]/10 flex flex-col justify-between aspect-square cursor-pointer group"
                >
-                  <div className="w-10 h-10 rounded-xl bg-zinc-800/50 flex items-center justify-center text-[#CCFF00]">
+                  <div className="w-10 h-10 rounded-xl bg-[#FF6B4A]/10 flex items-center justify-center text-[#FF6B4A] group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,107,74,0.1)]">
                      <MedalIcon size={20} />
                   </div>
                   <div>
                      <h4 className="font-heading font-black text-lg uppercase leading-tight tracking-tight">Trophy<br/>Room</h4>
-                     <p className="text-[8px] font-black text-zinc-600 uppercase mt-1">{stats.unlockedBadges.length} Badges</p>
+                     <p className="text-[8px] font-black text-zinc-600 uppercase mt-1">{(stats.unlockedBadges || []).length} Badges</p>
                   </div>
                </motion.div>
 
                <motion.div 
-                 whileTap={{ scale: 0.95 }}
-                 className="p-6 rounded-[36px] bg-zinc-900/30 border border-white/5 flex flex-col justify-between aspect-square opacity-50 grayscale cursor-not-allowed"
+                 className="p-6 rounded-[36px] bg-zinc-900/30 border border-white/5 flex flex-col justify-between aspect-square opacity-40 grayscale cursor-not-allowed"
                >
                   <div className="w-10 h-10 rounded-xl bg-zinc-800/50 flex items-center justify-center text-zinc-500">
                      <LibraryIcon size={20} />
@@ -255,6 +272,7 @@ const App: React.FC = () => {
                 const isLocked = step.id > stats.currentLevel;
                 const isCurrent = step.id === stats.currentLevel;
                 const isCompleted = step.id < stats.currentLevel;
+                const isSpecial = step.id % 3 === 0;
                 
                 return (
                   <motion.div 
@@ -262,21 +280,21 @@ const App: React.FC = () => {
                     whileTap={!isLocked ? { scale: 0.98 } : {}}
                     onClick={() => !isLocked && startLevel(step.id)}
                     className={`relative p-7 rounded-[36px] border transition-all cursor-pointer ${
-                      isCurrent ? 'bg-[#1C1C1E] border-[#CCFF00]/50 shadow-[0_20px_40px_-10px_rgba(204,255,0,0.1)]' : 
+                      isCurrent ? `bg-[#1C1C1E] border-[${isSpecial ? '#FF6B4A' : '#CCFF00'}]/50 shadow-[0_20px_40px_-10px_rgba(204,255,0,0.1)]` : 
                       isLocked ? 'bg-zinc-900/20 border-white/5 opacity-40 grayscale' : 'bg-zinc-900/50 border-white/10'
                     }`}
                   >
                     <div className="flex justify-between items-center">
                        <div>
                           <div className="flex items-center gap-2 mb-1">
-                             <span className={`text-[8px] font-black uppercase tracking-[0.2em] ${isCurrent ? 'text-[#CCFF00]' : 'text-zinc-600'}`}>
+                             <span className={`text-[8px] font-black uppercase tracking-[0.2em] ${isCurrent ? (isSpecial ? 'text-[#FF6B4A]' : 'text-[#CCFF00]') : 'text-zinc-600'}`}>
                                STAGE 0{step.id}
                              </span>
-                             {isCompleted && <SparklesIcon size={10} color="#CCFF00" />}
+                             {isCompleted && <SparklesIcon size={10} color={isSpecial ? "#FF6B4A" : "#CCFF00"} />}
                           </div>
                           <h3 className={`text-2xl font-heading font-black tracking-tighter leading-none ${isLocked ? 'text-zinc-700' : 'text-white'}`}>{step.title}</h3>
                        </div>
-                       <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${isCurrent ? 'bg-[#CCFF00] text-black shadow-lg shadow-[#CCFF00]/20' : 'bg-zinc-800/50 text-zinc-600'}`}>
+                       <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${isCurrent ? (isSpecial ? 'bg-[#FF6B4A]' : 'bg-[#CCFF00]') + ' text-black shadow-lg shadow-black/20' : 'bg-zinc-800/50 text-zinc-600'}`}>
                           {isLocked ? <FlashIcon size={16} /> : <MedalIcon size={18} />}
                        </div>
                     </div>
@@ -298,7 +316,7 @@ const App: React.FC = () => {
               <button onClick={() => setView('home')} className="mb-8 text-zinc-500 hover:text-white flex items-center gap-2 transition-colors">
                  <CloseIcon size={20} /> <span className="text-[10px] font-black uppercase tracking-widest">Back to Hub</span>
               </button>
-              <BadgeGallery unlockedBadges={stats.unlockedBadges} />
+              <BadgeGallery unlockedBadges={stats.unlockedBadges || []} />
            </motion.div>
         )}
 
@@ -307,6 +325,8 @@ const App: React.FC = () => {
             lesson={currentLesson} 
             onBack={() => setView('home')} 
             onSelectLesson={openPodcast}
+            favoriteLessons={stats.favoriteLessons || []}
+            onToggleFavorite={handleToggleFavorite}
           />
         )}
 

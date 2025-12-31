@@ -2,29 +2,49 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LessonData } from './types';
-import { CloseIcon, LibraryIcon, FlashIcon, HeadphonesIcon } from './components/Icons';
+import { CloseIcon, LibraryIcon, FlashIcon, HeadphonesIcon, HeartIcon } from './components/Icons';
 import { lessonsData } from './lessons';
 
 interface PodcastScreenProps {
   lesson: LessonData;
   onBack: () => void;
   onSelectLesson: (lesson: LessonData) => void;
+  favoriteLessons: string[];
+  onToggleFavorite: (lessonId: string) => void;
   onFinished?: () => void;
 }
 
-const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onSelectLesson, onFinished }) => {
+const PodcastScreen: React.FC<PodcastScreenProps> = ({ 
+  lesson, 
+  onBack, 
+  onSelectLesson, 
+  favoriteLessons, 
+  onToggleFavorite, 
+  onFinished 
+}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [showLibrary, setShowLibrary] = useState(false);
+  const [filterFav, setFilterFav] = useState(false);
+  
   const synth = window.speechSynthesis;
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const isCurrentFavorite = (favoriteLessons || []).includes(lesson.id);
+
   const segments = useMemo(() => {
-    return lesson.podcast_segments.length > 0 ? lesson.podcast_segments : [
+    const s = lesson?.podcast_segments;
+    return (s && s.length > 0) ? s : [
       { en: "Welcome back to Neo Radio.", vi: "Chào mừng bạn quay lại với Neo Radio." }
     ];
-  }, [lesson.podcast_segments]);
+  }, [lesson?.podcast_segments]);
+
+  const filteredLessons = useMemo(() => {
+    const data = lessonsData || [];
+    if (!filterFav) return data;
+    return data.filter(l => (favoriteLessons || []).includes(l.id));
+  }, [filterFav, favoriteLessons]);
 
   const playSegment = (index: number) => {
     synth.cancel();
@@ -92,34 +112,60 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onSelectL
             initial={{ opacity: 0, scale: 1.1 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.1 }}
-            className="absolute inset-0 z-[250] bg-[#0A0A0A] p-8 overflow-y-auto no-scrollbar"
+            className="absolute inset-0 z-[250] bg-[#0A0A0A] p-8 overflow-y-auto no-scrollbar flex flex-col"
           >
-            <div className="flex justify-between items-center mb-10">
+            <div className="flex justify-between items-center mb-6">
                <h2 className="text-3xl font-heading font-black tracking-tighter uppercase">Station<br/><span className="text-[#CCFF00]">Library</span></h2>
                <button onClick={() => setShowLibrary(false)} className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800">
                   <CloseIcon size={20} />
                </button>
             </div>
+
+            <div className="flex gap-2 mb-8">
+               <button 
+                 onClick={() => setFilterFav(false)}
+                 className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${!filterFav ? 'bg-[#CCFF00] text-black' : 'bg-zinc-900 text-zinc-500'}`}
+               >
+                 ALL STATIONS
+               </button>
+               <button 
+                 onClick={() => setFilterFav(true)}
+                 className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${filterFav ? 'bg-[#FF6B4A] text-white' : 'bg-zinc-900 text-zinc-500'}`}
+               >
+                 <HeartIcon size={12} fill={filterFav ? "white" : "none"} /> FAVORITES
+               </button>
+            </div>
             
-            <div className="space-y-4 pb-12">
-               {lessonsData.map((l) => (
-                 <motion.div 
-                   key={l.id}
-                   whileTap={{ scale: 0.98 }}
-                   onClick={() => { onSelectLesson(l); setShowLibrary(false); setCurrentIdx(0); }}
-                   className={`p-6 rounded-[32px] border transition-all cursor-pointer flex items-center justify-between ${
-                     l.id === lesson.id ? 'bg-[#CCFF00] text-black border-[#CCFF00]' : 'bg-zinc-900/50 border-white/5'
-                   }`}
-                 >
-                    <div>
-                       <span className={`text-[8px] font-black uppercase tracking-widest ${l.id === lesson.id ? 'text-black/40' : 'text-zinc-600'}`}>LEVEL 0{l.level}</span>
-                       <h4 className="text-lg font-heading font-black tracking-tight leading-none mt-1">{l.topic}</h4>
-                    </div>
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${l.id === lesson.id ? 'bg-black text-[#CCFF00]' : 'bg-zinc-800 text-zinc-500'}`}>
-                       <HeadphonesIcon size={18} />
-                    </div>
-                 </motion.div>
-               ))}
+            <div className="flex-1 space-y-4 pb-12 overflow-y-auto no-scrollbar">
+               {(filteredLessons || []).length > 0 ? (filteredLessons || []).map((l) => {
+                 const isFav = (favoriteLessons || []).includes(l.id);
+                 return (
+                    <motion.div 
+                      key={l.id}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => { onSelectLesson(l); setShowLibrary(false); setCurrentIdx(0); }}
+                      className={`p-6 rounded-[32px] border transition-all cursor-pointer flex items-center justify-between ${
+                        l.id === lesson.id ? 'bg-[#CCFF00] text-black border-[#CCFF00]' : 'bg-zinc-900/50 border-white/5'
+                      }`}
+                    >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[8px] font-black uppercase tracking-widest ${l.id === lesson.id ? 'text-black/40' : 'text-zinc-600'}`}>LEVEL 0{l.level}</span>
+                            {isFav && <HeartIcon size={10} color={l.id === lesson.id ? "black" : "#FF6B4A"} fill={l.id === lesson.id ? "black" : "#FF6B4A"} />}
+                          </div>
+                          <h4 className="text-lg font-heading font-black tracking-tight leading-none mt-1">{l.topic}</h4>
+                        </div>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${l.id === lesson.id ? 'bg-black text-[#CCFF00]' : 'bg-zinc-800 text-zinc-500'}`}>
+                          <HeadphonesIcon size={18} />
+                        </div>
+                    </motion.div>
+                 );
+               }) : (
+                 <div className="flex-1 flex flex-col items-center justify-center text-center px-10">
+                    <HeartIcon size={40} color="#222" className="mb-4" />
+                    <p className="text-zinc-600 font-bold uppercase tracking-widest text-[10px]">No favorites yet.<br/>Start loving some flows!</p>
+                 </div>
+               )}
             </div>
           </motion.div>
         )}
@@ -129,9 +175,20 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onSelectL
         <button onClick={() => { synth.cancel(); onBack(); }} className="p-2 -ml-2 text-zinc-600 hover:text-white transition-colors">
           <CloseIcon size={22} />
         </button>
-        <span className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em]">NEO RADIO FM</span>
-        <button onClick={() => setShowLibrary(true)} className="p-2 text-[#CCFF00]">
-          <LibraryIcon size={22} />
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em]">NEO RADIO FM</span>
+          <button 
+            onClick={() => setShowLibrary(true)} 
+            className="text-[8px] font-black text-[#CCFF00] uppercase tracking-widest mt-1 opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1"
+          >
+             <LibraryIcon size={10} /> STATION LIBRARY
+          </button>
+        </div>
+        <button 
+          onClick={() => onToggleFavorite(lesson.id)} 
+          className={`p-2 transition-all active:scale-90 ${isCurrentFavorite ? 'text-[#FF6B4A]' : 'text-zinc-600'}`}
+        >
+          <HeartIcon size={24} fill={isCurrentFavorite ? "#FF6B4A" : "none"} />
         </button>
       </header>
 
@@ -212,18 +269,7 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onSelectL
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <button 
-              onClick={() => setShowLibrary(true)}
-              className="flex flex-col items-center gap-1 group transition-all"
-            >
-              <div className="p-2 text-zinc-600 group-hover:text-[#CCFF00]">
-                <LibraryIcon size={20} />
-              </div>
-              <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest group-hover:text-[#CCFF00]">LIBRARY</span>
-            </button>
-            
-            <div className="flex items-center gap-6">
+          <div className="flex items-center justify-center gap-12">
               <button 
                 onClick={() => playSegment(currentIdx - 1)}
                 className="text-zinc-500 hover:text-white active:scale-90 transition-all disabled:opacity-10"
@@ -250,14 +296,6 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onSelectL
               >
                 <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" /></svg>
               </button>
-            </div>
-
-            <button className="flex flex-col items-center gap-1 group transition-all">
-              <div className="p-2 text-zinc-600 group-hover:text-[#FF6B4A]">
-                <FlashIcon size={20} />
-              </div>
-              <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest group-hover:text-[#FF6B4A]">FOCUS</span>
-            </button>
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ interface IconProps {
   size?: number;
   color?: string;
   className?: string;
+  fill?: string;
 }
 
 // UI Icons (Minimalist)
@@ -66,9 +67,14 @@ export const HeadphonesIcon: React.FC<IconProps> = ({ size = 24, color = "curren
   </svg>
 );
 
+export const HeartIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className, fill = "none" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
+
 // --- ACHIEVEMENT BADGE ICONS ---
 
-// Urban Rookie: Soft star bouncing (Urban Newbie)
 export const BadgeRookieIcon: React.FC<IconProps> = ({ size = 64, color = "#CCFF00" }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M50 15C55 15 58 28 62 32C66 36 78 35 78 40C78 45 68 50 66 55C64 60 68 72 63 75C58 78 50 68 45 68C40 68 32 78 27 75C22 72 26 60 24 55C22 50 12 45 12 40C12 35 24 36 28 32C32 28 35 15 50 15Z" fill={color} stroke="black" strokeWidth="2.5" strokeLinejoin="round" />
@@ -80,18 +86,13 @@ export const BadgeRookieIcon: React.FC<IconProps> = ({ size = 64, color = "#CCFF
   </svg>
 );
 
-// Street Smart: Blue Ramen bowl with glasses
 export const BadgeRamenIcon: React.FC<IconProps> = ({ size = 64 }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Bowl */}
     <path d="M20 45C20 45 20 75 50 75C80 75 80 45 80 45H20Z" fill="#3B82F6" stroke="black" strokeWidth="3" />
-    {/* Noodles */}
     <path d="M30 45C30 35 35 30 40 35C45 40 50 30 55 35C60 40 65 30 70 35" stroke="#CCFF00" strokeWidth="4" strokeLinecap="round" />
-    {/* Glasses */}
     <rect x="35" y="52" width="12" height="8" rx="2" stroke="black" strokeWidth="2" />
     <rect x="53" y="52" width="12" height="8" rx="2" stroke="black" strokeWidth="2" />
     <path d="M47 56H53" stroke="black" strokeWidth="2" />
-    {/* Steam */}
     <path d="M45 20C45 15 47 15 47 10" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" />
     <path d="M55 22C55 17 57 17 57 12" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" />
   </svg>
