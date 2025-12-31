@@ -65,6 +65,12 @@ export const SoundHighIcon: React.FC<IconProps> = ({ size = 24, color = "current
   </svg>
 );
 
+export const CloseIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M18 6L6 18M6 6l12 12" />
+  </svg>
+);
+
 export const SneakerIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M3 17h13.5l3-4h2.5v4H3z" />

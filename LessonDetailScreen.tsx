@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LessonData } from './types';
-import { SoundHighIcon } from './components/Icons';
+import { SoundHighIcon, CloseIcon } from './components/Icons';
 
 interface LessonDetailScreenProps {
   lesson: LessonData;
@@ -53,6 +53,12 @@ const LessonDetailScreen: React.FC<LessonDetailScreenProps> = ({ lesson, onFinis
     else onBack();
   };
 
+  const handleExit = () => {
+    if (window.confirm("Bạn có chắc muốn dừng bài học này không?")) {
+      onBack();
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -60,26 +66,27 @@ const LessonDetailScreen: React.FC<LessonDetailScreenProps> = ({ lesson, onFinis
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[60] bg-[#0A0A0A] flex flex-col pt-12"
     >
-      {/* Precision Progress Bar */}
+      {/* Refined Modern Header */}
       <div className="px-6 mb-12">
-        <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
+        <div className="flex justify-between items-center mb-6">
+          <span className="text-[9px] font-sans font-medium text-zinc-500 uppercase tracking-[0.25em]">
+            {isGrammarStep ? 'MASTERY PHASE' : `MODULE ${step + 1}/${totalVocab}`}
+          </span>
+          <button 
+            onClick={handleExit}
+            className="w-9 h-9 rounded-full bg-[#1C1C1E] flex items-center justify-center text-white border border-zinc-800 hover:bg-zinc-800 transition-colors active:scale-90"
+          >
+            <CloseIcon size={16} />
+          </button>
+        </div>
+
+        <div className="h-[6px] w-full bg-zinc-900 rounded-full overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ type: "spring", damping: 20, stiffness: 80 }}
-            className="h-full bg-[#CCFF00] shadow-[0_0_15px_rgba(204,255,0,0.6)]"
+            className="h-full bg-[#CCFF00] shadow-[0_0_15px_rgba(204,255,0,0.8)]"
           />
-        </div>
-        <div className="flex justify-between items-center mt-5">
-          <span className="text-[10px] font-sans font-black text-zinc-500 uppercase tracking-[0.2em]">
-            {isGrammarStep ? 'MASTERY PHASE' : `MODULE ${step + 1}/${totalVocab}`}
-          </span>
-          <button 
-            onClick={onBack}
-            className="text-[10px] font-sans font-black text-zinc-600 uppercase tracking-widest hover:text-[#FF6B4A] transition-colors"
-          >
-            EXIT SESSION
-          </button>
         </div>
       </div>
 
