@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FlameIcon, SparklesIcon } from './components/Icons';
 
@@ -9,6 +9,14 @@ interface SuccessScreenProps {
 }
 
 const SuccessScreen: React.FC<SuccessScreenProps> = ({ streak, onReturn }) => {
+  // Simulate haptic feedback on mount
+  useEffect(() => {
+    if ("vibrate" in navigator) {
+      // Short strong pulse for "Level Up" feeling
+      navigator.vibrate([100, 50, 100]);
+    }
+  }, []);
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -100,8 +108,6 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ streak, onReturn }) => {
           Back to Home
         </button>
       </motion.div>
-
-      {/* Ambient Noise Component is already handled by GrainOverlay in App.tsx */}
     </motion.div>
   );
 };

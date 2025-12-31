@@ -38,7 +38,8 @@ const App: React.FC = () => {
   const [lesson, setLesson] = useState<LessonData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentDay, setCurrentDay] = useState<string>("Monday");
-  const [view, setView] = useState<ViewType>('home');
+  // Temporarily set to 'success' for UI review as requested
+  const [view, setView] = useState<ViewType>('success');
   const [userStats, setUserStats] = useState<UserStats>({
     lessonsCompleted: 0,
     streak: 5,
@@ -88,12 +89,13 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col max-w-md mx-auto relative bg-[#0A0A0A] shadow-2xl border-x border-zinc-900 overflow-hidden text-white font-sans selection:bg-[#CCFF00] selection:text-black">
       <GrainOverlay />
       
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {view === 'podcast' && lesson && (
-          <PodcastScreen lesson={lesson} onBack={() => setView('home')} />
+          <PodcastScreen key="podcast" lesson={lesson} onBack={() => setView('home')} />
         )}
         {view === 'lessonDetail' && lesson && (
           <LessonDetailScreen 
+            key="lessonDetail"
             lesson={lesson} 
             onFinish={handleCompleteLesson} 
             onBack={() => setView('home')} 
@@ -101,6 +103,7 @@ const App: React.FC = () => {
         )}
         {view === 'success' && (
           <SuccessScreen 
+            key="success"
             streak={userStats.streak} 
             onReturn={() => setView('home')} 
           />
@@ -127,7 +130,6 @@ const App: React.FC = () => {
         
         {view === 'home' && (
           <>
-            {/* Today's Lesson Hero */}
             <motion.section 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -150,10 +152,8 @@ const App: React.FC = () => {
               </div>
             </motion.section>
 
-            {/* Word of the Day - Full Width */}
             {randomWord && <WordOfTheDayWidget word={randomWord} />}
 
-            {/* Secondary Row 50/50 */}
             <div className="grid grid-cols-2 gap-4">
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -188,7 +188,6 @@ const App: React.FC = () => {
               </motion.div>
             </div>
             
-            {/* Library Section */}
             <section className="space-y-4 pt-2">
                <div className="flex justify-between items-center px-1">
                   <h3 className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-zinc-600">LIBRARY</h3>
