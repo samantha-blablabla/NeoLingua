@@ -59,6 +59,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ streak, onReturn }) => {
             >
               Vibe Check<br/><span className="text-[#FF6B4A]">Passed</span>
             </motion.h2>
+            <h3 className="text-xl font-heading font-black text-white/30 uppercase tracking-widest -mt-2">Đã vượt qua thử thách</h3>
             
             <motion.p 
               initial={{ opacity: 0 }}
@@ -66,7 +67,9 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ streak, onReturn }) => {
               transition={{ delay: 0.5 }}
               className="text-zinc-500 font-sans font-medium text-[15px] max-w-[280px] mx-auto leading-relaxed"
             >
-              Cậu vừa hoàn thành bài học hôm nay. Streak của cậu đã tăng thêm 1 ngày!
+              You've crushed today's lesson. Your streak is glowing!
+              <br/>
+              <span className="italic opacity-60">Cậu vừa hoàn thành bài học hôm nay. Streak của cậu đã tăng thêm 1 ngày!</span>
             </motion.p>
           </div>
 
@@ -78,10 +81,10 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ streak, onReturn }) => {
           >
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[#FF6B4A]"></div>
             <div className="flex flex-col items-center gap-1">
-              <span className="text-[10px] font-sans font-black text-zinc-600 uppercase tracking-[0.3em]">CURRENT STREAK</span>
+              <span className="text-[10px] font-sans font-black text-zinc-600 uppercase tracking-[0.3em]">STREAK • CHUỖI NGÀY</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-5xl font-heading font-black text-[#FF6B4A]">{streak}</span>
-                <span className="text-xl font-heading font-black text-white uppercase opacity-40">Days</span>
+                <span className="text-xl font-heading font-black text-white uppercase opacity-40">Days • Ngày</span>
               </div>
             </div>
             
@@ -102,7 +105,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ streak, onReturn }) => {
             onClick={onReturn}
             className="w-full h-[56px] bg-[#CCFF00] text-black rounded-[20px] text-[12px] font-sans font-black uppercase tracking-[0.25em] clay-accent hover:scale-[1.02] active:scale-95 transition-all shadow-[0_20px_40px_rgba(204,255,0,0.2)]"
           >
-            Back to Home
+            Back to Home • VỀ TRANG CHỦ
           </button>
         </motion.div>
       </div>

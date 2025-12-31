@@ -20,14 +20,14 @@ import { syncUserStats } from './services/badgeService';
 type ViewType = 'home' | 'roadmap' | 'lessonDetail' | 'success' | 'profile' | 'podcast' | 'badges';
 
 const ROADMAP_STEPS = [
-  { id: 1, stage: 'Urban Newbie' as RoadmapStage, title: 'Survival Mode', desc: 'Cafe, Streets & Basics' },
-  { id: 2, stage: 'Urban Newbie' as RoadmapStage, title: 'City Explorer', desc: 'Shopping & Transit' },
-  { id: 3, stage: 'Street Smart' as RoadmapStage, title: 'Social Butterfly', desc: 'Making Connections' },
-  { id: 4, stage: 'Street Smart' as RoadmapStage, title: 'Vibe Master', desc: 'Daily Urban Life' },
-  { id: 5, stage: 'Professional Hustler' as RoadmapStage, title: 'Career Starter', desc: 'Office & Networking' },
-  { id: 6, stage: 'Professional Hustler' as RoadmapStage, title: 'Tech Guru', desc: 'Trends & Innovation' },
-  { id: 7, stage: 'Urban Legend' as RoadmapStage, title: 'Deep Thinker', desc: 'Critical Discussions' },
-  { id: 8, stage: 'Urban Legend' as RoadmapStage, title: 'Grandmaster', desc: 'Final Mastery' },
+  { id: 1, stage: 'Urban Newbie', title: 'Survival Mode', vi_title: 'Chế độ Sinh tồn', desc: 'Cafe, Streets & Basics', vi_desc: 'Cà phê, Đường phố & Cơ bản' },
+  { id: 2, stage: 'Urban Newbie', title: 'City Explorer', vi_title: 'Khám phá Thành phố', desc: 'Shopping & Transit', vi_desc: 'Mua sắm & Di chuyển' },
+  { id: 3, stage: 'Street Smart', title: 'Social Butterfly', vi_title: 'Bậc thầy Xã giao', desc: 'Making Connections', vi_desc: 'Kết nối & Kết bạn' },
+  { id: 4, stage: 'Street Smart', title: 'Vibe Master', vi_title: 'Người tạo Vibe', desc: 'Daily Urban Life', vi_desc: 'Nhịp sống Đô thị' },
+  { id: 5, stage: 'Professional Hustler', title: 'Career Starter', vi_title: 'Khởi đầu Sự nghiệp', desc: 'Office & Networking', vi_desc: 'Văn phòng & Kết nối' },
+  { id: 6, stage: 'Professional Hustler', title: 'Tech Guru', vi_title: 'Phù thủy Công nghệ', desc: 'Trends & Innovation', vi_desc: 'Xu hướng & Đổi mới' },
+  { id: 7, stage: 'Urban Legend', title: 'Deep Thinker', vi_title: 'Tư duy Sâu sắc', desc: 'Critical Discussions', vi_desc: 'Thảo luận Chuyên sâu' },
+  { id: 8, stage: 'Urban Legend', title: 'Grandmaster', vi_title: 'Huyền thoại Thành thị', desc: 'Final Mastery', vi_desc: 'Làm chủ Ngôn ngữ' },
 ];
 
 const App: React.FC = () => {
@@ -159,13 +159,15 @@ const App: React.FC = () => {
                   <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#CCFF00]/5 blur-[60px] rounded-full" />
                   <div className="relative z-10">
                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-[9px] font-black uppercase text-[#CCFF00] tracking-widest bg-[#CCFF00]/10 px-2 py-0.5 rounded-md">ACTIVE MISSION</span>
-                        <span className="text-[9px] font-black text-zinc-600 tracking-widest">• 0{stats.currentLevel}</span>
+                        <span className="text-[9px] font-black uppercase text-[#CCFF00] tracking-widest bg-[#CCFF00]/10 px-2 py-0.5 rounded-md">ACTIVE MISSION • 0{stats.currentLevel}</span>
                      </div>
-                     <h3 className="text-[2.6rem] font-heading font-black tracking-tighter leading-[0.9] mb-3">{currentStep.title}</h3>
-                     <p className="text-zinc-500 text-xs font-medium mb-8 leading-relaxed pr-8">{currentStep.desc}. Tap to start sprinting.</p>
+                     <h3 className="text-[2.6rem] font-heading font-black tracking-tighter leading-[0.9] mb-1">{currentStep.title}</h3>
+                     <h4 className="text-lg font-heading font-black text-white/40 tracking-tight leading-none mb-4">{currentStep.vi_title}</h4>
+                     <p className="text-zinc-500 text-xs font-medium mb-8 leading-relaxed pr-8">
+                       {currentStep.desc} • <span className="italic">{currentStep.vi_desc}</span>
+                     </p>
                      <button className="px-8 py-3.5 bg-[#CCFF00] text-black rounded-2xl font-black text-[10px] uppercase tracking-widest clay-accent transition-transform hover:scale-105">
-                        RESUME NOW
+                        RESUME SPRINT • TIẾP TỤC
                      </button>
                   </div>
                </motion.div>
@@ -173,7 +175,7 @@ const App: React.FC = () => {
 
             <section className="mb-8 px-2">
                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">Daily Urban Word</h2>
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">Daily Urban Word • TỪ MỚI</h2>
                   <SparklesIcon size={14} color="#FF6B4A" />
                </div>
                <motion.div 
@@ -196,7 +198,7 @@ const App: React.FC = () => {
             </section>
 
             <section className="mb-8 px-2">
-               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-4">Radio Flow</h2>
+               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-4">Radio Flow • LUYỆN NGHE</h2>
                <div 
                   onClick={() => openPodcast()}
                   className="relative p-6 rounded-[40px] bg-[#BFA3FF] text-black overflow-hidden flex items-center justify-between group shadow-xl cursor-pointer"
@@ -204,7 +206,7 @@ const App: React.FC = () => {
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-3xl rounded-full translate-x-10 -translate-y-10" />
                   <div className="relative z-10 flex-1">
                      <h4 className="text-2xl font-heading font-black tracking-tighter leading-none mb-1">Neo Radio FM</h4>
-                     <p className="text-[10px] font-black opacity-60 uppercase tracking-widest">Ambient Learning Flow</p>
+                     <p className="text-[10px] font-black opacity-60 uppercase tracking-widest">Ambient Learning Flow • Nghe thụ động</p>
                      
                      <div className="flex items-center gap-1 mt-4 h-4">
                         {[1, 2, 3, 4, 3, 2, 5, 2, 3, 4, 1].map((h, i) => (
@@ -215,7 +217,7 @@ const App: React.FC = () => {
                               className="w-1 bg-black/40 rounded-full"
                            />
                         ))}
-                        <span className="text-[9px] font-black ml-2 uppercase opacity-40">Ready to play</span>
+                        <span className="text-[9px] font-black ml-2 uppercase opacity-40">Ready • Sẵn sàng</span>
                      </div>
                   </div>
                   <div className="w-16 h-16 bg-black rounded-[24px] flex items-center justify-center text-[#CCFF00] shadow-lg relative z-10 transition-transform duration-300 group-hover:scale-105">
@@ -235,7 +237,7 @@ const App: React.FC = () => {
                   </div>
                   <div>
                      <h4 className="font-heading font-black text-lg uppercase leading-tight tracking-tight">Trophy<br/>Room</h4>
-                     <p className="text-[8px] font-black text-zinc-600 uppercase mt-1">{(stats.unlockedBadges || []).length} Badges</p>
+                     <p className="text-[8px] font-black text-zinc-600 uppercase mt-1">Phòng Truyền Thống</p>
                   </div>
                </motion.div>
 
@@ -247,7 +249,7 @@ const App: React.FC = () => {
                   </div>
                   <div>
                      <h4 className="font-heading font-black text-lg uppercase leading-tight tracking-tight">Vocab<br/>Vault</h4>
-                     <p className="text-[8px] font-black text-zinc-600 uppercase mt-1">Coming Soon</p>
+                     <p className="text-[8px] font-black text-zinc-600 uppercase mt-1">Kho Từ Vựng</p>
                   </div>
                </motion.div>
             </section>
@@ -263,7 +265,7 @@ const App: React.FC = () => {
             className="flex flex-col h-full pt-16 px-6 pb-32 overflow-y-auto no-scrollbar"
           >
             <header className="mb-10">
-               <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-[0.4em] mb-2 block">The Master Plan</span>
+               <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-[0.4em] mb-2 block">The Master Plan • LỘ TRÌNH</span>
                <h1 className="text-[3.5rem] font-heading font-black tracking-tighter uppercase leading-[0.85]">The Hustle<br/><span className="text-[#CCFF00]">Path</span></h1>
             </header>
 
@@ -288,11 +290,12 @@ const App: React.FC = () => {
                        <div>
                           <div className="flex items-center gap-2 mb-1">
                              <span className={`text-[8px] font-black uppercase tracking-[0.2em] ${isCurrent ? (isSpecial ? 'text-[#FF6B4A]' : 'text-[#CCFF00]') : 'text-zinc-600'}`}>
-                               STAGE 0{step.id}
+                               STAGE 0{step.id} • {step.stage}
                              </span>
                              {isCompleted && <SparklesIcon size={10} color={isSpecial ? "#FF6B4A" : "#CCFF00"} />}
                           </div>
                           <h3 className={`text-2xl font-heading font-black tracking-tighter leading-none ${isLocked ? 'text-zinc-700' : 'text-white'}`}>{step.title}</h3>
+                          <p className="text-[10px] font-bold text-zinc-500 mt-1 uppercase tracking-wider">{step.vi_title}</p>
                        </div>
                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${isCurrent ? (isSpecial ? 'bg-[#FF6B4A]' : 'bg-[#CCFF00]') + ' text-black shadow-lg shadow-black/20' : 'bg-zinc-800/50 text-zinc-600'}`}>
                           {isLocked ? <FlashIcon size={16} /> : <MedalIcon size={18} />}
@@ -304,7 +307,8 @@ const App: React.FC = () => {
             </div>
           </motion.main>
         )}
-
+        
+        {/* ... remaining views ... */}
         {view === 'badges' && (
            <motion.div 
              key="badges"
@@ -314,7 +318,7 @@ const App: React.FC = () => {
              className="pt-16 px-6 pb-32 h-full overflow-y-auto no-scrollbar"
            >
               <button onClick={() => setView('home')} className="mb-8 text-zinc-500 hover:text-white flex items-center gap-2 transition-colors">
-                 <CloseIcon size={20} /> <span className="text-[10px] font-black uppercase tracking-widest">Back to Hub</span>
+                 <CloseIcon size={20} /> <span className="text-[10px] font-black uppercase tracking-widest">Back to Hub • TRỞ VỀ</span>
               </button>
               <BadgeGallery unlockedBadges={stats.unlockedBadges || []} />
            </motion.div>
@@ -367,7 +371,8 @@ const App: React.FC = () => {
           </button>
         </div>
       </div>
-
+      
+      {/* ... loading indicator ... */}
       {loading && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[1000] flex items-center justify-center">
            <div className="text-center">
@@ -375,7 +380,7 @@ const App: React.FC = () => {
                  <div className="absolute inset-0 border-4 border-[#CCFF00]/10 rounded-full" />
                  <div className="absolute inset-0 border-4 border-[#CCFF00] border-t-transparent rounded-full animate-spin" />
               </div>
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#CCFF00] animate-pulse">Architecting...</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#CCFF00] animate-pulse">Architecting... • ĐANG SOẠN...</p>
            </div>
         </div>
       )}
