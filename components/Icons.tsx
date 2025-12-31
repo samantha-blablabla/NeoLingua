@@ -43,19 +43,17 @@ export const UserIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor
   </svg>
 );
 
-export const MoreIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" className={className}>
-    <circle cx="12" cy="12" r="1" />
-    <circle cx="12" cy="5" r="1" />
-    <circle cx="12" cy="19" r="1" />
-  </svg>
-);
-
 export const SparklesIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" className={className}>
     <path d="M12 3L14.5 9L21 11.5L14.5 14L12 21L9.5 14L3 11.5L9.5 9L12 3Z" />
     <path d="M20 16L21 18L23 19L21 20L20 22L19 20L17 19L19 18L20 16Z" />
     <path d="M5 4L6 6L8 7L6 8L5 10L4 8L2 7L4 6L5 4Z" />
+  </svg>
+);
+
+export const FlameIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 3.5 3 4 2.107 1.053 3 3.411 3 6a5 5 0 0 1-10 0z" />
   </svg>
 );
 

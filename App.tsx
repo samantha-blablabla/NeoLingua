@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { generateLesson } from './services/geminiService';
 import { LessonData, VocabularyItem, UserStats } from './types';
 import GrainOverlay from './components/GrainOverlay';
-import { HomeIcon, LibraryIcon, MedalIcon, FlashIcon, UserIcon, SparklesIcon, HeadphonesIcon } from './components/Icons';
+import { HomeIcon, LibraryIcon, MedalIcon, FlashIcon, UserIcon, SparklesIcon, HeadphonesIcon, FlameIcon } from './components/Icons';
 import { lessonsData } from './lessons';
 import PodcastScreen from './PodcastScreen';
 import BadgeGallery from './components/BadgeGallery';
@@ -14,22 +14,19 @@ type ViewType = 'home' | 'library' | 'badges' | 'profile' | 'podcast' | 'lessonD
 
 const WordOfTheDayWidget: React.FC<{ word: VocabularyItem }> = ({ word }) => (
   <motion.div
-    initial={{ opacity: 0, scale: 0.9, y: 10 }}
+    initial={{ opacity: 0, scale: 0.95, y: 10 }}
     animate={{ opacity: 1, scale: 1, y: 0 }}
     transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-    className="relative overflow-hidden bg-[#BFA3FF] rounded-[28px] p-6 text-black hard-shadow flex flex-col justify-between aspect-square"
+    className="relative overflow-hidden bg-[#BFA3FF] rounded-[32px] p-6 text-black hard-shadow flex flex-col justify-center min-h-[160px]"
   >
     <div className="absolute inset-0 opacity-[0.05] pointer-events-none mix-blend-overlay bg-white"></div>
     
     <div className="z-10 w-full">
-      <span className="text-[9px] font-sans font-bold uppercase tracking-[0.25em] opacity-40 block mb-1">DAILY WORD</span>
-      <h3 className="text-5xl font-heading font-black leading-[0.85] tracking-tighter break-words">
+      <span className="text-[10px] font-sans font-black uppercase tracking-[0.25em] opacity-40 block mb-2">DAILY WORD</span>
+      <h3 className="text-[2.6rem] font-heading font-black leading-none tracking-tighter whitespace-nowrap overflow-hidden text-ellipsis">
         {word.word}
       </h3>
-    </div>
-
-    <div className="z-10 w-full">
-      <p className="text-sm font-sans font-medium leading-relaxed opacity-80">
+      <p className="text-[14px] font-sans font-semibold leading-relaxed opacity-80 mt-3 max-w-[95%]">
         {word.meaning}
       </p>
     </div>
@@ -60,7 +57,6 @@ const App: React.FC = () => {
       setLesson(data);
     } catch (err) {
       console.error(err);
-      // Fallback to local data if API fails
       setLesson(lessonsData[0]);
     } finally {
       setLoading(false);
@@ -110,7 +106,7 @@ const App: React.FC = () => {
              <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=ccff00`} alt="Avatar" className="w-10 h-10 mt-1" />
           </div>
           <div>
-            <h2 className="text-[10px] font-sans font-bold uppercase tracking-widest opacity-30">LEVEL 12</h2>
+            <h2 className="text-[10px] font-sans font-bold uppercase tracking-widest opacity-30 tracking-[0.1em]">LEVEL 12</h2>
             <h1 className="text-xl font-heading font-black -mt-1 tracking-tighter">Yo, Alex!</h1>
           </div>
         </div>
@@ -120,39 +116,40 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-6 pb-32 no-scrollbar space-y-6 pt-2">
+      <main className="flex-1 overflow-y-auto px-6 pb-32 no-scrollbar space-y-4 pt-2">
         
         {view === 'home' && (
           <>
+            {/* Today's Lesson Hero */}
             <motion.section 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               onClick={() => !loading && setView('lessonDetail')}
-              className="relative aspect-[4/3] w-full bg-[#1C1C1E] rounded-[32px] p-8 flex flex-col justify-end overflow-hidden hard-shadow group cursor-pointer active:scale-[0.98] transition-all"
+              className="relative aspect-[16/10] w-full bg-[#1C1C1E] rounded-[32px] p-8 flex flex-col justify-end overflow-hidden hard-shadow group cursor-pointer active:scale-[0.98] transition-all"
             >
               <div className="absolute top-0 right-0 w-48 h-48 bg-[#CCFF00]/10 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-[#CCFF00]/20 transition-colors" />
               <div className="absolute inset-0 opacity-[0.02] pointer-events-none mix-blend-overlay bg-white"></div>
               
               <span className="text-[10px] font-sans font-bold text-[#CCFF00] uppercase tracking-[0.2em] mb-2 block">TODAY'S TOPIC</span>
-              <h2 className="text-4xl font-heading font-black leading-[0.9] tracking-tighter mb-4 text-white">
+              <h2 className="text-3xl font-heading font-black leading-[0.9] tracking-tighter mb-4 text-white">
                 {loading ? "ĐANG SOẠN..." : (lesson?.topic || "URBAN FLOW")}
               </h2>
               
-              <div className="flex items-center gap-2">
-                <button 
-                  className="px-5 py-2.5 bg-[#CCFF00] text-black rounded-xl text-[11px] font-sans font-black uppercase clay-accent group-hover:scale-105 transition-transform"
-                >
+              <div className="flex items-center gap-4">
+                <button className="px-5 py-2.5 bg-[#CCFF00] text-black rounded-xl text-[11px] font-sans font-black uppercase clay-accent group-hover:scale-105 transition-transform">
                   {loading ? "Đợi chút..." : "Bắt đầu học"}
                 </button>
                 <span className="text-[10px] font-sans font-medium text-zinc-500 uppercase tracking-widest">12 MINS</span>
               </div>
             </motion.section>
 
-            <div className="grid grid-cols-2 gap-4">
-              {randomWord && <WordOfTheDayWidget word={randomWord} />}
+            {/* Word of the Day - Full Width */}
+            {randomWord && <WordOfTheDayWidget word={randomWord} />}
 
+            {/* Secondary Row 50/50 */}
+            <div className="grid grid-cols-2 gap-4">
               <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 onClick={() => setView('podcast')}
                 className="bg-[#1C1C1E] rounded-[28px] p-5 border border-zinc-800 hard-shadow flex flex-col justify-between aspect-square cursor-pointer hover:border-zinc-600 transition-colors"
@@ -164,26 +161,42 @@ const App: React.FC = () => {
                 <div>
                   <h3 className="text-[9px] font-sans font-bold text-zinc-500 uppercase tracking-widest mb-1">PODCAST</h3>
                   <p className="text-xl font-heading font-black leading-tight text-white">Daily Studio</p>
-                  <p className="text-[10px] font-sans font-medium text-zinc-500 mt-1">Listening Practice</p>
+                  <p className="text-[10px] font-sans font-medium text-zinc-500 mt-1">Listening</p>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-[#1C1C1E] rounded-[28px] p-5 border border-zinc-800 hard-shadow flex flex-col justify-between aspect-square"
+              >
+                <div className="flex justify-between items-start">
+                  <FlameIcon size={20} color="#FF6B4A" />
+                  <div className="text-[9px] font-sans font-bold text-zinc-500 uppercase tracking-widest">Active</div>
+                </div>
+                <div>
+                  <p className="text-3xl font-heading font-black leading-tight text-[#FF6B4A]">{userStats.streak}</p>
+                  <p className="text-[10px] font-sans font-medium text-zinc-500 uppercase mt-1">Day Streak</p>
                 </div>
               </motion.div>
             </div>
             
-            <section className="space-y-4 pt-4">
+            {/* Library Section */}
+            <section className="space-y-4 pt-2">
                <div className="flex justify-between items-center px-1">
                   <h3 className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-zinc-600">LIBRARY</h3>
-                  <button onClick={() => setView('library')} className="text-[10px] font-sans font-black text-[#CCFF00] uppercase hover:underline">View All</button>
+                  <button onClick={() => setView('library')} className="text-[10px] font-sans font-black text-[#CCFF00] uppercase hover:underline transition-all">View All</button>
                </div>
                <div 
                  onClick={() => setView('lessonDetail')}
                  className="p-5 bg-zinc-900/50 rounded-3xl border border-zinc-800 flex items-center gap-5 cursor-pointer hover:bg-zinc-900 transition-colors active:scale-[0.99]"
                >
                   <div className="w-11 h-11 rounded-2xl bg-zinc-800 flex items-center justify-center text-[#CCFF00] border border-zinc-700">
-                    <FlashIcon size={22} />
+                    <FlashIcon size={20} />
                   </div>
                   <div className="space-y-0.5">
                     <h4 className="font-sans font-bold text-sm text-white">Grammar Spotlight</h4>
-                    <p className="text-xs font-sans font-medium text-zinc-500">Perfect vs Simple Past</p>
+                    <p className="text-xs font-sans font-medium text-zinc-500">Urban Essentials</p>
                   </div>
                </div>
             </section>
