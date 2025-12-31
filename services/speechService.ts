@@ -2,7 +2,7 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 
 /**
- * Base64 decoder helper for converting API response to byte array
+ * Base64 decoder helper
  */
 function decode(base64: string): Uint8Array {
   const binaryString = atob(base64);
@@ -15,7 +15,7 @@ function decode(base64: string): Uint8Array {
 }
 
 /**
- * Audio decoding helper for raw PCM data returned by the Gemini TTS API
+ * Audio decoding helper for raw PCM data
  */
 async function decodeAudioData(
   data: Uint8Array,
@@ -37,70 +37,56 @@ async function decodeAudioData(
 }
 
 /**
- * Service to play natural-sounding speech using Gemini 2.5 Flash TTS.
- * This implementation is more robust and specifically handles errors to avoid
- * the '[object Object]' log output by stringifying error details.
+ * Service to play natural native-sounding speech using Gemini 2.5 Flash TTS.
  */
 export const playNaturalSpeech = async (text: string) => {
   try {
     const apiKey = process.env.API_KEY;
-    if (!apiKey) throw new Error("API Key is missing from environment variables");
+    if (!apiKey) throw new Error("API Key is missing");
 
-    // Initialize the Gemini API client
     const ai = new GoogleGenAI({ apiKey });
     
-    // Use the dedicated Gemini TTS model for high-quality audio generation
+    // Using Zephyr voice for high-end native prosody
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text }] }],
+      contents: [{ parts: [{ text: `Say this naturally as a native urban professional: ${text}` }] }],
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
           voiceConfig: {
-            // 'Kore' is one of the high-quality prebuilt voices optimized for clear speech
-            prebuiltVoiceConfig: { voiceName: 'Kore' },
+            prebuiltVoiceConfig: { voiceName: 'Zephyr' }, // Zephyr is more expressive and modern
           },
         },
       },
     });
 
-    // Extract the raw audio bytes (PCM format)
     const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    if (!base64Audio) {
-      throw new Error("Gemini TTS API returned no audio content");
-    }
+    if (!base64Audio) throw new Error("No audio returned");
 
-    // Initialize AudioContext - using 24000Hz as standard for Gemini TTS output
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     const outputAudioContext = new AudioContextClass({ sampleRate: 24000 });
     
-    // Decode the PCM data and prepare for playback
     const audioBuffer = await decodeAudioData(
       decode(base64Audio),
       outputAudioContext,
       24000,
-      1 // Mono channel
+      1
     );
 
     const source = outputAudioContext.createBufferSource();
     source.buffer = audioBuffer;
     source.connect(outputAudioContext.destination);
     
-    // Handle potential auto-play restrictions by resuming the context
     if (outputAudioContext.state === 'suspended') {
       await outputAudioContext.resume();
     }
     
     source.start();
   } catch (error: any) {
-    // Fix: Robust error logging to prevent [object Object] output
-    const errorMessage = error?.message || (typeof error === 'object' ? JSON.stringify(error) : String(error));
-    console.warn(`[SpeechService] Gemini TTS failed. Reason: ${errorMessage}`);
-    
-    // Critical Fallback: Use browser's built-in Web Speech API if AI TTS fails
+    console.warn(`[TTS] Gemini failed: ${error?.message}. Falling back to Browser TTS.`);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
-    utterance.rate = 1.0;
+    utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
   }
 };

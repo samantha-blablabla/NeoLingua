@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LessonData, UserStats, RoadmapStage } from './types';
 import { generateLesson } from './services/geminiService';
@@ -8,12 +8,14 @@ import GrainOverlay from './components/GrainOverlay';
 import { 
   HomeIcon, LibraryIcon, MedalIcon, UserIcon, 
   SparklesIcon, FlameIcon, SoundHighIcon, FlashIcon, 
-  HeadphonesIcon, SparklesIcon as StarIcon, CloseIcon 
+  HeadphonesIcon, CloseIcon 
 } from './components/Icons';
 import LessonDetailScreen from './LessonDetailScreen';
 import SuccessScreen from './SuccessScreen';
 import PodcastScreen from './PodcastScreen';
 import BadgeGallery from './components/BadgeGallery';
+import { playNaturalSpeech } from './services/speechService';
+import { syncUserStats } from './services/badgeService';
 
 type ViewType = 'home' | 'roadmap' | 'lessonDetail' | 'success' | 'profile' | 'podcast' | 'badges';
 
@@ -33,7 +35,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [currentLesson, setCurrentLesson] = useState<LessonData | null>(null);
   const [stats, setStats] = useState<UserStats>(() => {
-    const saved = localStorage.getItem('neo_stats');
+    const saved = localStorage.getItem('neolingua_stats');
     return saved ? JSON.parse(saved) : {
       currentLevel: 1,
       lessonsCompleted: 0,
@@ -46,10 +48,14 @@ const App: React.FC = () => {
     };
   });
 
+  useEffect(() => {
+    syncUserStats(stats);
+  }, [stats]);
+
   const startLevel = async (lvl: number) => {
     setLoading(true);
     try {
-      let lesson = lessonsData.find(l => l.level === lvl && !stats.unlockedBadges.includes(l.id));
+      let lesson = lessonsData.find(l => l.level === lvl);
       if (!lesson) {
         lesson = await generateLesson(lvl);
       }
@@ -62,9 +68,34 @@ const App: React.FC = () => {
     }
   };
 
+  const openPodcast = (lesson?: LessonData) => {
+    if (lesson) {
+      setCurrentLesson(lesson);
+    } else {
+      const defaultLesson = lessonsData.find(l => l.level === stats.currentLevel) || lessonsData[0];
+      setCurrentLesson(defaultLesson);
+    }
+    setView('podcast');
+  };
+
   const currentStep = useMemo(() => 
     ROADMAP_STEPS.find(s => s.id === stats.currentLevel) || ROADMAP_STEPS[0]
   , [stats.currentLevel]);
+
+  const dailyWord = useMemo(() => {
+    const lesson = lessonsData.find(l => l.level === stats.currentLevel);
+    return lesson?.vocab_spotlight[0] || { word: 'Hustle', meaning: 'Nỗ lực không ngừng', pronunciation: '/ˈhʌs.əl/' };
+  }, [stats.currentLevel]);
+
+  const handleLessonFinish = () => {
+    setStats(prev => ({
+      ...prev,
+      lessonsCompleted: prev.lessonsCompleted + 1,
+      xp: prev.xp + 100,
+      currentLevel: Math.min(prev.currentLevel + 1, 8)
+    }));
+    setView('success');
+  };
 
   return (
     <div className="min-h-screen max-w-md mx-auto relative bg-[#0A0A0A] text-white font-sans overflow-hidden border-x border-zinc-900">
@@ -73,125 +104,145 @@ const App: React.FC = () => {
       <AnimatePresence mode="wait">
         {view === 'home' && (
           <motion.main 
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}
+            key="home"
+            initial={{ opacity: 0, y: 10 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, x: -20 }}
             className="flex flex-col h-full pt-12 px-6 pb-32 overflow-y-auto no-scrollbar"
           >
-            {/* Minimal Header */}
-            <header className="flex justify-between items-center mb-10">
-               <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#CCFF00] flex items-center justify-center text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]">
-                     <UserIcon size={16} />
+            <header className="flex justify-between items-center mb-10 px-2">
+               <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-[#CCFF00] flex items-center justify-center text-black shadow-[0_0_20px_rgba(204,255,0,0.2)]">
+                     <UserIcon size={20} />
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Hub / Central</span>
+                  <div>
+                    <h1 className="text-xs font-black uppercase tracking-widest leading-none">Neo.Hustler</h1>
+                    <p className="text-[8px] font-bold text-zinc-600 uppercase mt-1">Level {stats.currentLevel} Stage</p>
+                  </div>
                </div>
-               <div className="flex gap-3">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/50 rounded-full border border-white/5">
-                     <FlameIcon size={14} color="#FF6B4A" />
-                     <span className="text-[10px] font-black">{stats.streak}d</span>
+               <div className="flex gap-2">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 rounded-full border border-white/5">
+                     <FlameIcon size={12} color="#FF6B4A" />
+                     <span className="text-[9px] font-black">{stats.streak}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/50 rounded-full border border-white/5">
-                     <StarIcon size={14} color="#CCFF00" />
-                     <span className="text-[10px] font-black">{stats.xp}xp</span>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 rounded-full border border-white/5">
+                     <SparklesIcon size={12} color="#CCFF00" />
+                     <span className="text-[9px] font-black">{stats.xp}</span>
                   </div>
                </div>
             </header>
 
-            {/* Hero Section: Active Mission with Glassmorphism */}
-            <section className="mb-10">
-               <div className="flex justify-between items-end mb-4 px-2">
-                  <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">Active Mission</h2>
-                  <span className="text-[8px] font-black text-[#CCFF00] uppercase tracking-widest bg-[#CCFF00]/10 px-2 py-0.5 rounded-full">Sprinting</span>
-               </div>
-               
+            <section className="mb-8">
                <motion.div 
                  whileTap={{ scale: 0.98 }}
                  onClick={() => startLevel(stats.currentLevel)}
-                 className="glass-card relative p-8 rounded-[48px] overflow-hidden group shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]"
+                 className="glass-card relative p-8 rounded-[48px] overflow-hidden group cursor-pointer transition-shadow hover:shadow-[0_0_40px_rgba(204,255,0,0.05)]"
                >
-                  {/* Glowing background elements */}
-                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#CCFF00]/5 blur-[60px] rounded-full group-hover:bg-[#CCFF00]/10 transition-all duration-700" />
-                  <div className="absolute -bottom-20 -left-10 w-40 h-40 bg-[#BFA3FF]/5 blur-[60px] rounded-full" />
-                  
+                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#CCFF00]/5 blur-[60px] rounded-full" />
                   <div className="relative z-10">
-                     <div className="flex items-center gap-3 mb-3">
-                        <div className="w-6 h-6 bg-[#CCFF00] rounded-lg flex items-center justify-center">
-                           <FlashIcon size={14} color="black" />
-                        </div>
-                        <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">
-                           {currentStep.stage} • 0{stats.currentLevel}
-                        </span>
+                     <div className="flex items-center gap-2 mb-3">
+                        <span className="text-[9px] font-black uppercase text-[#CCFF00] tracking-widest bg-[#CCFF00]/10 px-2 py-0.5 rounded-md">ACTIVE MISSION</span>
+                        <span className="text-[9px] font-black text-zinc-600 tracking-widest">• 0{stats.currentLevel}</span>
                      </div>
-
-                     <h3 className="text-[2.6rem] font-heading font-black tracking-tighter leading-[0.9] mb-3 text-white">
-                        {currentStep.title}
-                     </h3>
-                     
-                     <p className="text-zinc-500 text-xs font-medium mb-8 pr-10 leading-relaxed">
-                        {currentStep.desc}. Complete this to unlock next urban tier.
-                     </p>
-                     
-                     <div className="flex items-center justify-between">
-                        <button className="px-8 py-3.5 bg-[#CCFF00] text-black rounded-2xl font-black text-[11px] uppercase tracking-widest clay-accent hover:scale-105 active:scale-95 transition-all">
-                           RESUME MISSION
-                        </button>
-                        <div className="flex flex-col items-end">
-                           <span className="text-[18px] font-heading font-black text-white leading-none">40%</span>
-                           <span className="text-[7px] font-black text-zinc-600 uppercase tracking-widest">Progress</span>
-                        </div>
-                     </div>
+                     <h3 className="text-[2.6rem] font-heading font-black tracking-tighter leading-[0.9] mb-3">{currentStep.title}</h3>
+                     <p className="text-zinc-500 text-xs font-medium mb-8 leading-relaxed pr-8">{currentStep.desc}. Tap to start sprinting.</p>
+                     <button className="px-8 py-3.5 bg-[#CCFF00] text-black rounded-2xl font-black text-[10px] uppercase tracking-widest clay-accent transition-transform hover:scale-105">
+                        RESUME NOW
+                     </button>
                   </div>
                </motion.div>
             </section>
 
-            {/* Quick Access Grid */}
-            <section className="grid grid-cols-2 gap-4 mb-10">
+            <section className="mb-8 px-2">
+               <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">Daily Urban Word</h2>
+                  <SparklesIcon size={14} color="#CCFF00" />
+               </div>
                <motion.div 
-                 whileTap={{ scale: 0.95 }}
-                 onClick={() => setView('podcast')}
-                 className="p-6 rounded-[40px] bg-zinc-900/30 border border-white/5 flex flex-col justify-between aspect-square group relative overflow-hidden"
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => playNaturalSpeech(dailyWord.word)}
+                  className="p-6 rounded-[32px] bg-zinc-900/40 border border-white/5 flex items-center justify-between group cursor-pointer"
                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#BFA3FF]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="w-12 h-12 rounded-2xl bg-zinc-800/50 flex items-center justify-center text-[#BFA3FF] relative z-10">
-                     <HeadphonesIcon size={24} />
+                  <div className="flex-1">
+                     <div className="flex items-center gap-3 mb-1">
+                        <h4 className="text-2xl font-heading font-black tracking-tighter text-white group-hover:text-[#CCFF00] transition-colors">{dailyWord.word}</h4>
+                        <span className="text-[10px] font-medium text-zinc-600 italic">{dailyWord.pronunciation}</span>
+                     </div>
+                     <p className="text-zinc-500 text-xs font-medium">{dailyWord.meaning}</p>
                   </div>
-                  <div className="relative z-10">
-                     <h4 className="font-heading font-black text-xl leading-tight uppercase tracking-tighter">Neo<br/>Radio</h4>
-                     <p className="text-[9px] font-black text-zinc-600 uppercase mt-1 tracking-widest group-hover:text-[#BFA3FF] transition-colors">Ambient Flow</p>
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-800/50 flex items-center justify-center text-[#CCFF00]">
+                     <SoundHighIcon size={20} />
                   </div>
                </motion.div>
+            </section>
 
+            <section className="mb-8 px-2">
+               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-4">Radio Flow</h2>
+               <div 
+                  onClick={() => openPodcast()}
+                  className="relative p-6 rounded-[40px] bg-[#BFA3FF] text-black overflow-hidden flex items-center justify-between group shadow-xl cursor-pointer"
+               >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-3xl rounded-full translate-x-10 -translate-y-10" />
+                  <div className="relative z-10 flex-1">
+                     <h4 className="text-2xl font-heading font-black tracking-tighter leading-none mb-1">Neo Radio FM</h4>
+                     <p className="text-[10px] font-black opacity-60 uppercase tracking-widest">Ambient Learning Flow</p>
+                     
+                     {/* Visualizer stays, but card doesn't move */}
+                     <div className="flex items-center gap-1 mt-4 h-4">
+                        {[1, 2, 3, 4, 3, 2, 5, 2, 3, 4, 1].map((h, i) => (
+                           <motion.div 
+                              key={i}
+                              animate={{ height: ["4px", `${h*4}px`, "4px"] }}
+                              transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.1 }}
+                              className="w-1 bg-black/40 rounded-full"
+                           />
+                        ))}
+                        <span className="text-[9px] font-black ml-2 uppercase opacity-40">Ready to play</span>
+                     </div>
+                  </div>
+                  <div className="w-16 h-16 bg-black rounded-[24px] flex items-center justify-center text-[#CCFF00] shadow-lg relative z-10 group-hover:scale-110 transition-transform duration-300">
+                     <HeadphonesIcon size={28} />
+                  </div>
+               </div>
+            </section>
+
+            <section className="grid grid-cols-2 gap-4 mb-10 px-2">
                <motion.div 
                  whileTap={{ scale: 0.95 }}
                  onClick={() => setView('badges')}
-                 className="p-6 rounded-[40px] bg-zinc-900/30 border border-white/5 flex flex-col justify-between aspect-square group relative overflow-hidden"
+                 className="p-6 rounded-[36px] bg-zinc-900/30 border border-white/5 flex flex-col justify-between aspect-square cursor-pointer"
                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#CCFF00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="w-12 h-12 rounded-2xl bg-zinc-800/50 flex items-center justify-center text-[#CCFF00] relative z-10">
-                     <MedalIcon size={24} />
+                  <div className="w-10 h-10 rounded-xl bg-zinc-800/50 flex items-center justify-center text-[#CCFF00]">
+                     <MedalIcon size={20} />
                   </div>
-                  <div className="relative z-10">
-                     <h4 className="font-heading font-black text-xl leading-tight uppercase tracking-tighter">Urban<br/>Trophy</h4>
-                     <p className="text-[9px] font-black text-zinc-600 uppercase mt-1 tracking-widest group-hover:text-[#CCFF00] transition-colors">{stats.unlockedBadges.length} UNLOCKED</p>
+                  <div>
+                     <h4 className="font-heading font-black text-lg uppercase leading-tight tracking-tight">Trophy<br/>Room</h4>
+                     <p className="text-[8px] font-black text-zinc-600 uppercase mt-1">{stats.unlockedBadges.length} Badges</p>
                   </div>
                </motion.div>
-            </section>
 
-            {/* Placement Test Promo - Simplified */}
-            <section className="px-1 text-center">
-               <button className="w-full p-6 rounded-[32px] bg-white/5 border border-white/10 flex items-center justify-center gap-4 hover:bg-white/10 transition-all group">
-                  <div className="text-left">
-                     <h4 className="font-heading font-black text-sm uppercase tracking-tight text-white group-hover:text-[#CCFF00] transition-colors">Jump to Street Smart?</h4>
-                     <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Take the 15-min placement test</p>
+               <motion.div 
+                 whileTap={{ scale: 0.95 }}
+                 className="p-6 rounded-[36px] bg-zinc-900/30 border border-white/5 flex flex-col justify-between aspect-square opacity-50 grayscale cursor-not-allowed"
+               >
+                  <div className="w-10 h-10 rounded-xl bg-zinc-800/50 flex items-center justify-center text-zinc-500">
+                     <LibraryIcon size={20} />
                   </div>
-                  <FlashIcon size={16} color="#444" className="group-hover:text-[#CCFF00] transition-colors" />
-               </button>
+                  <div>
+                     <h4 className="font-heading font-black text-lg uppercase leading-tight tracking-tight">Vocab<br/>Vault</h4>
+                     <p className="text-[8px] font-black text-zinc-600 uppercase mt-1">Coming Soon</p>
+                  </div>
+               </motion.div>
             </section>
           </motion.main>
         )}
 
         {view === 'roadmap' && (
           <motion.main 
-            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+            key="roadmap"
+            initial={{ opacity: 0, x: 20 }} 
+            animate={{ opacity: 1, x: 0 }} 
+            exit={{ opacity: 0, x: -20 }}
             className="flex flex-col h-full pt-16 px-6 pb-32 overflow-y-auto no-scrollbar"
           >
             <header className="mb-10">
@@ -200,7 +251,7 @@ const App: React.FC = () => {
             </header>
 
             <div className="space-y-4">
-              {ROADMAP_STEPS.map((step, idx) => {
+              {ROADMAP_STEPS.map((step) => {
                 const isLocked = step.id > stats.currentLevel;
                 const isCurrent = step.id === stats.currentLevel;
                 const isCompleted = step.id < stats.currentLevel;
@@ -209,7 +260,7 @@ const App: React.FC = () => {
                   <motion.div 
                     key={step.id}
                     whileTap={!isLocked ? { scale: 0.98 } : {}}
-                    onClick={() => startLevel(step.id)}
+                    onClick={() => !isLocked && startLevel(step.id)}
                     className={`relative p-7 rounded-[36px] border transition-all cursor-pointer ${
                       isCurrent ? 'bg-[#1C1C1E] border-[#CCFF00]/50 shadow-[0_20px_40px_-10px_rgba(204,255,0,0.1)]' : 
                       isLocked ? 'bg-zinc-900/20 border-white/5 opacity-40 grayscale' : 'bg-zinc-900/50 border-white/10'
@@ -221,7 +272,7 @@ const App: React.FC = () => {
                              <span className={`text-[8px] font-black uppercase tracking-[0.2em] ${isCurrent ? 'text-[#CCFF00]' : 'text-zinc-600'}`}>
                                STAGE 0{step.id}
                              </span>
-                             {isCompleted && <StarIcon size={10} color="#CCFF00" />}
+                             {isCompleted && <SparklesIcon size={10} color="#CCFF00" />}
                           </div>
                           <h3 className={`text-2xl font-heading font-black tracking-tighter leading-none ${isLocked ? 'text-zinc-700' : 'text-white'}`}>{step.title}</h3>
                        </div>
@@ -237,7 +288,13 @@ const App: React.FC = () => {
         )}
 
         {view === 'badges' && (
-           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-16 px-6 pb-32 h-full overflow-y-auto no-scrollbar">
+           <motion.div 
+             key="badges"
+             initial={{ opacity: 0 }} 
+             animate={{ opacity: 1 }} 
+             exit={{ opacity: 0 }}
+             className="pt-16 px-6 pb-32 h-full overflow-y-auto no-scrollbar"
+           >
               <button onClick={() => setView('home')} className="mb-8 text-zinc-500 hover:text-white flex items-center gap-2 transition-colors">
                  <CloseIcon size={20} /> <span className="text-[10px] font-black uppercase tracking-widest">Back to Hub</span>
               </button>
@@ -249,13 +306,14 @@ const App: React.FC = () => {
           <PodcastScreen 
             lesson={currentLesson} 
             onBack={() => setView('home')} 
+            onSelectLesson={openPodcast}
           />
         )}
 
         {view === 'lessonDetail' && currentLesson && (
           <LessonDetailScreen 
             lesson={currentLesson} 
-            onFinish={() => setView('success')} 
+            onFinish={handleLessonFinish} 
             onBack={() => setView('home')} 
           />
         )}
@@ -265,7 +323,6 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Navigation Dock - Glassmorphism style */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] z-[100]">
         <div className="floating-dock h-20 rounded-[40px] px-10 flex justify-between items-center shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]">
           <button onClick={() => setView('home')} className="group flex flex-col items-center gap-1">
@@ -280,13 +337,13 @@ const App: React.FC = () => {
             </motion.div>
             <span className={`text-[7px] font-black uppercase tracking-widest ${view === 'roadmap' ? 'text-[#CCFF00]' : 'text-zinc-700'}`}>PATH</span>
           </button>
-          <button className="group flex flex-col items-center gap-1 opacity-30">
+          <button className="group flex flex-col items-center gap-1 opacity-30 cursor-not-allowed">
             <LibraryIcon size={22} color="#555" />
             <span className="text-[7px] font-black uppercase tracking-widest text-zinc-700">VAULT</span>
           </button>
-          <button className="group flex flex-col items-center gap-1">
-            <UserIcon size={22} color={view === 'profile' ? '#CCFF00' : '#555'} />
-            <span className={`text-[7px] font-black uppercase tracking-widest ${view === 'profile' ? 'text-[#CCFF00]' : 'text-zinc-700'}`}>ME</span>
+          <button className="group flex flex-col items-center gap-1 opacity-30 cursor-not-allowed">
+            <UserIcon size={22} color="#555" />
+            <span className="text-[7px] font-black uppercase tracking-widest text-zinc-700">ME</span>
           </button>
         </div>
       </div>

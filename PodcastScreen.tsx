@@ -2,28 +2,27 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LessonData } from './types';
-import { CloseIcon, LibraryIcon, FlashIcon } from './components/Icons';
+import { CloseIcon, LibraryIcon, FlashIcon, HeadphonesIcon } from './components/Icons';
+import { lessonsData } from './lessons';
 
 interface PodcastScreenProps {
   lesson: LessonData;
   onBack: () => void;
+  onSelectLesson: (lesson: LessonData) => void;
   onFinished?: () => void;
 }
 
-const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onFinished }) => {
+const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onSelectLesson, onFinished }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [showLibrary, setShowLibrary] = useState(false);
   const synth = window.speechSynthesis;
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const segments = useMemo(() => {
     return lesson.podcast_segments.length > 0 ? lesson.podcast_segments : [
-      { en: "Welcome to NeoLingua Urban Radio.", vi: "Chào mừng bạn đến với Radio Đô thị NeoLingua." },
-      { en: "Today's session focuses on high-speed city life.", vi: "Buổi học hôm nay tập trung vào nhịp sống hối hả của thành phố." },
-      { en: "Mastering these phrases will level up your game.", vi: "Làm chủ các cụm từ này sẽ giúp bạn nâng tầm bản thân." },
-      { en: "It's not just about the coffee; it's about the networking opportunities in these modern hubs.", vi: "Nó không chỉ nằm ở việc uống cà phê; mà còn là về những cơ hội kết nối tại các trung tâm hiện đại này." },
-      { en: "Stay consistent and keep that urban flow.", vi: "Hãy kiên trì và giữ vững nhịp điệu đô thị." }
+      { en: "Welcome back to Neo Radio.", vi: "Chào mừng bạn quay lại với Neo Radio." }
     ];
   }, [lesson.podcast_segments]);
 
@@ -43,11 +42,10 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onFinishe
     setCurrentIdx(index);
     const utterance = new SpeechSynthesisUtterance(segments[index].en);
     utterance.lang = 'en-US';
-    utterance.rate = 0.9;
+    utterance.rate = 0.95;
     
     utterance.onstart = () => {
       setIsPlaying(true);
-      // Đảm bảo phần text active nằm chính giữa màn hình, không bị che khuất
       itemRefs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
     
@@ -79,26 +77,64 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onFinishe
 
   useEffect(() => {
     return () => synth.cancel();
-  }, []);
+  }, [lesson.id]);
 
   return (
     <motion.div 
       initial={{ y: '100%' }} 
       animate={{ y: 0 }} 
       exit={{ y: '100%' }}
-      transition={{ type: "spring", damping: 30, stiffness: 250 }}
       className="fixed inset-0 z-[200] bg-[#0A0A0A] flex flex-col overflow-hidden text-white"
     >
-      {/* Header */}
+      <AnimatePresence>
+        {showLibrary && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            className="absolute inset-0 z-[250] bg-[#0A0A0A] p-8 overflow-y-auto no-scrollbar"
+          >
+            <div className="flex justify-between items-center mb-10">
+               <h2 className="text-3xl font-heading font-black tracking-tighter uppercase">Station<br/><span className="text-[#CCFF00]">Library</span></h2>
+               <button onClick={() => setShowLibrary(false)} className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800">
+                  <CloseIcon size={20} />
+               </button>
+            </div>
+            
+            <div className="space-y-4 pb-12">
+               {lessonsData.map((l) => (
+                 <motion.div 
+                   key={l.id}
+                   whileTap={{ scale: 0.98 }}
+                   onClick={() => { onSelectLesson(l); setShowLibrary(false); setCurrentIdx(0); }}
+                   className={`p-6 rounded-[32px] border transition-all cursor-pointer flex items-center justify-between ${
+                     l.id === lesson.id ? 'bg-[#CCFF00] text-black border-[#CCFF00]' : 'bg-zinc-900/50 border-white/5'
+                   }`}
+                 >
+                    <div>
+                       <span className={`text-[8px] font-black uppercase tracking-widest ${l.id === lesson.id ? 'text-black/40' : 'text-zinc-600'}`}>LEVEL 0{l.level}</span>
+                       <h4 className="text-lg font-heading font-black tracking-tight leading-none mt-1">{l.topic}</h4>
+                    </div>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${l.id === lesson.id ? 'bg-black text-[#CCFF00]' : 'bg-zinc-800 text-zinc-500'}`}>
+                       <HeadphonesIcon size={18} />
+                    </div>
+                 </motion.div>
+               ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <header className="flex items-center justify-between px-6 pt-12 pb-4 shrink-0 bg-[#0A0A0A]">
         <button onClick={() => { synth.cancel(); onBack(); }} className="p-2 -ml-2 text-zinc-600 hover:text-white transition-colors">
           <CloseIcon size={22} />
         </button>
         <span className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em]">NEO RADIO FM</span>
-        <div className="w-10" /> 
+        <button onClick={() => setShowLibrary(true)} className="p-2 text-[#CCFF00]">
+          <LibraryIcon size={22} />
+        </button>
       </header>
 
-      {/* Mini Cover Art */}
       <div className="px-8 py-2 flex flex-col items-center shrink-0">
         <motion.div 
           animate={isPlaying ? { rotate: 360 } : {}}
@@ -106,7 +142,7 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onFinishe
           className="w-32 h-32 aspect-square rounded-full overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border-4 border-zinc-900 relative"
         >
           <img 
-            src={`https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=800`} 
+            src={`https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=800`} 
             alt="Cover Art" 
             className="w-full h-full object-cover"
           />
@@ -124,7 +160,6 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onFinishe
         </div>
       </div>
 
-      {/* Lyrics Section - Tăng padding bottom lên 40vh để không bao giờ bị cắt chữ */}
       <div 
         ref={scrollContainerRef}
         className="flex-1 px-8 overflow-y-auto no-scrollbar snap-y snap-mandatory"
@@ -167,29 +202,25 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onFinishe
         </div>
       </div>
 
-      {/* Controls Section */}
-      <div className="pb-10 pt-6 flex flex-col items-center px-6 shrink-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A] to-transparent border-t border-white/5">
+      <div className="pb-10 pt-6 flex flex-col items-center px-6 shrink-0 bg-[#0A0A0A] border-t border-white/5">
         <div className="w-full max-w-[360px] space-y-6">
-          {/* Progress Bar */}
           <div className="w-full h-[3px] bg-zinc-900 rounded-full overflow-hidden">
             <motion.div 
-              className="h-full bg-[#CCFF00] shadow-[0_0_10px_#CCFF00]"
+              className="h-full bg-[#CCFF00]"
               animate={{ width: `${((currentIdx + 1) / segments.length) * 100}%` }}
               transition={{ duration: 0.5 }}
             />
           </div>
 
-          {/* Controls Dock with Text Labels */}
           <div className="flex items-center justify-between">
-            {/* Play All Button with Text */}
             <button 
-              onClick={() => playSegment(0)}
+              onClick={() => setShowLibrary(true)}
               className="flex flex-col items-center gap-1 group transition-all"
             >
-              <div className="p-2 text-zinc-600 group-hover:text-[#CCFF00] transition-colors">
+              <div className="p-2 text-zinc-600 group-hover:text-[#CCFF00]">
                 <LibraryIcon size={20} />
               </div>
-              <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest group-hover:text-[#CCFF00]">PLAY ALL</span>
+              <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest group-hover:text-[#CCFF00]">LIBRARY</span>
             </button>
             
             <div className="flex items-center gap-6">
@@ -221,9 +252,8 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({ lesson, onBack, onFinishe
               </button>
             </div>
 
-            {/* Focus Button with Text */}
             <button className="flex flex-col items-center gap-1 group transition-all">
-              <div className="p-2 text-zinc-600 group-hover:text-[#FF6B4A] transition-colors">
+              <div className="p-2 text-zinc-600 group-hover:text-[#FF6B4A]">
                 <FlashIcon size={20} />
               </div>
               <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest group-hover:text-[#FF6B4A]">FOCUS</span>
