@@ -22,20 +22,20 @@
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 4px;
         }
         ::-webkit-scrollbar-track {
             background: #0A0A0A;
         }
         ::-webkit-scrollbar-thumb {
-            background: #333;
+            background: #1C1C1E;
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #CCFF00;
         }
 
-        /* Claymorphism Effects */
+        /* Modern Urban Dashboard Styles */
         .clay-card {
             box-shadow: 
                 20px 20px 60px #050505,
@@ -48,6 +48,29 @@
                 10px 10px 20px rgba(0,0,0,0.2),
                 inset 4px 4px 8px rgba(255,255,255,0.3),
                 inset -4px -4px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* Modern Hard Shadow (Neo-Brutalism lite) */
+        .hard-shadow {
+            box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.8);
+        }
+        .hard-shadow-accent {
+            box-shadow: 4px 4px 0px #CCFF00;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Floating Nav Styling */
+        .floating-dock {
+            background: rgba(28, 28, 30, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
     </style>
 <script type="importmap">

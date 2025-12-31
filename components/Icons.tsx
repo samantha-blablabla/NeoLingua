@@ -14,11 +14,19 @@ export const HomeIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor
   </svg>
 );
 
-export const BookIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className }) => (
+export const LibraryIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" className={className}>
-    <path d="M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.4C20 16.7314 19.7314 17 19.4 17H6C4.89543 17 4 17.8954 4 19ZM4 19C4 20.1046 4.89543 21 6 21H20" />
-    <path d="M8 7H16" />
-    <path d="M8 11H16" />
+    <path d="M4 19.5V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.4C20 16.7314 19.7314 17 19.4 17H6C4.89543 17 4 17.8954 4 19.5ZM4 19.5C4 20.3284 4.67157 21 5.5 21H19.5" />
+    <path d="M9 7H15" />
+    <path d="M9 11H15" />
+  </svg>
+);
+
+export const MedalIcon: React.FC<IconProps> = ({ size = 24, color = "currentColor", className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" className={className}>
+    <circle cx="12" cy="9" r="6" />
+    <path d="M9 14.2L7 22L12 19L17 22L15 14.2" />
+    <circle cx="12" cy="9" r="2" />
   </svg>
 );
 
