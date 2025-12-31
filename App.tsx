@@ -89,8 +89,12 @@ const App: React.FC = () => {
       <GrainOverlay />
       
       <AnimatePresence mode="wait">
-        {view === 'podcast' && lesson && (
-          <PodcastScreen key="podcast" lesson={lesson} onBack={() => setView('home')} />
+        {view === 'podcast' && (
+          <PodcastScreen 
+            key="podcast" 
+            lesson={lesson || lessonsData[0]} 
+            onBack={() => setView('home')} 
+          />
         )}
         {view === 'lessonDetail' && lesson && (
           <LessonDetailScreen 
@@ -158,16 +162,19 @@ const App: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 onClick={() => setView('podcast')}
-                className="bg-[#1C1C1E] rounded-[28px] p-5 border border-zinc-800 hard-shadow flex flex-col justify-between aspect-square cursor-pointer hover:border-zinc-600 transition-colors"
+                className="bg-[#1C1C1E] rounded-[28px] p-5 border border-zinc-800 hard-shadow flex flex-col justify-between aspect-square cursor-pointer hover:border-zinc-600 transition-colors active:scale-95 group"
               >
                 <div className="flex justify-between items-start">
                   <HeadphonesIcon size={20} color="#CCFF00" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#CCFF00] animate-pulse shadow-[0_0_8px_#CCFF00]"></div>
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#CCFF00]/10 rounded-full">
+                    <div className="w-1 h-1 rounded-full bg-[#CCFF00] animate-pulse"></div>
+                    <span className="text-[8px] font-black text-[#CCFF00] uppercase tracking-widest">LIVE</span>
+                  </div>
                 </div>
                 <div>
                   <h3 className="text-[9px] font-sans font-bold text-zinc-500 uppercase tracking-widest mb-1">PODCAST</h3>
-                  <p className="text-xl font-heading font-black leading-tight text-white">Daily Studio</p>
-                  <p className="text-[10px] font-sans font-medium text-zinc-500 mt-1">Listening</p>
+                  <p className="text-xl font-heading font-black leading-tight text-white group-hover:text-[#CCFF00] transition-colors">Midnight Hustle</p>
+                  <p className="text-[10px] font-sans font-medium text-zinc-500 mt-1">Listening Focus</p>
                 </div>
               </motion.div>
 
@@ -258,7 +265,7 @@ const App: React.FC = () => {
         <div className="floating-dock h-20 rounded-[40px] px-8 flex justify-between items-center shadow-2xl">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = view === item.id;
+            const isActive = view === item.id || (view === 'podcast' && item.id === 'home');
             return (
               <button 
                 key={item.id}

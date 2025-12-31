@@ -9,6 +9,7 @@ export interface VocabularyItem {
 export interface PodcastSegment {
   en: string;
   vi: string;
+  startTime?: number; // Giây bắt đầu của câu
 }
 
 export interface LessonData {
