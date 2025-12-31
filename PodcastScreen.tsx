@@ -175,7 +175,7 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({
         <button onClick={() => { synth.cancel(); onBack(); }} className="p-2 -ml-2 text-zinc-600 hover:text-white transition-colors">
           <CloseIcon size={22} />
         </button>
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center text-center">
           <span className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em]">NEO RADIO FM</span>
           <button 
             onClick={() => setShowLibrary(true)} 
@@ -192,11 +192,11 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({
         </button>
       </header>
 
-      <div className="px-8 py-2 flex flex-col items-center shrink-0">
+      <div className="px-8 py-4 flex flex-col items-center shrink-0">
         <motion.div 
           animate={isPlaying ? { rotate: 360 } : {}}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="w-32 h-32 aspect-square rounded-full overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border-4 border-zinc-900 relative"
+          className="w-28 h-28 aspect-square rounded-full overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border-4 border-zinc-900 relative"
         >
           <img 
             src={`https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=800`} 
@@ -204,11 +204,11 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-5 h-5 bg-[#0A0A0A] rounded-full border border-zinc-800 shadow-inner" />
+            <div className="w-4 h-4 bg-[#0A0A0A] rounded-full border border-zinc-800 shadow-inner" />
           </div>
         </motion.div>
         <div className="mt-4 text-center">
-          <h3 className="text-[11px] font-heading font-black uppercase tracking-tight text-zinc-500">
+          <h3 className="text-[12px] font-heading font-black uppercase tracking-tight text-white/90">
             {lesson.topic}
           </h3>
           <p className="text-[8px] font-black text-[#CCFF00] uppercase tracking-[0.3em] mt-1 opacity-50">
@@ -221,7 +221,7 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({
         ref={scrollContainerRef}
         className="flex-1 px-8 overflow-y-auto no-scrollbar snap-y snap-mandatory"
       >
-        <div className="pt-8 pb-[40vh] space-y-16">
+        <div className="pt-8 pb-[30vh] space-y-12">
           {segments.map((seg, idx) => {
             const active = currentIdx === idx;
             return (
@@ -230,36 +230,29 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({
                 ref={el => itemRefs.current[idx] = el}
                 onClick={() => playSegment(idx)}
                 animate={{ 
-                  opacity: active ? 1 : 0.15, 
+                  opacity: active ? 1 : 0.2, 
                   scale: active ? 1 : 0.95,
-                  filter: active ? 'blur(0px)' : 'blur(1px)'
+                  filter: active ? 'blur(0px)' : 'blur(0.5px)'
                 }}
-                className="snap-center cursor-pointer transition-all duration-700 flex flex-col"
+                className="snap-center cursor-pointer transition-all duration-500 flex flex-col gap-4"
               >
-                <h4 className={`text-[30px] font-heading font-black leading-[1.1] tracking-tighter ${active ? 'text-white' : 'text-zinc-600'}`}>
-                  {seg.en}
-                </h4>
-                <AnimatePresence>
-                  {active && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                      animate={{ opacity: 1, height: 'auto', marginTop: 20 }}
-                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                      className="overflow-visible"
-                    >
-                      <p className="text-[16px] font-sans font-bold text-[#CCFF00] leading-relaxed tracking-tight border-l-2 border-[#CCFF00] pl-4">
-                        {seg.vi}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div className="space-y-3">
+                  <h4 className={`text-[26px] font-heading font-black leading-[1.1] tracking-tighter ${active ? 'text-white' : 'text-zinc-500'}`}>
+                    {seg.en}
+                  </h4>
+                  <div className={`p-4 rounded-2xl border transition-all ${active ? 'bg-[#CCFF00]/5 border-[#CCFF00]/20' : 'bg-transparent border-transparent'}`}>
+                    <p className={`text-[14px] font-sans font-bold leading-relaxed tracking-tight ${active ? 'text-[#CCFF00]' : 'text-zinc-700'}`}>
+                      {seg.vi}
+                    </p>
+                  </div>
+                </div>
               </motion.div>
             );
           })}
         </div>
       </div>
 
-      <div className="pb-10 pt-6 flex flex-col items-center px-6 shrink-0 bg-[#0A0A0A] border-t border-white/5">
+      <div className="pb-10 pt-6 flex flex-col items-center px-6 shrink-0 bg-[#0A0A0A] border-t border-white/5 shadow-[0_-20px_40px_rgba(0,0,0,0.5)]">
         <div className="w-full max-w-[360px] space-y-6">
           <div className="w-full h-[3px] bg-zinc-900 rounded-full overflow-hidden">
             <motion.div 
@@ -280,12 +273,12 @@ const PodcastScreen: React.FC<PodcastScreenProps> = ({
               
               <button 
                 onClick={togglePlay}
-                className="w-16 h-16 bg-[#CCFF00] rounded-full flex items-center justify-center text-black shadow-[0_15px_40px_rgba(204,255,0,0.3)] hover:scale-105 active:scale-95 transition-all"
+                className="w-14 h-14 bg-[#CCFF00] rounded-full flex items-center justify-center text-black shadow-[0_15px_30px_rgba(204,255,0,0.3)] hover:scale-105 active:scale-95 transition-all"
               >
                 {isPlaying ? (
-                  <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
+                  <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
                 ) : (
-                  <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24" className="ml-1"><path d="M8 5v14l11-7z" /></svg>
+                  <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24" className="ml-1"><path d="M8 5v14l11-7z" /></svg>
                 )}
               </button>
               

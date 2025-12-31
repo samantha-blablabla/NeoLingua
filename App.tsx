@@ -126,7 +126,7 @@ const App: React.FC = () => {
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0, x: -20 }}
-            className="flex flex-col h-full pt-16 px-6 pb-60 overflow-y-auto no-scrollbar"
+            className="flex flex-col h-full pt-16 px-6 pb-40 overflow-y-auto no-scrollbar"
           >
             {/* Header */}
             <header className="flex justify-between items-center mb-12 px-2">
@@ -204,50 +204,48 @@ const App: React.FC = () => {
               </section>
             </MagneticReveal>
 
-            {/* Action Grid - UPDATED WITH AMBIENT GLOW */}
+            {/* Action Grid */}
             <MagneticReveal delay={0.15}>
-              <section className="grid grid-cols-2 gap-6 mb-12 px-2">
+              <section className="grid grid-cols-2 gap-6 mb-12 px-2 pb-20">
                  <motion.div 
                    whileTap={{ scale: 0.96 }}
                    onClick={() => setView('badges')}
-                   className="p-8 rounded-[40px] bg-zinc-900/20 border border-white/5 flex flex-col justify-between aspect-square cursor-pointer group hover:bg-zinc-900/40 transition-all overflow-hidden"
+                   className="p-9 aspect-[4/5] rounded-[48px] bg-zinc-900/20 border border-white/5 flex flex-col justify-between cursor-pointer group hover:bg-zinc-900/40 transition-all overflow-hidden"
                  >
-                    <div className="relative w-14 h-14 flex items-center justify-center">
-                       {/* Subtle Breathing Glow */}
+                    <div className="relative w-12 h-12 flex items-center justify-center">
                        <motion.div 
-                         animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.35, 0.15] }}
-                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                         className="absolute inset-0 bg-[#FF6B4A] blur-[24px] rounded-full"
+                         animate={{ scale: [1, 1.4, 1], opacity: [0.1, 0.3, 0.1] }}
+                         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                         className="absolute inset-0 bg-[#FF6B4A] blur-[28px] rounded-full"
                        />
-                       <div className="relative w-14 h-14 rounded-2xl bg-[#FF6B4A]/5 border border-[#FF6B4A]/10 backdrop-blur-md flex items-center justify-center text-[#FF6B4A]">
-                          <MedalIcon size={28} />
+                       <div className="relative z-10 text-[#FF6B4A]">
+                          <MedalIcon size={36} />
                        </div>
                     </div>
-                    <div>
-                       <h4 className="font-heading font-black text-2xl uppercase leading-none tracking-tighter">Trophy<br/>Room</h4>
-                       <p className="text-[10px] font-sans font-black text-zinc-800 uppercase mt-3 tracking-widest">Archive</p>
+                    <div className="space-y-3">
+                       <h4 className="font-heading font-black text-[1.8rem] uppercase leading-[0.9] tracking-tighter group-hover:text-[#FF6B4A] transition-colors">Trophy<br/>Room</h4>
+                       <p className="text-[9px] font-sans font-black text-zinc-800 uppercase tracking-[0.25em]">ARCHIVE</p>
                     </div>
                  </motion.div>
 
                  <motion.div 
                    whileTap={{ scale: 0.96 }}
                    onClick={() => setView('vault')}
-                   className="p-8 rounded-[40px] bg-zinc-900/20 border border-white/5 flex flex-col justify-between aspect-square cursor-pointer group hover:bg-zinc-900/40 transition-all overflow-hidden"
+                   className="p-9 aspect-[4/5] rounded-[48px] bg-zinc-900/20 border border-white/5 flex flex-col justify-between cursor-pointer group hover:bg-zinc-900/40 transition-all overflow-hidden"
                  >
-                    <div className="relative w-14 h-14 flex items-center justify-center">
-                       {/* Subtle Breathing Glow */}
+                    <div className="relative w-12 h-12 flex items-center justify-center">
                        <motion.div 
-                         animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.35, 0.15] }}
-                         transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-                         className="absolute inset-0 bg-[#CCFF00] blur-[24px] rounded-full"
+                         animate={{ scale: [1, 1.4, 1], opacity: [0.1, 0.3, 0.1] }}
+                         transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                         className="absolute inset-0 bg-[#CCFF00] blur-[28px] rounded-full"
                        />
-                       <div className="relative w-14 h-14 rounded-2xl bg-[#CCFF00]/5 border border-[#CCFF00]/10 backdrop-blur-md flex items-center justify-center text-[#CCFF00]">
-                          <LibraryIcon size={28} />
+                       <div className="relative z-10 text-[#CCFF00]">
+                          <LibraryIcon size={36} />
                        </div>
                     </div>
-                    <div>
-                       <h4 className="font-heading font-black text-2xl uppercase leading-none tracking-tighter">Vocab<br/>Vault</h4>
-                       <p className="text-[10px] font-sans font-black text-zinc-800 uppercase mt-3 tracking-widest">Lexicon</p>
+                    <div className="space-y-3">
+                       <h4 className="font-heading font-black text-[1.8rem] uppercase leading-[0.9] tracking-tighter group-hover:text-[#CCFF00] transition-colors">Vocab<br/>Vault</h4>
+                       <p className="text-[9px] font-sans font-black text-zinc-800 uppercase tracking-[0.25em]">LEXICON</p>
                     </div>
                  </motion.div>
               </section>
