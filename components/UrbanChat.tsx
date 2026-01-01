@@ -30,16 +30,51 @@ const UrbanChat: React.FC<Props> = ({ onBack, scenario, context_vi }) => {
   const chatSession = useRef<any>(null);
 
   useEffect(() => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      setMessages([{ role: 'model', text: "⚠️ API key not configured. Add VITE_GEMINI_API_KEY to .env.local" }]);
+      return;
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
     chatSession.current = ai.chats.create({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash-exp',
       config: {
-        systemInstruction: `You are an elite urban professional. Scenario: ${scenario}. 
-        RESPONSE RULES:
-        1. CONVERSE ONLY IN ENGLISH. Use high-end modern urban vocabulary.
-        2. VOCAB FORMAT: **word|Vietnamese meaning**.
-        3. No Vietnamese in the main text.
-        4. If the user is too formal, provide a cooler alternative in [square brackets].`,
+        systemInstruction: `You are an ELITE URBAN PROFESSIONAL roleplay coach. Scenario: ${scenario}. Context: ${context_vi}
+
+🎯 YOUR MISSION:
+- Help users master modern urban English through immersive conversation
+- Respond naturally like a native speaker in real urban situations
+- Provide real-time feedback to optimize their language to sound more "street-smart"
+
+📋 RESPONSE STRUCTURE:
+1. MAIN RESPONSE (English only):
+   - Use natural, modern urban vocabulary
+   - Incorporate slang, phrasal verbs, and idioms
+   - Mark important vocabulary: **word|Nghĩa tiếng Việt**
+
+2. URBAN OPTIMIZATION (when user's English is too formal):
+   - Format: 🔥 URBAN UPGRADE: [Original] → [Cooler version]
+   - Example: "I would like coffee" → "Can I get a coffee?" or "Coffee, please!"
+
+3. FEEDBACK (occasionally):
+   - 💬 STREET TIP: [Quick tip about urban usage]
+   - Example: "💬 STREET TIP: 'Yo' is casual greeting among friends, not for formal settings"
+
+🎨 STYLE GUIDE:
+- Be conversational and engaging
+- Use contractions (I'm, you're, we'll)
+- Mix short and long sentences
+- Show personality and emotion
+- Respond to context, not just words
+
+🚫 NEVER:
+- Use Vietnamese in main conversation
+- Be overly formal or academic
+- Explain grammar unless asked
+- Break character from the scenario
+
+Remember: You're not a teacher, you're a cool urban friend helping them sound natural!`,
       },
     });
 
@@ -159,15 +194,34 @@ const UrbanChat: React.FC<Props> = ({ onBack, scenario, context_vi }) => {
         )}
       </AnimatePresence>
 
-      <header className="p-6 pt-12 border-b border-white/5 flex items-center justify-between shrink-0 bg-[#0A0A0A]/80 backdrop-blur-xl z-[10]">
-        <button onClick={onBack} className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/5 active:scale-90 transition-transform">
-           <CloseIcon size={20} />
-        </button>
-        <div className="text-center">
-           <h2 className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-[#CCFF00]">STREET TALK</h2>
-           <p className="text-[9px] font-sans font-bold text-zinc-600 uppercase mt-1 tracking-widest">Live Coaching</p>
+      <header className="p-6 pt-16 pb-8 border-b border-white/5 shrink-0 bg-gradient-to-b from-[#0A0A0A] to-[#0A0A0A]/90 backdrop-blur-xl z-[10]">
+        <div className="flex items-center justify-between mb-6">
+          <button onClick={onBack} className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/5 active:scale-90 transition-transform hover:bg-white/10">
+             <CloseIcon size={20} />
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse shadow-[0_0_10px_#CCFF00]" />
+            <span className="text-[9px] font-sans font-black uppercase tracking-widest text-[#CCFF00]">LIVE</span>
+          </div>
         </div>
-        <div className="w-12" />
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 rounded-[20px] bg-gradient-to-br from-[#CCFF00] to-[#CCFF00]/60 flex items-center justify-center shadow-[0_10px_30px_rgba(204,255,0,0.2)]">
+              <FlashIcon size={28} color="#0A0A0A" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-heading font-black uppercase tracking-tighter leading-none text-white">Street Talk</h2>
+              <p className="text-xs font-sans font-bold text-zinc-500 mt-1 tracking-wide">Sandbox</p>
+            </div>
+          </div>
+
+          <div className="pl-[68px] space-y-1">
+            <p className="text-[11px] font-sans font-black uppercase tracking-[0.3em] text-[#CCFF00]/60">SCENARIO</p>
+            <p className="text-sm font-sans font-bold text-zinc-400">{scenario}</p>
+            <p className="text-xs font-sans font-medium text-zinc-600 italic">{context_vi}</p>
+          </div>
+        </div>
       </header>
 
       <div 
@@ -182,24 +236,31 @@ const UrbanChat: React.FC<Props> = ({ onBack, scenario, context_vi }) => {
               animate={{ opacity: 1, y: 0 }}
               className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
             >
-              <div className={`flex items-center gap-3 mb-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                 <span className="text-[8px] font-sans font-black uppercase tracking-widest text-zinc-600">
-                    {msg.role === 'user' ? 'YOU' : 'URBAN GURU'}
-                 </span>
+              <div className={`flex items-center gap-3 mb-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${
+                   msg.role === 'user'
+                     ? 'bg-[#CCFF00]/10 border border-[#CCFF00]/20'
+                     : 'bg-white/5 border border-white/10'
+                 }`}>
+                   <div className={`w-1.5 h-1.5 rounded-full ${msg.role === 'user' ? 'bg-[#CCFF00]' : 'bg-zinc-500'}`} />
+                   <span className="text-[9px] font-sans font-black uppercase tracking-[0.25em] text-zinc-400">
+                      {msg.role === 'user' ? 'YOU' : 'URBAN GURU'}
+                   </span>
+                 </div>
                  {msg.role === 'model' && (
-                    <button 
-                      onClick={() => playNaturalSpeech(cleanTextForTTS(msg.text))} 
-                      className="w-10 h-10 flex items-center justify-center bg-[#CCFF00]/5 text-[#CCFF00] rounded-full active:scale-90 transition-all"
+                    <button
+                      onClick={() => playNaturalSpeech(cleanTextForTTS(msg.text))}
+                      className="w-9 h-9 flex items-center justify-center bg-[#CCFF00]/10 text-[#CCFF00] rounded-full border border-[#CCFF00]/20 active:scale-90 transition-all hover:bg-[#CCFF00]/20"
                     >
                        <SoundHighIcon size={16} />
                     </button>
                  )}
               </div>
-              
-              <div className={`max-w-[90%] p-5 rounded-[28px] backdrop-blur-md border ${
-                msg.role === 'user' 
-                  ? 'bg-[#CCFF00]/10 border-[#CCFF00]/20 text-white rounded-tr-none' 
-                  : 'bg-white/[0.04] border-white/10 text-zinc-100 rounded-tl-none'
+
+              <div className={`max-w-[85%] p-6 rounded-[32px] backdrop-blur-md border shadow-lg ${
+                msg.role === 'user'
+                  ? 'bg-gradient-to-br from-[#CCFF00]/15 to-[#CCFF00]/5 border-[#CCFF00]/30 text-white rounded-tr-[8px]'
+                  : 'bg-gradient-to-br from-white/[0.06] to-white/[0.02] border-white/10 text-zinc-100 rounded-tl-[8px]'
               }`}>
                 <p className="text-[15px] font-sans font-medium leading-relaxed tracking-tight">
                   {renderMessageText(msg.text)}
@@ -209,16 +270,29 @@ const UrbanChat: React.FC<Props> = ({ onBack, scenario, context_vi }) => {
           ))}
           
           {isTyping && (
-            <div className="flex gap-2 p-4 bg-white/5 rounded-2xl w-20 border border-white/5">
-              {[0, 1, 2].map(i => (
-                <motion.div 
-                  key={i} 
-                  animate={{ opacity: [0.3, 1, 0.3] }} 
-                  transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
-                  className="w-1.5 h-1.5 bg-[#CCFF00] rounded-full" 
-                />
-              ))}
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-start gap-3"
+            >
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                <div className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
+                <span className="text-[9px] font-sans font-black uppercase tracking-[0.25em] text-zinc-400">URBAN GURU</span>
+              </div>
+              <div className="flex gap-2.5 p-5 bg-gradient-to-br from-white/[0.06] to-white/[0.02] rounded-[32px] rounded-tl-[8px] border border-white/10 w-24">
+                {[0, 1, 2].map(i => (
+                  <motion.div
+                    key={i}
+                    animate={{
+                      scale: [1, 1.3, 1],
+                      opacity: [0.4, 1, 0.4]
+                    }}
+                    transition={{ repeat: Infinity, duration: 1.2, delay: i * 0.15 }}
+                    className="w-2 h-2 bg-[#CCFF00] rounded-full shadow-[0_0_8px_rgba(204,255,0,0.5)]"
+                  />
+                ))}
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
