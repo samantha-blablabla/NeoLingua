@@ -2,7 +2,7 @@
  * Google Cloud Text-to-Speech Service
  *
  * Uses Google Cloud TTS API for native-sounding speech synthesis
- * Voice: en-US-Neural2-J (male, natural-sounding American English)
+ * Voice: en-US-Journey-F (ultra-natural conversational female voice)
  */
 
 const GOOGLE_TTS_API_URL = 'https://texttospeech.googleapis.com/v1/text:synthesize';
@@ -80,13 +80,13 @@ export async function playGoogleTTS(text: string): Promise<void> {
     },
     voice: {
       languageCode: 'en-US',
-      name: 'en-US-Neural2-J', // Natural male voice
-      ssmlGender: 'MALE'
+      name: 'en-US-Journey-F', // Ultra-natural conversational voice
+      ssmlGender: 'FEMALE'
     },
     audioConfig: {
       audioEncoding: 'MP3',
-      pitch: 0,
-      speakingRate: 1.0
+      pitch: 0,          // Natural pitch (Journey voices are already optimized)
+      speakingRate: 1.0  // Natural speaking rate
     }
   };
 

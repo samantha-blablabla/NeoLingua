@@ -29,17 +29,81 @@ const UrbanChat: React.FC<Props> = ({ onBack, scenario, context_vi }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const groqClient = useRef<Groq | null>(null);
 
-  // Clean text for TTS (remove markdown formatting)
-  const cleanTextForTTS = (text: string) => {
-    return text
-      .replace(/\*\*(.*?)\|(.*?)\*\*/g, "$1")
-      .replace(/\*\*(.*?)\*\*/g, "$1")
-      .replace(/🔥|💬|⚠️|✅/g, "")
-      .replace(/URBAN UPGRADE:/g, "")
-      .replace(/STREET TIP:/g, "");
+  // Multi-layer protection against auto-play loops
+  const hasAutoPlayedRef = useRef(false); // Track if initial greeting has been auto-played
+  const playedMessagesRef = useRef(new Set<string>()); // Track all played messages
+  const isPlayingRef = useRef(false); // Track if currently playing
+  const playTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Track play timeout
+
+  // Helper function to safely auto-play TTS (with protection against loops)
+  const safeAutoPlay = (text: string, isInitialGreeting = false) => {
+    // Clear any pending play timeout
+    if (playTimeoutRef.current) {
+      clearTimeout(playTimeoutRef.current);
+      playTimeoutRef.current = null;
+    }
+
+    // Check if already playing
+    if (isPlayingRef.current) {
+      return;
+    }
+
+    // Check if this exact message was already played
+    if (playedMessagesRef.current.has(text)) {
+      return;
+    }
+
+    // Check if initial greeting was already played (for greeting only)
+    if (isInitialGreeting && hasAutoPlayedRef.current) {
+      return;
+    }
+
+    // Mark as playing and add to played set
+    isPlayingRef.current = true;
+    playedMessagesRef.current.add(text);
+    if (isInitialGreeting) {
+      hasAutoPlayedRef.current = true;
+    }
+
+    // Schedule the actual TTS play
+    playTimeoutRef.current = setTimeout(() => {
+      const cleanText = cleanTextForTTS(text);
+      playGoogleTTS(cleanText).finally(() => {
+        isPlayingRef.current = false;
+      });
+    }, 500);
   };
 
-  const systemPrompt = `You are an ELITE URBAN PROFESSIONAL roleplay coach. Scenario: ${scenario}. Context: ${context_vi}
+  // Clean text for TTS (remove markdown formatting but keep speakable content)
+  const cleanTextForTTS = (text: string) => {
+    let cleaned = text;
+
+    // First pass: Remove vocabulary markup but keep only English word
+    // This handles: **word|Vietnamese meaning** → word
+    cleaned = cleaned.replace(/\*\*(.*?)\|(.*?)\*\*/g, "$1");
+
+    // Second pass: Remove remaining markdown bold
+    // This handles: **word** → word
+    cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, "$1");
+
+    // Remove all emojis
+    cleaned = cleaned.replace(/[🔥💬⚠️✅]/g, "");
+
+    // Make section headers speakable (lowercase, conversational)
+    cleaned = cleaned.replace(/URBAN UPGRADE:/g, "Urban upgrade:");
+
+    // Remove Vietnamese section markers completely (TTS shouldn't read Vietnamese)
+    cleaned = cleaned.replace(/STREET TIP:/g, "");
+    cleaned = cleaned.replace(/💬 STREET TIP:/g, "");
+
+    // Clean up extra whitespace
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+    return cleaned;
+  };
+
+  // Use useMemo to prevent systemPrompt from changing on every render
+  const systemPrompt = React.useMemo(() => `You are an ELITE URBAN PROFESSIONAL roleplay coach. Scenario: ${scenario}. Context: ${context_vi}
 
 🎯 YOUR MISSION:
 - Help users master modern urban English through immersive conversation
@@ -75,7 +139,7 @@ const UrbanChat: React.FC<Props> = ({ onBack, scenario, context_vi }) => {
 - Break character from the scenario
 - Use wrong Vietnamese spelling (always double-check: "cà phê" not "ca phê", "sữa" not "sửa")
 
-Remember: You're not a teacher, you're a cool urban friend helping them sound natural!`;
+Remember: You're not a teacher, you're a cool urban friend helping them sound natural!`, [scenario, context_vi]);
 
   useEffect(() => {
     const apiKey = import.meta.env.VITE_GROQ_API_KEY;
@@ -105,11 +169,8 @@ Remember: You're not a teacher, you're a cool urban friend helping them sound na
         const responseText = completion.choices[0]?.message?.content || "Yo! What's good? How can I help you today?";
         setMessages([{ role: 'assistant', text: responseText }]);
 
-        // Auto-play AI greeting
-        setTimeout(() => {
-          const cleanText = cleanTextForTTS(responseText);
-          playGoogleTTS(cleanText);
-        }, 500);
+        // Auto-play AI greeting (protected against loops)
+        safeAutoPlay(responseText, true);
       } catch (e) {
         console.error('Error starting chat:', e);
         setMessages([{ role: 'assistant', text: "⚠️ Failed to connect. Check your API key and internet connection." }]);
@@ -118,13 +179,29 @@ Remember: You're not a teacher, you're a cool urban friend helping them sound na
       }
     };
     startChat();
-  }, [scenario, systemPrompt]);
+  }, [scenario]); // systemPrompt is memoized, only depend on scenario
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isTyping]);
+
+  // Cleanup on unmount to prevent memory leaks and lingering audio
+  useEffect(() => {
+    return () => {
+      // Clear any pending timeout
+      if (playTimeoutRef.current) {
+        clearTimeout(playTimeoutRef.current);
+      }
+      // Stop any playing audio
+      stopSpeech();
+      // Reset all flags
+      hasAutoPlayedRef.current = false;
+      playedMessagesRef.current.clear();
+      isPlayingRef.current = false;
+    };
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim() || !groqClient.current) return;
@@ -154,11 +231,8 @@ Remember: You're not a teacher, you're a cool urban friend helping them sound na
       const responseText = completion.choices[0]?.message?.content || "Signal's dropping. Come again?";
       setMessages(prev => [...prev, { role: 'assistant', text: responseText }]);
 
-      // Auto-play AI response
-      setTimeout(() => {
-        const cleanText = cleanTextForTTS(responseText);
-        playGoogleTTS(cleanText);
-      }, 500);
+      // Auto-play AI response (protected against loops)
+      safeAutoPlay(responseText, false);
     } catch (e) {
       console.error('Error sending message:', e);
       setMessages(prev => [...prev, { role: 'assistant', text: "Signal's dropping. Come again?" }]);
