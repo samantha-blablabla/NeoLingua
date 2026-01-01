@@ -74,27 +74,26 @@ const UrbanChat: React.FC<Props> = ({ onBack, scenario, context_vi }) => {
     }, 500);
   };
 
-  // Clean text for TTS (remove markdown formatting but keep speakable content)
+  // Clean text for TTS (only read main conversation, skip tips)
   const cleanTextForTTS = (text: string) => {
     let cleaned = text;
 
-    // First pass: Remove vocabulary markup but keep only English word
+    // CRITICAL: Remove URBAN UPGRADE and STREET TIP sections completely
+    // These are for user reading only, NOT for TTS
+    // Pattern: Remove from emoji/marker to end of that section
+    cleaned = cleaned.replace(/🔥\s*URBAN UPGRADE:[\s\S]*?(?=💬\s*STREET TIP:|$)/gi, "");
+    cleaned = cleaned.replace(/💬\s*STREET TIP:[\s\S]*?$/gi, "");
+
+    // Remove vocabulary markup but keep only English word
     // This handles: **word|Vietnamese meaning** → word
     cleaned = cleaned.replace(/\*\*(.*?)\|(.*?)\*\*/g, "$1");
 
-    // Second pass: Remove remaining markdown bold
+    // Remove remaining markdown bold
     // This handles: **word** → word
     cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, "$1");
 
     // Remove all emojis
     cleaned = cleaned.replace(/[🔥💬⚠️✅]/g, "");
-
-    // Make section headers speakable (lowercase, conversational)
-    cleaned = cleaned.replace(/URBAN UPGRADE:/g, "Urban upgrade:");
-
-    // Remove Vietnamese section markers completely (TTS shouldn't read Vietnamese)
-    cleaned = cleaned.replace(/STREET TIP:/g, "");
-    cleaned = cleaned.replace(/💬 STREET TIP:/g, "");
 
     // Clean up extra whitespace
     cleaned = cleaned.replace(/\s+/g, " ").trim();
@@ -242,25 +241,81 @@ Remember: You're not a teacher, you're a cool urban friend helping them sound na
   };
 
   const renderMessageText = (text: string) => {
-    const parts = text.split(/(\*\*.*?\*\*)/g);
-    return parts.map((part, i) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        const content = part.slice(2, -2);
-        const [word, meaning] = content.split('|');
-        if (!meaning) return <span key={i} className="font-bold">{word}</span>;
-        
-        return (
-          <button
-            key={i}
-            onClick={() => setActiveDef({ word, meaning })}
-            className="inline-block px-2 py-1 mx-0.5 bg-[#CCFF00]/10 border-b-2 border-[#CCFF00] text-[#CCFF00] font-bold rounded-sm active:scale-95 transition-transform"
-          >
-            {word}
-          </button>
-        );
-      }
-      return <span key={i}>{part}</span>;
-    });
+    // Split text into sections: main conversation, urban upgrade, street tip
+    const sections = [];
+
+    // Check for URBAN UPGRADE section
+    const urbanUpgradeMatch = text.match(/🔥\s*URBAN UPGRADE:([\s\S]*?)(?=💬\s*STREET TIP:|$)/i);
+    // Check for STREET TIP section
+    const streetTipMatch = text.match(/💬\s*STREET TIP:([\s\S]*?)$/i);
+
+    // Get main conversation (everything before tips)
+    let mainText = text;
+    if (urbanUpgradeMatch) {
+      mainText = text.substring(0, text.indexOf(urbanUpgradeMatch[0]));
+    } else if (streetTipMatch) {
+      mainText = text.substring(0, text.indexOf(streetTipMatch[0]));
+    }
+
+    // Render main conversation with vocabulary highlighting
+    const renderWithVocab = (content: string) => {
+      const parts = content.split(/(\*\*.*?\*\*)/g);
+      return parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          const innerContent = part.slice(2, -2);
+          const [word, meaning] = innerContent.split('|');
+          if (!meaning) return <span key={i} className="font-bold">{word}</span>;
+
+          return (
+            <button
+              key={i}
+              onClick={() => setActiveDef({ word, meaning })}
+              className="inline-block px-2 py-1 mx-0.5 bg-[#CCFF00]/10 border-b-2 border-[#CCFF00] text-[#CCFF00] font-bold rounded-sm active:scale-95 transition-transform"
+            >
+              {word}
+            </button>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      });
+    };
+
+    // Main conversation
+    sections.push(
+      <div key="main" className="leading-relaxed">
+        {renderWithVocab(mainText)}
+      </div>
+    );
+
+    // Urban Upgrade section (with spacing)
+    if (urbanUpgradeMatch) {
+      sections.push(
+        <div key="urban" className="mt-6 pt-6 border-t border-white/10">
+          <div className="text-xs font-black uppercase tracking-widest text-[#CCFF00]/60 mb-2">
+            🔥 URBAN UPGRADE
+          </div>
+          <div className="text-sm leading-relaxed text-zinc-300">
+            {urbanUpgradeMatch[1].trim()}
+          </div>
+        </div>
+      );
+    }
+
+    // Street Tip section (with spacing)
+    if (streetTipMatch) {
+      sections.push(
+        <div key="street" className="mt-6 pt-6 border-t border-white/10">
+          <div className="text-xs font-black uppercase tracking-widest text-[#CCFF00]/60 mb-2">
+            💬 STREET TIP
+          </div>
+          <div className="text-sm leading-relaxed text-zinc-300">
+            {streetTipMatch[1].trim()}
+          </div>
+        </div>
+      );
+    }
+
+    return <>{sections}</>;
   };
 
   return (
