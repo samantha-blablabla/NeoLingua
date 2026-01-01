@@ -1,12 +1,12 @@
 
-import { GoogleGenAI } from "@google/genai";
+import Groq from "groq-sdk";
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
-import { playNaturalSpeech } from '../services/speechService';
+import { playGoogleTTS, stopSpeech } from '../services/googleTTS';
 import { CloseIcon, FlashIcon, SoundHighIcon } from './Icons';
 
 interface Message {
-  role: 'user' | 'model';
+  role: 'user' | 'assistant';
   text: string;
 }
 
@@ -27,20 +27,19 @@ const UrbanChat: React.FC<Props> = ({ onBack, scenario, context_vi }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [activeDef, setActiveDef] = useState<Definition | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const chatSession = useRef<any>(null);
+  const groqClient = useRef<Groq | null>(null);
 
-  useEffect(() => {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) {
-      setMessages([{ role: 'model', text: "⚠️ API key not configured. Add VITE_GEMINI_API_KEY to .env.local" }]);
-      return;
-    }
+  // Clean text for TTS (remove markdown formatting)
+  const cleanTextForTTS = (text: string) => {
+    return text
+      .replace(/\*\*(.*?)\|(.*?)\*\*/g, "$1")
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/🔥|💬|⚠️|✅/g, "")
+      .replace(/URBAN UPGRADE:/g, "")
+      .replace(/STREET TIP:/g, "");
+  };
 
-    const ai = new GoogleGenAI({ apiKey });
-    chatSession.current = ai.chats.create({
-      model: 'gemini-2.0-flash-exp',
-      config: {
-        systemInstruction: `You are an ELITE URBAN PROFESSIONAL roleplay coach. Scenario: ${scenario}. Context: ${context_vi}
+  const systemPrompt = `You are an ELITE URBAN PROFESSIONAL roleplay coach. Scenario: ${scenario}. Context: ${context_vi}
 
 🎯 YOUR MISSION:
 - Help users master modern urban English through immersive conversation
@@ -51,15 +50,16 @@ const UrbanChat: React.FC<Props> = ({ onBack, scenario, context_vi }) => {
 1. MAIN RESPONSE (English only):
    - Use natural, modern urban vocabulary
    - Incorporate slang, phrasal verbs, and idioms
-   - Mark important vocabulary: **word|Nghĩa tiếng Việt**
+   - Mark important vocabulary: **word|Nghĩa tiếng Việt chính xác**
+   - Example: **latte|cà phê sữa** (NOT "ca phê sửa" or wrong spelling)
 
 2. URBAN OPTIMIZATION (when user's English is too formal):
    - Format: 🔥 URBAN UPGRADE: [Original] → [Cooler version]
    - Example: "I would like coffee" → "Can I get a coffee?" or "Coffee, please!"
 
-3. FEEDBACK (occasionally):
-   - 💬 STREET TIP: [Quick tip about urban usage]
-   - Example: "💬 STREET TIP: 'Yo' is casual greeting among friends, not for formal settings"
+3. STREET TIPS (occasionally, IN VIETNAMESE):
+   - 💬 STREET TIP: [Giải thích bằng tiếng Việt về cách dùng]
+   - Example: "💬 STREET TIP: 'Yo' là lời chào thân mật giữa bạn bè, không dùng trong môi trường công sở hoặc trang trọng nhé!"
 
 🎨 STYLE GUIDE:
 - Be conversational and engaging
@@ -69,28 +69,56 @@ const UrbanChat: React.FC<Props> = ({ onBack, scenario, context_vi }) => {
 - Respond to context, not just words
 
 🚫 NEVER:
-- Use Vietnamese in main conversation
+- Use Vietnamese in main conversation (except in STREET TIP sections)
 - Be overly formal or academic
 - Explain grammar unless asked
 - Break character from the scenario
+- Use wrong Vietnamese spelling (always double-check: "cà phê" not "ca phê", "sữa" not "sửa")
 
-Remember: You're not a teacher, you're a cool urban friend helping them sound natural!`,
-      },
+Remember: You're not a teacher, you're a cool urban friend helping them sound natural!`;
+
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+    if (!apiKey || apiKey === 'your_groq_api_key_here') {
+      setMessages([{ role: 'assistant', text: "⚠️ Groq API key not configured.\n\n1. Get free key: https://console.groq.com/keys\n2. Add to .env.local: VITE_GROQ_API_KEY=your_key" }]);
+      return;
+    }
+
+    groqClient.current = new Groq({
+      apiKey,
+      dangerouslyAllowBrowser: true
     });
 
     const startChat = async () => {
       setIsTyping(true);
       try {
-        const result = await chatSession.current.sendMessage({ message: "Yo! Just stepped in. What are we vibing with?" });
-        setMessages([{ role: 'model', text: result.text }]);
+        const completion = await groqClient.current!.chat.completions.create({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: "Start the conversation by greeting me and asking what I'd like according to the scenario." }
+          ],
+          temperature: 0.8,
+          max_tokens: 1024
+        });
+
+        const responseText = completion.choices[0]?.message?.content || "Yo! What's good? How can I help you today?";
+        setMessages([{ role: 'assistant', text: responseText }]);
+
+        // Auto-play AI greeting
+        setTimeout(() => {
+          const cleanText = cleanTextForTTS(responseText);
+          playGoogleTTS(cleanText);
+        }, 500);
       } catch (e) {
-        console.error(e);
+        console.error('Error starting chat:', e);
+        setMessages([{ role: 'assistant', text: "⚠️ Failed to connect. Check your API key and internet connection." }]);
       } finally {
         setIsTyping(false);
       }
     };
     startChat();
-  }, [scenario]);
+  }, [scenario, systemPrompt]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -99,25 +127,44 @@ Remember: You're not a teacher, you're a cool urban friend helping them sound na
   }, [messages, isTyping]);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !groqClient.current) return;
     const userMsg = input;
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
-    
+
     setIsTyping(true);
     try {
-      const result = await chatSession.current.sendMessage({ message: userMsg });
-      setMessages(prev => [...prev, { role: 'model', text: result.text }]);
+      // Build conversation history
+      const conversationHistory = [
+        { role: 'system' as const, content: systemPrompt },
+        ...messages.map(m => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.text
+        })),
+        { role: 'user' as const, content: userMsg }
+      ];
+
+      const completion = await groqClient.current.chat.completions.create({
+        model: 'llama-3.3-70b-versatile',
+        messages: conversationHistory,
+        temperature: 0.8,
+        max_tokens: 1024
+      });
+
+      const responseText = completion.choices[0]?.message?.content || "Signal's dropping. Come again?";
+      setMessages(prev => [...prev, { role: 'assistant', text: responseText }]);
+
+      // Auto-play AI response
+      setTimeout(() => {
+        const cleanText = cleanTextForTTS(responseText);
+        playGoogleTTS(cleanText);
+      }, 500);
     } catch (e) {
-      setMessages(prev => [...prev, { role: 'model', text: "Signal's dropping. Come again?" }]);
+      console.error('Error sending message:', e);
+      setMessages(prev => [...prev, { role: 'assistant', text: "Signal's dropping. Come again?" }]);
     } finally {
       setIsTyping(false);
     }
-  };
-
-  const cleanTextForTTS = (text: string) => {
-    return text.replace(/\*\*(.*?)\|(.*?)\*\*/g, "$1")
-               .replace(/\*\*(.*?)\*\*/g, "$1");
   };
 
   const renderMessageText = (text: string) => {
@@ -182,8 +229,8 @@ Remember: You're not a teacher, you're a cool urban friend helping them sound na
                    <p className="text-lg font-sans font-bold text-zinc-300 leading-snug">{activeDef.meaning}</p>
                 </div>
 
-                <button 
-                  onClick={() => playNaturalSpeech(activeDef.word)}
+                <button
+                  onClick={() => playGoogleTTS(activeDef.word)}
                   className="w-full py-5 rounded-2xl bg-[#CCFF00] text-black font-sans font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-transform"
                 >
                   <SoundHighIcon size={20} /> HEAR PRONUNCIATION
@@ -247,10 +294,14 @@ Remember: You're not a teacher, you're a cool urban friend helping them sound na
                       {msg.role === 'user' ? 'YOU' : 'URBAN GURU'}
                    </span>
                  </div>
-                 {msg.role === 'model' && (
+                 {msg.role === 'assistant' && (
                     <button
-                      onClick={() => playNaturalSpeech(cleanTextForTTS(msg.text))}
+                      onClick={() => {
+                        stopSpeech();
+                        playGoogleTTS(cleanTextForTTS(msg.text));
+                      }}
                       className="w-9 h-9 flex items-center justify-center bg-[#CCFF00]/10 text-[#CCFF00] rounded-full border border-[#CCFF00]/20 active:scale-90 transition-all hover:bg-[#CCFF00]/20"
+                      title="Replay message"
                     >
                        <SoundHighIcon size={16} />
                     </button>
