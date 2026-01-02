@@ -15,6 +15,7 @@ import SuccessScreen from './SuccessScreen';
 import PodcastScreen from './PodcastScreen';
 import BadgeGallery from './components/BadgeGallery';
 import UrbanChat from './components/UrbanChat';
+import Dashboard from './components/Dashboard';
 import VocabVaultScreen from './VocabVaultScreen';
 import { playNaturalSpeech } from './services/speechService';
 import { syncUserStats } from './services/badgeService';
@@ -34,7 +35,7 @@ const MagneticReveal: React.FC<{ children: React.ReactNode, delay?: number }> = 
   );
 };
 
-type ViewType = 'home' | 'roadmap' | 'lessonDetail' | 'success' | 'profile' | 'podcast' | 'badges' | 'chat' | 'vault';
+type ViewType = 'home' | 'roadmap' | 'lessonDetail' | 'success' | 'profile' | 'podcast' | 'badges' | 'chat' | 'vault' | 'curriculum';
 
 const ROADMAP_STEPS = [
   { id: 1, stage: 'Urban Newbie', title: 'Survival Mode', vi_title: 'Chế độ Sinh tồn', desc: 'Cafe, Streets & Basics', vi_desc: 'Cà phê, Đường phố & Cơ bản' },
@@ -169,8 +170,26 @@ const App: React.FC = () => {
               </section>
             </MagneticReveal>
 
-            {/* Street Talk Sandbox Card */}
+            {/* Curriculum Card - NEW STRUCTURED LEARNING */}
             <MagneticReveal delay={0.05}>
+              <section className="mb-10" onClick={() => setView('curriculum')}>
+                 <motion.div whileTap={{ scale: 0.98 }} className="p-10 rounded-[48px] bg-gradient-to-br from-[#CCFF00]/20 to-transparent border border-[#CCFF00]/30 flex items-center justify-between group shadow-xl cursor-pointer overflow-hidden relative">
+                    <div className="relative z-10">
+                       <div className="flex items-center gap-2 mb-4">
+                          <div className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse shadow-[0_0_10px_#CCFF00]" />
+                          <span className="text-[10px] font-sans font-black uppercase tracking-widest text-[#CCFF00]">Structured Learning</span>
+                       </div>
+                       <h4 className="text-3xl font-heading font-black tracking-tighter leading-[0.85] uppercase text-[#CCFF00]">Learning<br/>Curriculum</h4>
+                    </div>
+                    <div className="w-20 h-20 bg-black rounded-[32px] flex items-center justify-center text-[#CCFF00] border border-[#CCFF00]/30 shadow-2xl group-hover:rotate-12 transition-all duration-500">
+                       <LibraryIcon size={32} />
+                    </div>
+                 </motion.div>
+              </section>
+            </MagneticReveal>
+
+            {/* Street Talk Sandbox Card */}
+            <MagneticReveal delay={0.1}>
               <section className="mb-10" onClick={() => setView('chat')}>
                  <motion.div whileTap={{ scale: 0.98 }} className="p-10 rounded-[48px] bg-zinc-900/30 border border-white/5 flex items-center justify-between group shadow-xl cursor-pointer overflow-hidden relative">
                     <div className="relative z-10">
@@ -296,6 +315,7 @@ const App: React.FC = () => {
         {view === 'success' && <SuccessScreen streak={stats.streak} onReturn={() => setView('home')} />}
         {view === 'chat' && <UrbanChat scenario="Coffee shop vibes" context_vi="Học cách gọi cafe cực nghệ" onBack={() => setView('home')} />}
         {view === 'podcast' && currentLesson && <PodcastScreen lesson={currentLesson} favoriteLessons={stats.favoriteLessons} onToggleFavorite={() => {}} onBack={() => setView('home')} onSelectLesson={() => {}} />}
+        {view === 'curriculum' && <Dashboard />}
       </AnimatePresence>
 
       <div className="fixed bottom-0 left-0 right-0 h-64 pointer-events-none z-[80]">
