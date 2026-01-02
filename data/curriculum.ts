@@ -16,26 +16,26 @@ export interface VocabItem {
 
 export interface GrammarPoint {
   title: string;
-  explanation: string; // Vietnamese explanation
+  explanationVi: string; // Vietnamese explanation
   examples: {
-    english: string;
-    vietnamese: string;
+    en: string;
+    vi: string;
   }[];
   quiz: {
     question: string;
-    options: string[];
-    correctAnswer: number; // index of correct option
-    explanation: string;
-  }[];
+    correctAnswer: string; // The answer text
+    feedback: string;
+  };
 }
 
 export interface PracticeScenario {
-  id: string;
+  scenarioId: string;
   title: string;
-  context: string; // English context
-  contextVI: string; // Vietnamese context
-  difficulty: 'easy' | 'medium' | 'hard';
-  estimatedMinutes: number;
+  description: string; // What this practice is about
+  userRole: string; // Vietnamese: Your role in this scenario
+  scenario: string; // Vietnamese: The scenario description
+  difficulty?: 'easy' | 'medium' | 'hard';
+  estimatedMinutes?: number;
 }
 
 export interface Lesson {
@@ -170,7 +170,7 @@ const lessonA1_1: Lesson = {
 
   grammar: {
     title: 'Present Simple: To Be (I am, You are)',
-    explanation: `
+    explanationVi: `
 **Động từ "to be" (am/is/are)**
 
 Trong tiếng Anh, chúng ta dùng "to be" để nói về bản thân và người khác:
@@ -188,49 +188,31 @@ Trong tiếng Anh, chúng ta dùng "to be" để nói về bản thân và ngư�
     `,
     examples: [
       {
-        english: "I'm Sarah. Nice to meet you!",
-        vietnamese: "Tôi là Sarah. Rất vui được gặp bạn!"
+        en: "I'm Sarah. Nice to meet you!",
+        vi: "Tôi là Sarah. Rất vui được gặp bạn!"
       },
       {
-        english: "You're very kind. Thank you!",
-        vietnamese: "Bạn rất tốt bụng. Cảm ơn!"
+        en: "You're very kind. Thank you!",
+        vi: "Bạn rất tốt bụng. Cảm ơn!"
       },
       {
-        english: "He's my friend from work.",
-        vietnamese: "Anh ấy là bạn tôi ở công ty."
+        en: "He's my friend from work.",
+        vi: "Anh ấy là bạn tôi ở công ty."
       }
     ],
-    quiz: [
-      {
-        question: "How do you say 'Tôi là John' in English?",
-        options: [
-          "I John",
-          "I am John",
-          "I is John",
-          "Me John"
-        ],
-        correctAnswer: 1,
-        explanation: "Correct! We use 'I am' (or I'm) to introduce ourselves."
-      },
-      {
-        question: "What's the contraction of 'You are'?",
-        options: [
-          "Your",
-          "You'r",
-          "You're",
-          "Youre"
-        ],
-        correctAnswer: 2,
-        explanation: "You're is the contraction of 'You are'. Don't confuse with 'your' (của bạn)!"
-      }
-    ]
+    quiz: {
+      question: "How do you say 'Tôi là John' in English?",
+      correctAnswer: "I am John",
+      feedback: "Correct! We use 'I am' (or I'm) to introduce ourselves."
+    }
   },
 
   practice: {
-    id: 'practice-a1-1',
+    scenarioId: 'practice-a1-1',
     title: 'Coffee Shop Greetings',
-    context: 'You enter a cozy coffee shop. A friendly barista greets you.',
-    contextVI: 'Bạn bước vào một quán cà phê ấm cúng. Nhân viên pha chế thân thiện chào bạn.',
+    description: 'Luyện tập chào hỏi và tự giới thiệu trong môi trường quán cà phê',
+    userRole: 'Bạn là khách hàng bước vào quán cà phê',
+    scenario: 'Bạn bước vào một quán cà phê ấm cúng. Nhân viên pha chế thân thiện chào bạn và bắt đầu trò chuyện.',
     difficulty: 'easy',
     estimatedMinutes: 10
   },
@@ -339,7 +321,7 @@ const lessonA1_2: Lesson = {
 
   grammar: {
     title: 'Polite Requests: Can I...? / I\'d like...',
-    explanation: `
+    explanationVi: `
 **Cách đặt món lịch sự trong tiếng Anh**
 
 Có 3 cách phổ biến để đặt món:
@@ -361,49 +343,31 @@ Có 3 cách phổ biến để đặt món:
     `,
     examples: [
       {
-        english: "Can I get a latte, please?",
-        vietnamese: "Cho tôi một ly latte được không?"
+        en: "Can I get a latte, please?",
+        vi: "Cho tôi một ly latte được không?"
       },
       {
-        english: "I'd like a cappuccino and a muffin.",
-        vietnamese: "Tôi muốn một ly cappuccino và một cái bánh muffin."
+        en: "I'd like a cappuccino and a muffin.",
+        vi: "Tôi muốn một ly cappuccino và một cái bánh muffin."
       },
       {
-        english: "I'll have the special, thanks!",
-        vietnamese: "Tôi sẽ lấy món đặc biệt, cảm ơn!"
+        en: "I'll have the special, thanks!",
+        vi: "Tôi sẽ lấy món đặc biệt, cảm ơn!"
       }
     ],
-    quiz: [
-      {
-        question: "What's the most polite way to order?",
-        options: [
-          "Give me coffee",
-          "I want coffee",
-          "I'd like a coffee, please",
-          "Coffee now"
-        ],
-        correctAnswer: 2,
-        explanation: "I'd like... please is the most polite form!"
-      },
-      {
-        question: "What does 'I'll have' mean?",
-        options: [
-          "Tôi có",
-          "Tôi sẽ lấy/đặt",
-          "Tôi thích",
-          "Tôi muốn mua"
-        ],
-        correctAnswer: 1,
-        explanation: "I'll have means 'Tôi sẽ lấy/đặt' when ordering food."
-      }
-    ]
+    quiz: {
+      question: "What's the most polite way to order?",
+      correctAnswer: "I'd like a coffee, please",
+      feedback: "I'd like... please is the most polite form!"
+    }
   },
 
   practice: {
-    id: 'practice-a1-2',
+    scenarioId: 'practice-a1-2',
     title: 'Ordering at a Cafe',
-    context: 'Order your favorite drink and snack at a busy cafe',
-    contextVI: 'Đặt món đồ uống và đồ ăn nhẹ yêu thích tại quán cafe đông khách',
+    description: 'Luyện tập đặt món đồ uống và đồ ăn nhẹ tại quán cafe',
+    userRole: 'Bạn là khách hàng đang muốn đặt món tại quán cafe',
+    scenario: 'Bạn đứng trước quầy của một quán cafe đông khách. Nhân viên pha chế hỏi bạn muốn gọi món gì.',
     difficulty: 'easy',
     estimatedMinutes: 10
   },
@@ -512,7 +476,7 @@ const lessonA1_3: Lesson = {
 
   grammar: {
     title: 'Numbers & Questions (How much? How many?)',
-    explanation: `
+    explanationVi: `
 **Hỏi về số lượng và giá cả**
 
 1. **How much** - Bao nhiêu (tiền)?
@@ -534,49 +498,31 @@ const lessonA1_3: Lesson = {
     `,
     examples: [
       {
-        english: "How much is this shirt?",
-        vietnamese: "Cái áo này giá bao nhiêu?"
+        en: "How much is this shirt?",
+        vi: "Cái áo này giá bao nhiêu?"
       },
       {
-        english: "It's twenty dollars.",
-        vietnamese: "Nó 20 đô la."
+        en: "It's twenty dollars.",
+        vi: "Nó 20 đô la."
       },
       {
-        english: "How many do you want?",
-        vietnamese: "Bạn muốn bao nhiêu cái?"
+        en: "How many do you want?",
+        vi: "Bạn muốn bao nhiêu cái?"
       }
     ],
-    quiz: [
-      {
-        question: "When asking about price, which is correct?",
-        options: [
-          "How many is this?",
-          "How much is this?",
-          "What much is this?",
-          "How price is this?"
-        ],
-        correctAnswer: 1,
-        explanation: "How much is used for prices!"
-      },
-      {
-        question: "How do you say '$15.50' in English?",
-        options: [
-          "fifteen and fifty dollars",
-          "fifteen dollars fifty",
-          "fifteen fifty or fifteen dollars and fifty cents",
-          "fifty fifteen dollars"
-        ],
-        correctAnswer: 2,
-        explanation: "We say 'fifteen fifty' or 'fifteen dollars and fifty cents'"
-      }
-    ]
+    quiz: {
+      question: "When asking about price, which is correct?",
+      correctAnswer: "How much is this?",
+      feedback: "How much is used for prices!"
+    }
   },
 
   practice: {
-    id: 'practice-a1-3',
+    scenarioId: 'practice-a1-3',
     title: 'Shopping for Clothes',
-    context: 'Shop for clothes at a store, ask about prices and sizes',
-    contextVI: 'Mua quần áo tại cửa hàng, hỏi về giá cả và kích cỡ',
+    description: 'Luyện tập mua sắm quần áo và hỏi về giá cả, kích cỡ',
+    userRole: 'Bạn là khách hàng muốn mua quần áo',
+    scenario: 'Bạn đang ở cửa hàng quần áo và tìm thấy một chiếc áo đẹp. Nhân viên bán hàng đến hỏi bạn có cần giúp gì không.',
     difficulty: 'easy',
     estimatedMinutes: 10
   },
