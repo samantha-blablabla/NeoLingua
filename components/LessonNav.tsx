@@ -71,7 +71,7 @@ export default function LessonNav({
           const isExpanded = expandedModuleId === module.id;
 
           return (
-            <div key={module.id} className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
+            <div key={module.id} className="bg-white/5 border border-white/10 rounded-[40px] overflow-hidden">
               {/* Module Header */}
               <button
                 onClick={() => setExpandedModuleId(isExpanded ? '' : module.id)}

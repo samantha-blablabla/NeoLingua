@@ -103,7 +103,7 @@ export default function Dashboard() {
 
         <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
           {/* Overall Progress */}
-          <div className="bg-white/5 border border-white/10 rounded-lg p-8">
+          <div className="bg-white/5 border border-white/10 rounded-[40px] p-10">
             <div className="text-xs font-sans font-bold text-zinc-500 mb-4 uppercase tracking-wider">TIẾN ĐỘ HỌC TẬP</div>
             <div className="flex items-baseline gap-4 mb-4">
               <h2 className="text-4xl font-heading font-black text-[#CCFF00]">{completedLessonIds.length}</h2>
@@ -121,7 +121,7 @@ export default function Dashboard() {
 
           {/* Current Lesson */}
           {currentLesson && (
-            <div className="bg-gradient-to-br from-[#CCFF00]/20 to-transparent border border-[#CCFF00]/30 rounded-lg p-8">
+            <div className="bg-gradient-to-br from-[#CCFF00]/20 to-transparent border border-[#CCFF00]/30 rounded-[48px] p-10">
               <div className="text-xs font-sans font-bold text-[#CCFF00] mb-4 uppercase tracking-wider">TIẾP TỤC HỌC</div>
               <h2 className="text-2xl font-heading font-black tracking-tight mb-2">{currentLesson.title}</h2>
               <p className="font-sans text-zinc-400 mb-6">{currentLesson.description}</p>
@@ -136,7 +136,7 @@ export default function Dashboard() {
 
               <button
                 onClick={() => setView('lesson')}
-                className="w-full bg-[#CCFF00] text-black py-4 rounded-lg font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
+                className="w-full bg-[#CCFF00] text-black py-4 rounded-[28px] font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
               >
                 {completedLessonIds.includes(currentLesson.id) ? 'Ôn tập bài học' : 'Bắt đầu học'} →
               </button>
@@ -147,7 +147,7 @@ export default function Dashboard() {
           <div className="grid md:grid-cols-2 gap-4">
             <button
               onClick={() => setView('curriculum')}
-              className="bg-white/5 border border-white/10 rounded-lg p-8 text-left hover:bg-white/10 transition-colors"
+              className="bg-white/5 border border-white/10 rounded-[40px] p-9 text-left hover:bg-white/10 transition-colors"
             >
               <div className="text-3xl mb-4">📚</div>
               <h3 className="text-xl font-heading font-black tracking-tight mb-2">Xem giáo trình</h3>
@@ -159,7 +159,7 @@ export default function Dashboard() {
                 setPracticeScenarioId('coffee-shop');
                 setView('practice');
               }}
-              className="bg-white/5 border border-white/10 rounded-lg p-8 text-left hover:bg-white/10 transition-colors"
+              className="bg-white/5 border border-white/10 rounded-[40px] p-9 text-left hover:bg-white/10 transition-colors"
             >
               <div className="text-3xl mb-4">💬</div>
               <h3 className="text-xl font-heading font-black tracking-tight mb-2">Luyện hội thoại</h3>
@@ -168,7 +168,7 @@ export default function Dashboard() {
           </div>
 
           {/* Learning Path Overview */}
-          <div className="bg-white/5 border border-white/10 rounded-lg p-8">
+          <div className="bg-white/5 border border-white/10 rounded-[40px] p-10">
             <div className="text-xs font-sans font-bold text-zinc-500 mb-4 uppercase tracking-wider">LỘ TRÌNH HỌC TẬP</div>
             <h3 className="text-xl font-heading font-black tracking-tight mb-2">{foundationPath.title}</h3>
             <p className="font-sans text-zinc-400 mb-6">{foundationPath.description}</p>
@@ -182,7 +182,7 @@ export default function Dashboard() {
                 const moduleProgress = (moduleCompleted / moduleTotal) * 100;
 
                 return (
-                  <div key={module.id} className="bg-black/30 rounded-lg p-4">
+                  <div key={module.id} className="bg-black/30 rounded-[24px] p-6">
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <div className="text-xs font-sans font-bold text-zinc-500 uppercase">{module.level}</div>
@@ -205,7 +205,7 @@ export default function Dashboard() {
           </div>
 
           {/* Tips */}
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-6">
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-[32px] p-8">
             <div className="flex gap-4">
               <div className="text-2xl">💡</div>
               <div>

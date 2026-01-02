@@ -136,12 +136,12 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
               >
                 <div className="text-xs font-sans font-bold text-zinc-500 mb-2 uppercase tracking-wider">KHỞI ĐỘNG • {lesson.warmup.type.toUpperCase()}</div>
                 <h2 className="text-2xl font-heading font-black tracking-tight mb-4">{lesson.warmup.title}</h2>
-                <div className="bg-white/5 border border-white/10 rounded-lg p-8">
+                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8">
                   <p className="text-lg font-sans leading-relaxed">{lesson.warmup.content}</p>
                 </div>
                 <button
                   onClick={goToNextSection}
-                  className="w-full bg-[#CCFF00] text-black py-4 rounded-lg font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
+                  className="w-full bg-[#CCFF00] text-black py-4 rounded-[28px] font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
                 >
                   Tiếp tục học từ vựng →
                 </button>
@@ -167,7 +167,7 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="bg-white/5 border border-white/10 rounded-lg p-6 hover:border-[#CCFF00]/50 transition-colors cursor-pointer"
+                      className="bg-white/5 border border-white/10 rounded-[20px] p-6 hover:border-[#CCFF00]/50 transition-colors cursor-pointer"
                       onClick={() => setActiveVocab(vocab)}
                     >
                       <div className="flex items-baseline gap-3 mb-2">
@@ -182,7 +182,7 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
 
                 <button
                   onClick={goToNextSection}
-                  className="w-full bg-[#CCFF00] text-black py-4 rounded-lg font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
+                  className="w-full bg-[#CCFF00] text-black py-4 rounded-[28px] font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
                 >
                   Tiếp tục học ngữ pháp →
                 </button>
@@ -201,12 +201,12 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                 <div className="text-xs font-sans font-bold text-zinc-500 mb-2 uppercase tracking-wider">ĐIỂM NGỮ PHÁP</div>
                 <h2 className="text-2xl font-heading font-black tracking-tight mb-6">{lesson.grammar.title}</h2>
 
-                <div className="bg-white/5 border border-white/10 rounded-lg p-8 space-y-4">
+                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
                   <p className="font-sans text-zinc-300 leading-relaxed">{lesson.grammar.explanationVi}</p>
 
                   <div className="space-y-3 mt-6">
                     {lesson.grammar.examples.map((example, index) => (
-                      <div key={index} className="bg-black/30 rounded-lg p-4">
+                      <div key={index} className="bg-black/30 rounded-[20px] p-4">
                         <p className="font-sans text-[#CCFF00] mb-1">"{example.en}"</p>
                         <p className="text-sm font-sans text-zinc-400">"{example.vi}"</p>
                       </div>
@@ -215,7 +215,7 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                 </div>
 
                 {/* Grammar Quiz */}
-                <div className="bg-white/5 border border-[#CCFF00]/30 rounded-lg p-8 space-y-4">
+                <div className="bg-white/5 border border-[#CCFF00]/30 rounded-[24px] p-8 space-y-4">
                   <div className="text-xs font-sans font-bold text-[#CCFF00] mb-2 uppercase tracking-wider">KIỂM TRA NHANH</div>
                   <p className="text-lg font-sans mb-4">{lesson.grammar.quiz.question}</p>
 
@@ -224,7 +224,7 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                     value={quizAnswer}
                     onChange={(e) => setQuizAnswer(e.target.value)}
                     placeholder="Nhập câu trả lời..."
-                    className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 font-sans text-white placeholder-zinc-500 focus:outline-none focus:border-[#CCFF00]"
+                    className="w-full bg-black/50 border border-white/20 rounded-[16px] px-4 py-3 font-sans text-white placeholder-zinc-500 focus:outline-none focus:border-[#CCFF00]"
                     onKeyPress={(e) => e.key === 'Enter' && handleQuizSubmit()}
                   />
 
@@ -240,7 +240,7 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
 
                   <button
                     onClick={handleQuizSubmit}
-                    className="w-full bg-[#CCFF00] text-black py-3 rounded-lg font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
+                    className="w-full bg-[#CCFF00] text-black py-3 rounded-[28px] font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
                   >
                     Nộp bài
                   </button>
@@ -263,12 +263,12 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                 <div className="bg-white/5 border border-white/10 rounded-lg p-8 space-y-6">
                   <p className="text-lg font-sans text-zinc-300">{lesson.practice.description}</p>
 
-                  <div className="bg-black/30 rounded-lg p-6 space-y-3">
+                  <div className="bg-black/30 rounded-[20px] p-6 space-y-3">
                     <div className="text-xs font-sans font-bold text-[#CCFF00] mb-2 uppercase tracking-wider">VAI TRÒ CỦA BẠN</div>
                     <p className="font-sans text-zinc-300">{lesson.practice.userRole}</p>
                   </div>
 
-                  <div className="bg-black/30 rounded-lg p-6 space-y-3">
+                  <div className="bg-black/30 rounded-[20px] p-6 space-y-3">
                     <div className="text-xs font-sans font-bold text-[#CCFF00] mb-2 uppercase tracking-wider">TÌNH HUỐNG</div>
                     <p className="font-sans text-zinc-300">{lesson.practice.scenario}</p>
                   </div>
@@ -278,7 +278,7 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                       onPractice?.(lesson.practice.scenarioId);
                       goToNextSection();
                     }}
-                    className="w-full bg-[#CCFF00] text-black py-4 rounded-lg font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
+                    className="w-full bg-[#CCFF00] text-black py-4 rounded-[28px] font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
                   >
                     Bắt đầu luyện tập →
                   </button>
@@ -286,7 +286,7 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
 
                 <button
                   onClick={goToNextSection}
-                  className="w-full bg-white/10 text-white py-4 rounded-lg font-sans font-bold hover:bg-white/20 transition-colors"
+                  className="w-full bg-white/10 text-white py-4 rounded-[28px] font-sans font-bold hover:bg-white/20 transition-colors"
                 >
                   Bỏ qua và ôn tập
                 </button>
@@ -321,14 +321,14 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                   {lesson.nextLessonId && (
                     <button
                       onClick={onNext}
-                      className="flex-1 bg-[#CCFF00] text-black py-4 rounded-lg font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
+                      className="flex-1 bg-[#CCFF00] text-black py-4 rounded-[28px] font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
                     >
                       Bài học tiếp theo →
                     </button>
                   )}
                   <button
                     onClick={onComplete}
-                    className="flex-1 bg-white/10 text-white py-4 rounded-lg font-sans font-bold hover:bg-white/20 transition-colors"
+                    className="flex-1 bg-white/10 text-white py-4 rounded-[28px] font-sans font-bold hover:bg-white/20 transition-colors"
                   >
                     {lesson.nextLessonId ? 'Hoàn thành sau' : 'Hoàn thành bài học'}
                   </button>
@@ -354,7 +354,7 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed inset-x-6 top-1/2 -translate-y-1/2 max-w-2xl mx-auto bg-black border border-white/20 rounded-lg z-50 overflow-hidden"
+              className="fixed inset-x-6 top-1/2 -translate-y-1/2 max-w-2xl mx-auto bg-black border border-white/20 rounded-[32px] z-50 overflow-hidden"
             >
               <div className="p-8 space-y-6">
                 <div className="flex items-baseline gap-3">
@@ -364,12 +364,12 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
 
                 <div className="text-lg font-mono text-[#CCFF00]">{activeVocab.pronunciation}</div>
 
-                <div className="bg-white/5 rounded-lg p-6">
+                <div className="bg-white/5 rounded-[20px] p-6">
                   <div className="text-xs font-sans font-bold text-zinc-500 mb-2 uppercase tracking-wider">NGHĨA</div>
                   <p className="text-lg font-sans text-zinc-300">{activeVocab.meaning}</p>
                 </div>
 
-                <div className="bg-white/5 rounded-lg p-6 space-y-3">
+                <div className="bg-white/5 rounded-[20px] p-6 space-y-3">
                   <div className="text-xs font-sans font-bold text-zinc-500 mb-2 uppercase tracking-wider">VÍ DỤ</div>
                   <p className="font-sans text-[#CCFF00] italic">"{activeVocab.exampleEN}"</p>
                   <p className="font-sans text-zinc-400">"{activeVocab.exampleVi}"</p>
@@ -378,13 +378,13 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                 <div className="flex gap-4">
                   <button
                     onClick={() => handlePlayVocab(activeVocab)}
-                    className="flex-1 bg-[#CCFF00] text-black py-3 rounded-lg font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
+                    className="flex-1 bg-[#CCFF00] text-black py-3 rounded-[28px] font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
                   >
                     🔊 Nghe phát âm
                   </button>
                   <button
                     onClick={() => setActiveVocab(null)}
-                    className="flex-1 bg-white/10 text-white py-3 rounded-lg font-sans font-bold hover:bg-white/20 transition-colors"
+                    className="flex-1 bg-white/10 text-white py-3 rounded-[28px] font-sans font-bold hover:bg-white/20 transition-colors"
                   >
                     Đóng
                   </button>
