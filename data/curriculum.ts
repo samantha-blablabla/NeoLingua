@@ -546,19 +546,6 @@ Today you learned:
   nextLessonId: 'a1-4'
 };
 
-// ============================================
-// MODULE A1: Survival English
-// ============================================
-
-const moduleA1: Module = {
-  id: 'module-a1',
-  title: 'Survival English',
-  description: 'Essential English for daily life - greetings, food, shopping, and basic conversations',
-  level: 'A1',
-  lessons: [lessonA1_1, lessonA1_2, lessonA1_3, lessonA1_4, lessonA1_5, lessonA1_6, lessonA1_7, lessonA1_8],
-  estimatedWeeks: 8
-};
-
 // Lesson A1-4: Asking for Directions
 const lessonA1_4: Lesson = {
   id: 'a1-4',
@@ -1280,6 +1267,19 @@ Today you learned:
   homework: `
 Write down 3 emergency phone numbers in your country (police, ambulance, etc.) and practice saying "I need..." sentences for different emergencies.
   `
+};
+
+// ============================================
+// MODULE A1: Survival English
+// ============================================
+
+const moduleA1: Module = {
+  id: 'module-a1',
+  title: 'Survival English',
+  description: 'Essential English for daily life - greetings, food, shopping, and basic conversations',
+  level: 'A1',
+  lessons: [lessonA1_1, lessonA1_2, lessonA1_3, lessonA1_4, lessonA1_5, lessonA1_6, lessonA1_7, lessonA1_8],
+  estimatedWeeks: 8
 };
 
 // ============================================
