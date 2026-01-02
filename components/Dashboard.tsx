@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 import Lesson from './Lesson';
 import LessonNav from './LessonNav';
 import UrbanChat from './UrbanChat';
+import { LibraryIcon, ChatBubbleIcon } from './Icons';
 import { foundationPath } from '../data/curriculum';
 import type { Lesson as LessonType } from '../data/curriculum';
 
@@ -147,9 +148,11 @@ export default function Dashboard() {
           <div className="grid md:grid-cols-2 gap-4">
             <button
               onClick={() => setView('curriculum')}
-              className="bg-white/5 border border-white/10 rounded-[40px] p-9 text-left hover:bg-white/10 transition-colors"
+              className="bg-white/5 border border-white/10 rounded-[40px] p-9 text-left hover:bg-white/10 transition-colors group"
             >
-              <div className="text-3xl mb-4">📚</div>
+              <div className="w-14 h-14 bg-[#CCFF00]/10 rounded-[20px] flex items-center justify-center mb-6 group-hover:bg-[#CCFF00]/20 transition-colors">
+                <LibraryIcon size={28} color="#CCFF00" />
+              </div>
               <h3 className="text-xl font-heading font-black tracking-tight mb-2">Xem giáo trình</h3>
               <p className="text-sm font-sans text-zinc-400">Duyệt toàn bộ bài học và theo dõi tiến độ</p>
             </button>
@@ -159,9 +162,11 @@ export default function Dashboard() {
                 setPracticeScenarioId('coffee-shop');
                 setView('practice');
               }}
-              className="bg-white/5 border border-white/10 rounded-[40px] p-9 text-left hover:bg-white/10 transition-colors"
+              className="bg-white/5 border border-white/10 rounded-[40px] p-9 text-left hover:bg-white/10 transition-colors group"
             >
-              <div className="text-3xl mb-4">💬</div>
+              <div className="w-14 h-14 bg-[#CCFF00]/10 rounded-[20px] flex items-center justify-center mb-6 group-hover:bg-[#CCFF00]/20 transition-colors">
+                <ChatBubbleIcon size={28} color="#CCFF00" />
+              </div>
               <h3 className="text-xl font-heading font-black tracking-tight mb-2">Luyện hội thoại</h3>
               <p className="text-sm font-sans text-zinc-400">Thực hành giao tiếp thực tế với AI</p>
             </button>

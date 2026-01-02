@@ -103,17 +103,17 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
 
       {/* Section Navigation */}
       <div className="fixed top-[74px] left-0 right-0 z-30 bg-black/80 backdrop-blur-sm border-b border-white/10">
-        <div className="max-w-4xl mx-auto px-6 py-3 flex gap-4 overflow-x-auto">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex gap-3 overflow-x-auto no-scrollbar">
           {sections.map((section) => (
             <button
               key={section}
               onClick={() => setCurrentSection(section)}
-              className={`text-xs whitespace-nowrap px-3 py-1 rounded transition-colors ${
+              className={`text-xs font-sans font-bold whitespace-nowrap px-4 py-2 rounded-[12px] transition-all ${
                 currentSection === section
-                  ? 'bg-[#CCFF00] text-black'
+                  ? 'bg-[#CCFF00] text-black shadow-lg'
                   : completedSections.has(section)
-                  ? 'text-[#CCFF00]'
-                  : 'text-zinc-500'
+                  ? 'text-[#CCFF00] bg-[#CCFF00]/10'
+                  : 'text-zinc-500 bg-white/5'
               }`}
             >
               {completedSections.has(section) && '✓ '}
