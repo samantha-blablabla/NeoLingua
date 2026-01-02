@@ -101,7 +101,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
+        <div className="max-w-4xl mx-auto px-6 py-8 pb-40 space-y-8">
           {/* Overall Progress */}
           <div className="bg-white/5 border border-white/10 rounded-[40px] p-10">
             <div className="text-xs font-sans font-bold text-zinc-500 mb-4 uppercase tracking-wider">TIẾN ĐỘ HỌC TẬP</div>

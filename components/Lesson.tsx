@@ -61,14 +61,16 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
 
   const handleQuizSubmit = () => {
     const isCorrect = quizAnswer.trim().toLowerCase() === lesson.grammar.quiz.correctAnswer.toLowerCase();
-    setQuizFeedback(isCorrect ? '✅ Chính xác!' : `❌ ${lesson.grammar.quiz.feedback}`);
 
     if (isCorrect) {
+      setQuizFeedback('correct');
       setTimeout(() => {
         setQuizFeedback('');
         setQuizAnswer('');
         goToNextSection();
-      }, 2000);
+      }, 2500);
+    } else {
+      setQuizFeedback('incorrect');
     }
   };
 
@@ -122,7 +124,7 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
       </div>
 
       {/* Main Content */}
-      <div className="pt-[140px] pb-24 px-6">
+      <div className="pt-[140px] pb-40 px-6">
         <div className="max-w-4xl mx-auto">
           <AnimatePresence mode="wait">
             {/* WARMUP SECTION */}
@@ -228,13 +230,15 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                     onKeyPress={(e) => e.key === 'Enter' && handleQuizSubmit()}
                   />
 
-                  {quizFeedback && (
+                  {quizFeedback === 'incorrect' && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className={`text-sm font-sans ${quizFeedback.startsWith('✅') ? 'text-[#CCFF00]' : 'text-red-400'}`}
+                      className="bg-red-500/10 border border-red-500/30 rounded-[16px] p-4"
                     >
-                      {quizFeedback}
+                      <p className="text-sm font-sans text-red-400">
+                        💭 {lesson.grammar.quiz.feedback}
+                      </p>
                     </motion.div>
                   )}
 
@@ -338,6 +342,90 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Quiz Success Celebration Modal */}
+      <AnimatePresence>
+        {quizFeedback === 'correct' && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                rotate: 0,
+                transition: {
+                  type: "spring",
+                  damping: 15,
+                  stiffness: 300
+                }
+              }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="fixed inset-x-6 top-1/2 -translate-y-1/2 max-w-md mx-auto z-50"
+            >
+              <div className="bg-gradient-to-br from-[#CCFF00] to-[#99CC00] rounded-[40px] p-8 text-center relative overflow-hidden">
+                {/* Animated sparkles */}
+                <motion.div
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 180, 360]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                  className="absolute top-4 right-4 text-4xl"
+                >
+                  ✨
+                </motion.div>
+                <motion.div
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    rotate: [0, -180, -360]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "linear",
+                    delay: 0.3
+                  }}
+                  className="absolute bottom-4 left-4 text-4xl"
+                >
+                  ⭐
+                </motion.div>
+
+                <motion.div
+                  animate={{
+                    scale: [1, 1.1, 1],
+                    y: [0, -10, 0]
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="text-7xl mb-4"
+                >
+                  🎉
+                </motion.div>
+
+                <h3 className="text-3xl font-heading font-black text-black mb-2">
+                  Chính xác!
+                </h3>
+                <p className="text-lg font-sans font-bold text-black/70">
+                  Bạn làm tuyệt vời! 🌟
+                </p>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Vocabulary Detail Modal */}
       <AnimatePresence>
