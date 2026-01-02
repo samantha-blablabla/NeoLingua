@@ -555,8 +555,8 @@ const moduleA1: Module = {
   title: 'Survival English',
   description: 'Essential English for daily life - greetings, food, shopping, and basic conversations',
   level: 'A1',
-  lessons: [lessonA1_1, lessonA1_2, lessonA1_3],
-  estimatedWeeks: 4
+  lessons: [lessonA1_1, lessonA1_2, lessonA1_3, lessonA1_4, lessonA1_5, lessonA1_6, lessonA1_7, lessonA1_8],
+  estimatedWeeks: 8
 };
 
 // Lesson A1-4: Asking for Directions
@@ -848,6 +848,440 @@ Write 3 sentences you would say at a restaurant using "Can I have...?" or "Can y
   `
 };
 
+// Lesson A1-6: Making Small Talk
+const lessonA1_6: Lesson = {
+  id: 'a1-6',
+  moduleId: 'module-a1',
+  title: 'Making Small Talk',
+  description: 'Learn casual conversation topics like weather, hobbies, and weekend plans',
+  level: 'A1',
+  estimatedMinutes: 25,
+  nextLessonId: 'a1-7',
+
+  warmup: {
+    type: 'text',
+    title: 'Breaking the Ice',
+    content: `You're waiting for the elevator with a colleague. There's an awkward silence. How do you start a friendly conversation? Let's learn small talk!`
+  },
+
+  vocabulary: [
+    {
+      word: 'weather',
+      pronunciation: '/ˈweðər/',
+      partOfSpeech: '(n)',
+      meaning: 'thời tiết',
+      exampleEN: 'The weather is nice today.',
+      exampleVI: 'Thời tiết hôm nay đẹp.'
+    },
+    {
+      word: 'weekend',
+      pronunciation: '/ˌwiːkˈend/',
+      partOfSpeech: '(n)',
+      meaning: 'cuối tuần',
+      exampleEN: 'What are your plans for the weekend?',
+      exampleVI: 'Bạn có kế hoạch gì cho cuối tuần?'
+    },
+    {
+      word: 'hobby',
+      pronunciation: '/ˈhɒbi/',
+      partOfSpeech: '(n)',
+      meaning: 'sở thích',
+      exampleEN: 'What are your hobbies?',
+      exampleVI: 'Sở thích của bạn là gì?'
+    },
+    {
+      word: 'favorite',
+      pronunciation: '/ˈfeɪvərɪt/',
+      partOfSpeech: '(adj/n)',
+      meaning: 'yêu thích',
+      exampleEN: "What's your favorite movie?",
+      exampleVI: 'Phim yêu thích của bạn là gì?'
+    },
+    {
+      word: 'like',
+      pronunciation: '/laɪk/',
+      partOfSpeech: '(v)',
+      meaning: 'thích',
+      exampleEN: 'I like reading books.',
+      exampleVI: 'Tôi thích đọc sách.'
+    },
+    {
+      word: 'enjoy',
+      pronunciation: '/ɪnˈdʒɔɪ/',
+      partOfSpeech: '(v)',
+      meaning: 'tận hưởng, thích',
+      exampleEN: 'I enjoy playing tennis.',
+      exampleVI: 'Tôi thích chơi tennis.'
+    },
+    {
+      word: 'usually',
+      pronunciation: '/ˈjuːʒuəli/',
+      partOfSpeech: '(adv)',
+      meaning: 'thường xuyên',
+      exampleEN: 'I usually go to the gym on Mondays.',
+      exampleVI: 'Tôi thường đi gym vào thứ Hai.'
+    }
+  ],
+
+  grammar: {
+    title: 'Present Simple (Habits & Preferences)',
+    explanationVi: `
+**Thì Hiện Tại Đơn - Nói về thói quen và sở thích**
+
+Dùng để nói về những việc bạn thường làm hoặc những điều bạn thích.
+
+**Cấu trúc khẳng định:**
+
+1. **I/You/We/They + động từ nguyên mẫu**
+   - I like coffee. (Tôi thích cà phê.)
+   - They play football. (Họ chơi bóng đá.)
+
+2. **He/She/It + động từ + s/es**
+   - She likes tea. (Cô ấy thích trà.)
+   - He plays guitar. (Anh ấy chơi guitar.)
+
+**Cấu trúc nghi vấn:**
+
+1. **Do you/we/they + động từ?**
+   - Do you like music? (Bạn có thích nhạc không?)
+
+2. **Does he/she/it + động từ?**
+   - Does she play tennis? (Cô ấy có chơi tennis không?)
+
+**Từ thường gặp:** usually, often, sometimes, always, never
+    `,
+    examples: [
+      {
+        en: "I usually go for a walk on weekends.",
+        vi: "Tôi thường đi dạo vào cuối tuần."
+      },
+      {
+        en: "Do you like watching movies?",
+        vi: "Bạn có thích xem phim không?"
+      },
+      {
+        en: "She enjoys reading in her free time.",
+        vi: "Cô ấy thích đọc sách trong thời gian rảnh."
+      }
+    ],
+    quiz: {
+      question: "How do you say 'Tôi thường chơi game vào tối thứ Sáu' in English?",
+      correctAnswer: "I usually play games on Friday nights.",
+      feedback: "Excellent! We use Present Simple with 'usually' for habits."
+    }
+  },
+
+  practice: {
+    scenarioId: 'practice-a1-6',
+    title: 'Coffee Break Chat',
+    description: 'Luyện tập trò chuyện nhẹ nhàng với đồng nghiệp',
+    userRole: 'Bạn là nhân viên đang nghỉ giải lao',
+    scenario: 'Bạn đang uống cà phê ở pantry văn phòng. Một đồng nghiệp mới đến ngồi cạnh. Hãy bắt chuyện về thời tiết, cuối tuần, hoặc sở thích.',
+    difficulty: 'easy',
+    estimatedMinutes: 10
+  },
+
+  summary: `
+Today you learned:
+✅ Small talk vocabulary: weather, weekend, hobby, favorite
+✅ Present Simple for habits and preferences
+✅ How to ask about likes and hobbies
+  `,
+
+  homework: `
+Think about 3 of your hobbies or habits. Write them down using Present Simple (e.g., "I usually...", "I like...", "I enjoy...").
+  `
+};
+
+// Lesson A1-7: Using Public Transport
+const lessonA1_7: Lesson = {
+  id: 'a1-7',
+  moduleId: 'module-a1',
+  title: 'Using Public Transport',
+  description: 'Learn how to buy tickets, ask about schedules, and navigate public transport',
+  level: 'A1',
+  estimatedMinutes: 30,
+  nextLessonId: 'a1-8',
+
+  warmup: {
+    type: 'text',
+    title: 'Taking the Train',
+    content: `You need to catch a train to the airport. You're at the station ticket counter. How do you buy a ticket and ask about the departure time? Let's learn!`
+  },
+
+  vocabulary: [
+    {
+      word: 'ticket',
+      pronunciation: '/ˈtɪkɪt/',
+      partOfSpeech: '(n)',
+      meaning: 'vé',
+      exampleEN: 'I need a ticket to London.',
+      exampleVI: 'Tôi cần một vé đến London.'
+    },
+    {
+      word: 'platform',
+      pronunciation: '/ˈplætfɔːrm/',
+      partOfSpeech: '(n)',
+      meaning: 'sân ga, peran',
+      exampleEN: 'The train leaves from platform 3.',
+      exampleVI: 'Tàu khởi hành từ sân ga số 3.'
+    },
+    {
+      word: 'schedule',
+      pronunciation: '/ˈʃedjuːl/',
+      partOfSpeech: '(n)',
+      meaning: 'lịch trình',
+      exampleEN: 'What is the train schedule?',
+      exampleVI: 'Lịch tàu là gì?'
+    },
+    {
+      word: 'arrive',
+      pronunciation: '/əˈraɪv/',
+      partOfSpeech: '(v)',
+      meaning: 'đến nơi',
+      exampleEN: 'What time does the bus arrive?',
+      exampleVI: 'Xe buýt đến lúc mấy giờ?'
+    },
+    {
+      word: 'depart',
+      pronunciation: '/dɪˈpɑːrt/',
+      partOfSpeech: '(v)',
+      meaning: 'khởi hành',
+      exampleEN: 'The train departs at 3 PM.',
+      exampleVI: 'Tàu khởi hành lúc 3 giờ chiều.'
+    },
+    {
+      word: 'return',
+      pronunciation: '/rɪˈtɜːrn/',
+      partOfSpeech: '(adj/n)',
+      meaning: 'khứ hồi',
+      exampleEN: 'A return ticket, please.',
+      exampleVI: 'Cho tôi một vé khứ hồi.'
+    },
+    {
+      word: 'single',
+      pronunciation: '/ˈsɪŋɡl/',
+      partOfSpeech: '(adj)',
+      meaning: 'một chiều',
+      exampleEN: 'Just a single ticket.',
+      exampleVI: 'Chỉ cần vé một chiều thôi.'
+    }
+  ],
+
+  grammar: {
+    title: 'Questions: "How do I...?"',
+    explanationVi: `
+**Hỏi cách thức với "How do I...?"**
+
+Dùng để hỏi cách làm một việc gì đó.
+
+**Cấu trúc:**
+
+**How do I + động từ...?** - Làm thế nào để tôi...?
+
+**Các câu hỏi phổ biến:**
+
+1. **How do I get to...?** - Làm sao để đến...?
+   - How do I get to the airport? (Làm sao để đến sân bay?)
+
+2. **How do I buy...?** - Làm sao để mua...?
+   - How do I buy a ticket? (Làm sao để mua vé?)
+
+3. **How do I use...?** - Làm sao để dùng...?
+   - How do I use this machine? (Làm sao để dùng máy này?)
+
+**Trả lời:**
+- You + động từ... (Bạn + động từ...)
+- You can + động từ... (Bạn có thể + động từ...)
+
+**Ví dụ:**
+- Q: How do I get there?
+- A: You take bus number 5. (Bạn bắt xe buýt số 5.)
+    `,
+    examples: [
+      {
+        en: "How do I get to platform 2?",
+        vi: "Làm sao để đến sân ga số 2?"
+      },
+      {
+        en: "You go down the stairs and turn left.",
+        vi: "Bạn đi xuống cầu thang và rẽ trái."
+      },
+      {
+        en: "How do I buy a ticket from this machine?",
+        vi: "Làm sao để mua vé từ máy này?"
+      }
+    ],
+    quiz: {
+      question: "How do you ask 'Làm sao để đến sân bay?' in English?",
+      correctAnswer: "How do I get to the airport?",
+      feedback: "Perfect! 'How do I get to...?' is used to ask for directions."
+    }
+  },
+
+  practice: {
+    scenarioId: 'practice-a1-7',
+    title: 'At the Train Station',
+    description: 'Luyện tập mua vé và hỏi thông tin tàu',
+    userRole: 'Bạn là hành khách cần mua vé tàu',
+    scenario: 'Bạn đang ở ga tàu và cần đi đến sân bay. Bạn cần mua vé, hỏi giờ khởi hành, và tìm sân ga đúng.',
+    difficulty: 'medium',
+    estimatedMinutes: 12
+  },
+
+  summary: `
+Today you learned:
+✅ Transport vocabulary: ticket, platform, schedule, arrive, depart
+✅ "How do I...?" questions for asking instructions
+✅ How to buy tickets and ask about transport
+  `,
+
+  homework: `
+Practice saying 3 questions you might ask at a train or bus station using "How do I...?". Write them down!
+  `
+};
+
+// Lesson A1-8: Emergency Situations
+const lessonA1_8: Lesson = {
+  id: 'a1-8',
+  moduleId: 'module-a1',
+  title: 'Emergency Situations',
+  description: "Essential phrases for asking for help when you're in trouble or need assistance",
+  level: 'A1',
+  estimatedMinutes: 30,
+
+  warmup: {
+    type: 'text',
+    title: 'When You Need Help',
+    content: `You're lost in a foreign city and your phone battery died. You need help finding your hotel. What do you say? Let's learn important emergency phrases!`
+  },
+
+  vocabulary: [
+    {
+      word: 'help',
+      pronunciation: '/help/',
+      partOfSpeech: '(n/v)',
+      meaning: 'giúp đỡ',
+      exampleEN: 'Can you help me, please?',
+      exampleVI: 'Bạn có thể giúp tôi không?'
+    },
+    {
+      word: 'emergency',
+      pronunciation: '/ɪˈmɜːrdʒənsi/',
+      partOfSpeech: '(n)',
+      meaning: 'tình huống khẩn cấp',
+      exampleEN: 'This is an emergency!',
+      exampleVI: 'Đây là tình huống khẩn cấp!'
+    },
+    {
+      word: 'hospital',
+      pronunciation: '/ˈhɒspɪtl/',
+      partOfSpeech: '(n)',
+      meaning: 'bệnh viện',
+      exampleEN: 'I need to go to the hospital.',
+      exampleVI: 'Tôi cần đến bệnh viện.'
+    },
+    {
+      word: 'police',
+      pronunciation: '/pəˈliːs/',
+      partOfSpeech: '(n)',
+      meaning: 'cảnh sát',
+      exampleEN: 'Please call the police.',
+      exampleVI: 'Làm ơn gọi cảnh sát.'
+    },
+    {
+      word: 'lost',
+      pronunciation: '/lɒst/',
+      partOfSpeech: '(adj)',
+      meaning: 'bị lạc',
+      exampleEN: "I'm lost. Can you help me?",
+      exampleVI: 'Tôi bị lạc. Bạn có thể giúp tôi không?'
+    },
+    {
+      word: 'passport',
+      pronunciation: '/ˈpɑːspɔːrt/',
+      partOfSpeech: '(n)',
+      meaning: 'hộ chiếu',
+      exampleEN: 'I lost my passport.',
+      exampleVI: 'Tôi mất hộ chiếu.'
+    },
+    {
+      word: 'wallet',
+      pronunciation: '/ˈwɒlɪt/',
+      partOfSpeech: '(n)',
+      meaning: 'ví tiền',
+      exampleEN: 'My wallet was stolen.',
+      exampleVI: 'Ví của tôi bị mất cắp.'
+    }
+  ],
+
+  grammar: {
+    title: 'Urgent Requests: "I need..." / "Can you help me...?"',
+    explanationVi: `
+**Xin giúp đỡ khi khẩn cấp**
+
+Khi bạn cần giúp đỡ gấp, dùng các cấu trúc sau:
+
+**1. I need... - Tôi cần...**
+- I need help. (Tôi cần giúp đỡ.)
+- I need a doctor. (Tôi cần bác sĩ.)
+- I need to go to the hospital. (Tôi cần đến bệnh viện.)
+
+**2. Can you help me...? - Bạn có thể giúp tôi...?**
+- Can you help me? (Bạn có thể giúp tôi không?)
+- Can you help me find my hotel? (Bạn có thể giúp tôi tìm khách sạn không?)
+- Can you call the police? (Bạn có thể gọi cảnh sát không?)
+
+**3. I lost... - Tôi mất/bị lạc...**
+- I lost my phone. (Tôi mất điện thoại.)
+- I'm lost. (Tôi bị lạc.)
+
+**Lưu ý:** Nói "Excuse me" hoặc "Sorry" trước khi xin giúp đỡ!
+- Excuse me, can you help me? ✓
+    `,
+    examples: [
+      {
+        en: "Excuse me, I need help. I'm lost.",
+        vi: "Xin lỗi, tôi cần giúp đỡ. Tôi bị lạc."
+      },
+      {
+        en: "Can you help me find a hospital?",
+        vi: "Bạn có thể giúp tôi tìm bệnh viện không?"
+      },
+      {
+        en: "I lost my passport. What should I do?",
+        vi: "Tôi mất hộ chiếu. Tôi nên làm gì?"
+      }
+    ],
+    quiz: {
+      question: "How do you say 'Tôi cần bác sĩ' in English?",
+      correctAnswer: "I need a doctor.",
+      feedback: "Correct! 'I need...' is direct and clear in emergencies."
+    }
+  },
+
+  practice: {
+    scenarioId: 'practice-a1-8',
+    title: 'Lost in the City',
+    description: 'Luyện tập xin giúp đỡ khi gặp khó khăn',
+    userRole: 'Bạn là du khách đang gặp vấn đề',
+    scenario: 'Bạn bị lạc ở một thành phố lạ, điện thoại hết pin, và bạn không nhớ địa chỉ khách sạn. Hãy tìm người giúp đỡ.',
+    difficulty: 'medium',
+    estimatedMinutes: 10
+  },
+
+  summary: `
+Today you learned:
+✅ Emergency vocabulary: help, hospital, police, lost, passport
+✅ How to ask for urgent help: "I need...", "Can you help me...?"
+✅ What to say when you're lost or in trouble
+  `,
+
+  homework: `
+Write down 3 emergency phone numbers in your country (police, ambulance, etc.) and practice saying "I need..." sentences for different emergencies.
+  `
+};
+
 // ============================================
 // LEARNING PATHS
 // ============================================
@@ -865,7 +1299,12 @@ export const foundationPath: LearningPath = {
 export const allLessons = {
   'a1-1': lessonA1_1,
   'a1-2': lessonA1_2,
-  'a1-3': lessonA1_3
+  'a1-3': lessonA1_3,
+  'a1-4': lessonA1_4,
+  'a1-5': lessonA1_5,
+  'a1-6': lessonA1_6,
+  'a1-7': lessonA1_7,
+  'a1-8': lessonA1_8
 };
 
 export const allModules = {
