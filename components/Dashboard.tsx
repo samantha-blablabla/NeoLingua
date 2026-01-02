@@ -92,22 +92,22 @@ export default function Dashboard() {
   // Dashboard View
   if (view === 'dashboard') {
     return (
-      <div className="min-h-screen bg-black text-white font-mono">
+      <div className="min-h-screen bg-black text-white font-sans">
         {/* Header */}
         <div className="sticky top-0 z-50 bg-black/90 backdrop-blur-sm border-b border-white/10">
           <div className="max-w-4xl mx-auto px-6 py-4">
-            <h1 className="text-2xl font-bold">NeoLingua</h1>
-            <p className="text-sm text-zinc-400">Your English Learning Journey</p>
+            <h1 className="text-2xl font-heading font-black tracking-tight">NeoLingua</h1>
+            <p className="text-sm font-sans text-zinc-400 mt-1">Hành trình học tiếng Anh của bạn</p>
           </div>
         </div>
 
         <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
           {/* Overall Progress */}
           <div className="bg-white/5 border border-white/10 rounded-lg p-8">
-            <div className="text-xs text-zinc-500 mb-2">YOUR PROGRESS</div>
+            <div className="text-xs font-sans font-bold text-zinc-500 mb-4 uppercase tracking-wider">TIẾN ĐỘ HỌC TẬP</div>
             <div className="flex items-baseline gap-4 mb-4">
-              <h2 className="text-4xl font-bold text-[#CCFF00]">{completedLessonIds.length}</h2>
-              <span className="text-zinc-400">/ {totalLessons} lessons completed</span>
+              <h2 className="text-4xl font-heading font-black text-[#CCFF00]">{completedLessonIds.length}</h2>
+              <span className="font-sans text-zinc-400">/ {totalLessons} bài học đã hoàn thành</span>
             </div>
             <div className="h-3 bg-white/10 rounded-full overflow-hidden">
               <motion.div
@@ -122,23 +122,23 @@ export default function Dashboard() {
           {/* Current Lesson */}
           {currentLesson && (
             <div className="bg-gradient-to-br from-[#CCFF00]/20 to-transparent border border-[#CCFF00]/30 rounded-lg p-8">
-              <div className="text-xs text-[#CCFF00] mb-2">CONTINUE LEARNING</div>
-              <h2 className="text-2xl font-bold mb-2">{currentLesson.title}</h2>
-              <p className="text-zinc-400 mb-6">{currentLesson.description}</p>
+              <div className="text-xs font-sans font-bold text-[#CCFF00] mb-4 uppercase tracking-wider">TIẾP TỤC HỌC</div>
+              <h2 className="text-2xl font-heading font-black tracking-tight mb-2">{currentLesson.title}</h2>
+              <p className="font-sans text-zinc-400 mb-6">{currentLesson.description}</p>
 
-              <div className="flex gap-4 text-sm text-zinc-500 mb-6">
+              <div className="flex gap-4 text-sm font-sans text-zinc-500 mb-6">
                 <span>{currentLesson.level}</span>
                 <span>•</span>
-                <span>{currentLesson.estimatedMinutes} minutes</span>
+                <span>{currentLesson.estimatedMinutes} phút</span>
                 <span>•</span>
-                <span>{currentLesson.vocabulary.length} new words</span>
+                <span>{currentLesson.vocabulary.length} từ mới</span>
               </div>
 
               <button
                 onClick={() => setView('lesson')}
-                className="w-full bg-[#CCFF00] text-black py-4 rounded-lg font-bold hover:bg-[#CCFF00]/90 transition-colors"
+                className="w-full bg-[#CCFF00] text-black py-4 rounded-lg font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
               >
-                {completedLessonIds.includes(currentLesson.id) ? 'Review Lesson' : 'Start Lesson'} →
+                {completedLessonIds.includes(currentLesson.id) ? 'Ôn tập bài học' : 'Bắt đầu học'} →
               </button>
             </div>
           )}
@@ -149,9 +149,9 @@ export default function Dashboard() {
               onClick={() => setView('curriculum')}
               className="bg-white/5 border border-white/10 rounded-lg p-8 text-left hover:bg-white/10 transition-colors"
             >
-              <div className="text-3xl mb-3">📚</div>
-              <h3 className="text-xl font-bold mb-2">View Curriculum</h3>
-              <p className="text-sm text-zinc-400">Browse all lessons and track progress</p>
+              <div className="text-3xl mb-4">📚</div>
+              <h3 className="text-xl font-heading font-black tracking-tight mb-2">Xem giáo trình</h3>
+              <p className="text-sm font-sans text-zinc-400">Duyệt toàn bộ bài học và theo dõi tiến độ</p>
             </button>
 
             <button
@@ -161,19 +161,19 @@ export default function Dashboard() {
               }}
               className="bg-white/5 border border-white/10 rounded-lg p-8 text-left hover:bg-white/10 transition-colors"
             >
-              <div className="text-3xl mb-3">💬</div>
-              <h3 className="text-xl font-bold mb-2">Street Talk Practice</h3>
-              <p className="text-sm text-zinc-400">Practice real conversations with AI</p>
+              <div className="text-3xl mb-4">💬</div>
+              <h3 className="text-xl font-heading font-black tracking-tight mb-2">Luyện hội thoại</h3>
+              <p className="text-sm font-sans text-zinc-400">Thực hành giao tiếp thực tế với AI</p>
             </button>
           </div>
 
           {/* Learning Path Overview */}
           <div className="bg-white/5 border border-white/10 rounded-lg p-8">
-            <div className="text-xs text-zinc-500 mb-4">YOUR LEARNING PATH</div>
-            <h3 className="text-xl font-bold mb-2">{foundationPath.title}</h3>
-            <p className="text-zinc-400 mb-6">{foundationPath.description}</p>
+            <div className="text-xs font-sans font-bold text-zinc-500 mb-4 uppercase tracking-wider">LỘ TRÌNH HỌC TẬP</div>
+            <h3 className="text-xl font-heading font-black tracking-tight mb-2">{foundationPath.title}</h3>
+            <p className="font-sans text-zinc-400 mb-6">{foundationPath.description}</p>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               {foundationPath.modules.map((module) => {
                 const moduleCompleted = module.lessons.filter(l =>
                   completedLessonIds.includes(l.id)
@@ -183,12 +183,12 @@ export default function Dashboard() {
 
                 return (
                   <div key={module.id} className="bg-black/30 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-3">
                       <div>
-                        <div className="text-xs text-zinc-500">{module.level}</div>
-                        <div className="font-bold">{module.title}</div>
+                        <div className="text-xs font-sans font-bold text-zinc-500 uppercase">{module.level}</div>
+                        <div className="font-heading font-black tracking-tight mt-1">{module.title}</div>
                       </div>
-                      <div className="text-sm text-zinc-400">
+                      <div className="text-sm font-sans text-zinc-400">
                         {moduleCompleted}/{moduleTotal}
                       </div>
                     </div>
@@ -209,9 +209,9 @@ export default function Dashboard() {
             <div className="flex gap-4">
               <div className="text-2xl">💡</div>
               <div>
-                <h4 className="font-bold mb-1">Pro Tip</h4>
-                <p className="text-sm text-zinc-400">
-                  Complete lessons in order to unlock new content. Practice in Street Talk to reinforce what you've learned!
+                <h4 className="font-heading font-black tracking-tight mb-2">Mẹo học tập</h4>
+                <p className="text-sm font-sans text-zinc-400">
+                  Hoàn thành các bài học theo thứ tự để mở khóa nội dung mới. Luyện tập trong Street Talk để củng cố kiến thức đã học!
                 </p>
               </div>
             </div>

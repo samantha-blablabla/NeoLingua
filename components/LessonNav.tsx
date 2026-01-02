@@ -43,19 +43,19 @@ export default function LessonNav({
   };
 
   return (
-    <div className="min-h-screen bg-black text-white font-mono">
+    <div className="min-h-screen bg-black text-white font-sans">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-black/90 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-zinc-500 mb-1">LEARNING PATH</div>
-              <h1 className="text-xl font-bold">Your Curriculum</h1>
+              <div className="text-xs font-sans font-bold text-zinc-500 mb-1 uppercase tracking-wider">LỘ TRÌNH HỌC TẬP</div>
+              <h1 className="text-xl font-heading font-black tracking-tight">Giáo trình của bạn</h1>
             </div>
             {onClose && (
               <button
                 onClick={onClose}
-                className="text-zinc-400 hover:text-white transition-colors"
+                className="text-zinc-400 hover:text-white transition-colors font-sans"
               >
                 ✕
               </button>
@@ -79,20 +79,20 @@ export default function LessonNav({
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="text-xs text-zinc-500 mb-1">{module.level} • {module.estimatedWeeks} WEEKS</div>
-                    <h2 className="text-xl font-bold mb-2">{module.title}</h2>
-                    <p className="text-sm text-zinc-400">{module.description}</p>
+                    <div className="text-xs font-sans font-bold text-zinc-500 mb-1 uppercase">{module.level} • {module.estimatedWeeks} TUẦN</div>
+                    <h2 className="text-xl font-heading font-black tracking-tight mb-2">{module.title}</h2>
+                    <p className="text-sm font-sans text-zinc-400">{module.description}</p>
                   </div>
-                  <div className="text-[#CCFF00] ml-4">
+                  <div className="text-[#CCFF00] ml-4 font-sans">
                     {isExpanded ? '▼' : '▶'}
                   </div>
                 </div>
 
                 {/* Progress Bar */}
                 <div className="mt-4">
-                  <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
-                    <span>Progress</span>
-                    <span>{progress.completed}/{progress.total} lessons</span>
+                  <div className="flex items-center justify-between text-xs font-sans text-zinc-500 mb-2">
+                    <span>Tiến độ</span>
+                    <span>{progress.completed}/{progress.total} bài học</span>
                   </div>
                   <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                     <motion.div
@@ -155,27 +155,27 @@ export default function LessonNav({
 
                               {/* Lesson Info */}
                               <div className="flex-1">
-                                <div className={`text-xs mb-1 ${
+                                <div className={`text-xs font-sans font-bold mb-1 uppercase ${
                                   isCurrent ? 'text-black/60' : 'text-zinc-500'
                                 }`}>
-                                  LESSON {index + 1} • {lesson.estimatedMinutes} MIN
+                                  BÀI {index + 1} • {lesson.estimatedMinutes} PHÚT
                                 </div>
-                                <h3 className={`font-bold mb-1 ${
+                                <h3 className={`font-heading font-black tracking-tight mb-1 ${
                                   isCurrent ? 'text-black' : 'text-white'
                                 }`}>
                                   {lesson.title}
                                 </h3>
-                                <p className={`text-sm ${
+                                <p className={`text-sm font-sans ${
                                   isCurrent ? 'text-black/70' : 'text-zinc-400'
                                 }`}>
                                   {lesson.description}
                                 </p>
 
                                 {/* Lesson Stats */}
-                                <div className={`flex gap-4 mt-3 text-xs ${
+                                <div className={`flex gap-4 mt-3 text-xs font-sans ${
                                   isCurrent ? 'text-black/60' : 'text-zinc-500'
                                 }`}>
-                                  <span>📚 {lesson.vocabulary.length} vocab</span>
+                                  <span>📚 {lesson.vocabulary.length} từ vựng</span>
                                   <span>📝 {lesson.grammar.title}</span>
                                   <span>💬 {lesson.practice.title}</span>
                                 </div>
@@ -183,8 +183,8 @@ export default function LessonNav({
 
                               {/* Current Indicator */}
                               {isCurrent && (
-                                <div className="flex-shrink-0 text-black text-xs font-bold">
-                                  CURRENT
+                                <div className="flex-shrink-0 text-black text-xs font-sans font-bold">
+                                  HIỆN TẠI
                                 </div>
                               )}
                             </div>
@@ -203,12 +203,12 @@ export default function LessonNav({
       {/* Footer Stats */}
       <div className="sticky bottom-0 bg-black/90 backdrop-blur-sm border-t border-white/10">
         <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-sm font-sans">
             <div className="text-zinc-400">
-              Total: {modules.reduce((sum, m) => sum + m.lessons.length, 0)} lessons
+              Tổng: {modules.reduce((sum, m) => sum + m.lessons.length, 0)} bài học
             </div>
-            <div className="text-[#CCFF00]">
-              Completed: {completedLessonIds.length} lessons
+            <div className="text-[#CCFF00] font-bold">
+              Hoàn thành: {completedLessonIds.length} bài học
             </div>
           </div>
         </div>
