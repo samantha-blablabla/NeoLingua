@@ -203,16 +203,128 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                 <div className="text-xs font-sans font-bold text-zinc-500 mb-2 uppercase tracking-wider">ĐIỂM NGỮ PHÁP</div>
                 <h2 className="text-2xl font-heading font-black tracking-tight mb-6">{lesson.grammar.title}</h2>
 
-                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
-                  <p className="font-sans text-zinc-300 leading-relaxed">{lesson.grammar.explanationVi}</p>
+                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-6">
+                  {/* Parse and render grammar explanation with hierarchy */}
+                  {lesson.grammar.explanationVi.split('\n\n').map((paragraph, pIndex) => {
+                    // Check if paragraph is a heading (starts with **)
+                    if (paragraph.trim().startsWith('**') && paragraph.trim().endsWith('**')) {
+                      const heading = paragraph.trim().replace(/\*\*/g, '');
+                      return (
+                        <h3 key={pIndex} className="text-xl font-heading font-black text-[#CCFF00] tracking-tight mt-6 first:mt-0">
+                          {heading}
+                        </h3>
+                      );
+                    }
 
-                  <div className="space-y-3 mt-6">
-                    {lesson.grammar.examples.map((example, index) => (
-                      <div key={index} className="bg-black/30 rounded-[20px] p-4">
-                        <p className="font-sans text-[#CCFF00] mb-1">"{example.en}"</p>
-                        <p className="text-sm font-sans text-zinc-400">"{example.vi}"</p>
-                      </div>
-                    ))}
+                    // Check if paragraph contains bullet points
+                    if (paragraph.includes('- **')) {
+                      const lines = paragraph.split('\n').filter(line => line.trim());
+                      return (
+                        <div key={pIndex} className="space-y-3">
+                          {lines.map((line, lIndex) => {
+                            // Bullet point with bold title
+                            if (line.trim().startsWith('- **')) {
+                              const match = line.match(/- \*\*(.+?)\*\* - (.+)/);
+                              if (match) {
+                                return (
+                                  <div key={lIndex} className="flex gap-3">
+                                    <span className="text-[#CCFF00] font-sans text-lg flex-shrink-0">•</span>
+                                    <div>
+                                      <span className="font-heading font-bold text-white">{match[1]}</span>
+                                      <span className="font-sans text-zinc-300"> - {match[2]}</span>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            }
+                            // Regular bullet point
+                            if (line.trim().startsWith('-')) {
+                              return (
+                                <div key={lIndex} className="flex gap-3">
+                                  <span className="text-[#CCFF00] font-sans text-lg flex-shrink-0">•</span>
+                                  <p className="font-sans text-zinc-300">{line.replace(/^-\s*/, '')}</p>
+                                </div>
+                              );
+                            }
+                            // Regular text within bullet section
+                            return (
+                              <p key={lIndex} className="font-sans text-zinc-300 leading-relaxed pl-6">
+                                {line}
+                              </p>
+                            );
+                          })}
+                        </div>
+                      );
+                    }
+
+                    // Regular numbered list
+                    if (/^\d+\./.test(paragraph.trim())) {
+                      const lines = paragraph.split('\n').filter(line => line.trim());
+                      return (
+                        <div key={pIndex} className="space-y-4">
+                          {lines.map((line, lIndex) => {
+                            const numberMatch = line.match(/^(\d+)\.\s+\*\*(.+?)\*\*/);
+                            if (numberMatch) {
+                              const [, number, title] = numberMatch;
+                              const rest = line.replace(/^\d+\.\s+\*\*.+?\*\*\s*-?\s*/, '');
+                              return (
+                                <div key={lIndex} className="bg-black/40 rounded-[16px] p-4">
+                                  <div className="flex items-baseline gap-2 mb-1">
+                                    <span className="font-heading font-black text-[#CCFF00] text-lg">{number}.</span>
+                                    <span className="font-heading font-bold text-white">{title}</span>
+                                  </div>
+                                  {rest && (
+                                    <p className="font-sans text-zinc-400 text-sm pl-7">{rest}</p>
+                                  )}
+                                </div>
+                              );
+                            }
+                            // Sub-items under numbered list
+                            if (line.trim().startsWith('-')) {
+                              return (
+                                <div key={lIndex} className="flex gap-2 pl-7">
+                                  <span className="text-zinc-500 font-sans">→</span>
+                                  <p className="font-sans text-zinc-300 text-sm">{line.replace(/^-\s*/, '')}</p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })}
+                        </div>
+                      );
+                    }
+
+                    // Regular paragraph
+                    return (
+                      <p key={pIndex} className="font-sans text-zinc-300 leading-relaxed">
+                        {paragraph.replace(/\*\*(.+?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
+                          .split('<strong')
+                          .map((part, i) => {
+                            if (i === 0) return part;
+                            const [attrs, ...rest] = part.split('>');
+                            const [content, ...after] = rest.join('>').split('</strong>');
+                            return (
+                              <React.Fragment key={i}>
+                                <strong className="text-white font-bold">{content}</strong>
+                                {after.join('</strong>')}
+                              </React.Fragment>
+                            );
+                          })}
+                      </p>
+                    );
+                  })}
+
+                  {/* Examples section */}
+                  <div className="pt-6 border-t border-white/10">
+                    <div className="text-xs font-sans font-bold text-[#CCFF00] mb-4 uppercase tracking-wider">VÍ DỤ</div>
+                    <div className="space-y-3">
+                      {lesson.grammar.examples.map((example, index) => (
+                        <div key={index} className="bg-black/30 rounded-[20px] p-5">
+                          <p className="font-sans text-[#CCFF00] mb-2 text-base">"{example.en}"</p>
+                          <p className="text-sm font-sans text-zinc-400">"{example.vi}"</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
