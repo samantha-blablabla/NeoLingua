@@ -351,76 +351,130 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+              className="fixed inset-0 bg-black/90 backdrop-blur-md z-50"
             />
+
+            {/* Confetti particles */}
+            {[...Array(30)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{
+                  opacity: 0,
+                  y: -20,
+                  x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0,
+                  scale: 0
+                }}
+                animate={{
+                  opacity: [0, 1, 1, 0],
+                  y: typeof window !== 'undefined' ? window.innerHeight + 100 : 800,
+                  x: typeof window !== 'undefined'
+                    ? (window.innerWidth / 2) + (Math.random() - 0.5) * 600
+                    : Math.random() * 400,
+                  rotate: Math.random() * 720,
+                  scale: [0, 1, 1, 0.5]
+                }}
+                transition={{
+                  duration: 2 + Math.random() * 1,
+                  delay: Math.random() * 0.3,
+                  ease: "easeOut"
+                }}
+                className="fixed w-3 h-3 rounded-sm z-50 pointer-events-none"
+                style={{
+                  backgroundColor: ['#CCFF00', '#00D9FF', '#FF00E5', '#FFE500', '#00FF94'][i % 5],
+                  top: '40%'
+                }}
+              />
+            ))}
+
             <motion.div
-              initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+              initial={{ opacity: 0, scale: 0.3, y: 100 }}
               animate={{
                 opacity: 1,
                 scale: 1,
-                rotate: 0,
+                y: 0,
                 transition: {
                   type: "spring",
-                  damping: 15,
-                  stiffness: 300
+                  damping: 20,
+                  stiffness: 300,
+                  delay: 0.1
                 }
               }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="fixed inset-x-6 top-1/2 -translate-y-1/2 max-w-md mx-auto z-50"
+              exit={{ opacity: 0, scale: 0.8, y: -50 }}
+              className="fixed inset-x-6 top-1/2 -translate-y-1/2 max-w-lg mx-auto z-50"
             >
-              <div className="bg-gradient-to-br from-[#CCFF00] to-[#99CC00] rounded-[40px] p-8 text-center relative overflow-hidden">
-                {/* Animated sparkles */}
+              <div className="bg-gradient-to-br from-[#CCFF00] via-[#CCFF00] to-[#99FF00] rounded-[48px] p-12 text-center relative overflow-hidden shadow-2xl">
+                {/* Animated rays */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    background: 'repeating-conic-gradient(from 0deg, transparent 0deg 10deg, white 10deg 20deg)'
+                  }}
+                />
+
+                {/* Big celebration emoji */}
                 <motion.div
                   animate={{
                     scale: [1, 1.2, 1],
-                    rotate: [0, 180, 360]
+                    rotate: [0, 10, -10, 0]
                   }}
                   transition={{
-                    duration: 2,
+                    duration: 0.5,
                     repeat: Infinity,
-                    ease: "linear"
+                    repeatType: "reverse"
                   }}
-                  className="absolute top-4 right-4 text-4xl"
-                >
-                  ✨
-                </motion.div>
-                <motion.div
-                  animate={{
-                    scale: [1, 1.3, 1],
-                    rotate: [0, -180, -360]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "linear",
-                    delay: 0.3
-                  }}
-                  className="absolute bottom-4 left-4 text-4xl"
-                >
-                  ⭐
-                </motion.div>
-
-                <motion.div
-                  animate={{
-                    scale: [1, 1.1, 1],
-                    y: [0, -10, 0]
-                  }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="text-7xl mb-4"
+                  className="text-8xl mb-6 relative z-10"
                 >
                   🎉
                 </motion.div>
 
-                <h3 className="text-3xl font-heading font-black text-black mb-2">
-                  Chính xác!
-                </h3>
-                <p className="text-lg font-sans font-bold text-black/70">
-                  Bạn làm tuyệt vời! 🌟
-                </p>
+                {/* Text with Bricolage Grotesque */}
+                <motion.h3
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-5xl font-heading font-black text-black mb-3 relative z-10 tracking-tight leading-none"
+                  style={{
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  CHÍNH XÁC!
+                </motion.h3>
+
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="text-xl font-heading font-bold text-black/80 relative z-10"
+                >
+                  Bạn làm tuyệt vời! ⭐
+                </motion.p>
+
+                {/* Floating sparkles around */}
+                {[...Array(8)].map((_, i) => (
+                  <motion.div
+                    key={`sparkle-${i}`}
+                    animate={{
+                      y: [0, -15, 0],
+                      opacity: [0.5, 1, 0.5],
+                      scale: [0.8, 1.2, 0.8]
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      delay: i * 0.2,
+                      ease: "easeInOut"
+                    }}
+                    className="absolute text-3xl pointer-events-none"
+                    style={{
+                      left: `${15 + (i * 10)}%`,
+                      top: `${20 + (i % 2) * 50}%`
+                    }}
+                  >
+                    {['✨', '⭐', '💫', '🌟'][i % 4]}
+                  </motion.div>
+                ))}
               </div>
             </motion.div>
           </>

@@ -318,10 +318,9 @@ const App: React.FC = () => {
         {view === 'curriculum' && <Dashboard />}
       </AnimatePresence>
 
-      <div className="fixed bottom-0 left-0 right-0 h-64 pointer-events-none z-[80]">
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/90 to-transparent opacity-100" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent opacity-100" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-transparent opacity-100" />
+      {/* Subtle fade overlay at bottom - only for scroll aesthetic */}
+      <div className="fixed bottom-0 left-0 right-0 h-32 pointer-events-none z-[5]">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/60 via-transparent to-transparent" />
       </div>
 
       <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[92%] z-[100]">
