@@ -11,7 +11,7 @@
 import { execSync } from 'child_process';
 import os from 'os';
 
-const PORT = 3002;
+const PORT = 3000;
 const URL = `http://localhost:${PORT}`;
 
 // Colors for console
