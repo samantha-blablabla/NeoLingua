@@ -88,13 +88,15 @@ const UrbanChat: React.FC<Props> = ({ onBack, scenario, context_vi }) => {
     cleaned = cleaned.replace(/🔥\s*URBAN UPGRADE:[\s\S]*?(?=💬\s*STREET TIP:|$)/gi, "");
     cleaned = cleaned.replace(/💬\s*STREET TIP:[\s\S]*?$/gi, "");
 
-    // Remove vocabulary markup but keep only English word
-    // This handles: **word|Vietnamese meaning** → word
-    cleaned = cleaned.replace(/\*\*(.*?)\|(.*?)\*\*/g, "$1");
+    // Remove vocabulary markup - handle both NEW and OLD formats
+    // NEW format: **word|/pronunciation/|(pos)|meaning|example EN|example VI** → word
+    // OLD format: **word|meaning** → word
+    // Strategy: Match everything between ** and **, then extract only first segment before |
+    cleaned = cleaned.replace(/\*\*([^|*]+?)\|[^*]*?\*\*/g, "$1");
 
-    // Remove remaining markdown bold
+    // Remove remaining markdown bold (no pipes)
     // This handles: **word** → word
-    cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, "$1");
+    cleaned = cleaned.replace(/\*\*([^*]+?)\*\*/g, "$1");
 
     // Remove all emojis
     cleaned = cleaned.replace(/[🔥💬⚠️✅]/g, "");
