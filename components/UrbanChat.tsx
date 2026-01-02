@@ -13,6 +13,10 @@ interface Message {
 interface Definition {
   word: string;
   meaning: string;
+  pronunciation?: string;  // IPA pronunciation
+  partOfSpeech?: string;   // (n), (v), (adj), (adv), etc.
+  example?: string;        // Example sentence in English
+  exampleVi?: string;      // Vietnamese translation of example
 }
 
 interface Props {
@@ -113,8 +117,16 @@ const UrbanChat: React.FC<Props> = ({ onBack, scenario, context_vi }) => {
 1. MAIN RESPONSE (English only):
    - Use natural, modern urban vocabulary
    - Incorporate slang, phrasal verbs, and idioms
-   - Mark important vocabulary: **word|Nghĩa tiếng Việt chính xác**
-   - Example: **latte|cà phê sữa** (NOT "ca phê sửa" or wrong spelling)
+   - Mark important vocabulary with FULL format: **word|/pronunciation/|(pos)|meaning|example EN|example VI**
+   - Format breakdown:
+     * word: The vocabulary word
+     * /pronunciation/: IPA pronunciation (e.g., /ləˈteɪ/)
+     * (pos): Part of speech - (n), (v), (adj), (adv), (prep), (phrase)
+     * meaning: Vietnamese meaning (CORRECT spelling!)
+     * example EN: Short example sentence in English
+     * example VI: Vietnamese translation of example
+   - Example: **latte|/ˈlɑːteɪ/|(n)|cà phê sữa|Can I get a latte?|Cho tôi một ly cà phê sữa?**
+   - Another: **chill|/tʃɪl/|(adj)|thư giãn, thoải mái|This place is pretty chill.|Chỗ này khá thoải mái.**
 
 2. URBAN OPTIMIZATION (when user's English is too formal):
    - Format: 🔥 URBAN UPGRADE: [Original] → [Cooler version]
@@ -263,16 +275,53 @@ Remember: You're not a teacher, you're a cool urban friend helping them sound na
       return parts.map((part, i) => {
         if (part.startsWith('**') && part.endsWith('**')) {
           const innerContent = part.slice(2, -2);
-          const [word, meaning] = innerContent.split('|');
-          if (!meaning) return <span key={i} className="font-bold">{word}</span>;
+          // Parse new format: word|/pronunciation/|(pos)|meaning|example EN|example VI
+          const segments = innerContent.split('|');
+
+          if (segments.length === 1) {
+            // Old format or just bold text
+            return <span key={i} className="font-bold">{segments[0]}</span>;
+          }
+
+          const word = segments[0];
+          let pronunciation = '';
+          let partOfSpeech = '';
+          let meaning = segments[1] || '';
+          let example = '';
+          let exampleVi = '';
+
+          // Check if we have the full new format (6 segments)
+          if (segments.length >= 6) {
+            pronunciation = segments[1]; // /pronunciation/
+            partOfSpeech = segments[2];  // (pos)
+            meaning = segments[3];       // Vietnamese meaning
+            example = segments[4];       // Example sentence EN
+            exampleVi = segments[5];     // Example sentence VI
+          } else if (segments.length === 2) {
+            // Old format: word|meaning
+            meaning = segments[1];
+          }
 
           return (
             <button
               key={i}
-              onClick={() => setActiveDef({ word, meaning })}
-              className="inline-block px-2 py-1 mx-0.5 bg-[#CCFF00]/10 border-b-2 border-[#CCFF00] text-[#CCFF00] font-bold rounded-sm active:scale-95 transition-transform"
+              onClick={() => setActiveDef({
+                word,
+                meaning,
+                pronunciation,
+                partOfSpeech,
+                example,
+                exampleVi
+              })}
+              className="inline-block px-2 py-1 mx-0.5 bg-[#CCFF00]/10 border-b-2 border-[#CCFF00] text-[#CCFF00] font-bold rounded-sm active:scale-95 transition-transform group relative"
+              title={pronunciation ? `${pronunciation} ${partOfSpeech}` : meaning}
             >
               {word}
+              {partOfSpeech && (
+                <span className="ml-1 text-[10px] text-[#CCFF00]/60 font-normal">
+                  {partOfSpeech}
+                </span>
+              )}
             </button>
           );
         }
@@ -345,18 +394,34 @@ Remember: You're not a teacher, you're a cool urban friend helping them sound na
                 <div className="w-12 h-1.5 bg-white/10 rounded-full mb-8" />
                 
                 <div className="w-full flex justify-between items-start mb-6">
-                   <div className="space-y-1">
+                   <div className="space-y-2 flex-1">
                       <span className="text-[10px] font-sans font-black text-[#CCFF00] uppercase tracking-[0.4em]">DEFINITION</span>
-                      <h4 className="text-4xl font-heading font-black tracking-tighter text-white uppercase leading-none">{activeDef.word}</h4>
+                      <div className="flex items-baseline gap-3">
+                        <h4 className="text-4xl font-heading font-black tracking-tighter text-white uppercase leading-none">{activeDef.word}</h4>
+                        {activeDef.partOfSpeech && (
+                          <span className="text-sm font-sans font-bold text-zinc-500">{activeDef.partOfSpeech}</span>
+                        )}
+                      </div>
+                      {activeDef.pronunciation && (
+                        <p className="text-sm font-mono text-[#CCFF00]/80 tracking-wide">{activeDef.pronunciation}</p>
+                      )}
                    </div>
                    <button onClick={() => setActiveDef(null)} className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 active:scale-90 transition-all">
                       <CloseIcon size={20} />
                    </button>
                 </div>
 
-                <div className="w-full p-6 bg-white/[0.03] rounded-[32px] border border-white/5 mb-8">
+                <div className="w-full p-6 bg-white/[0.03] rounded-[32px] border border-white/5 mb-6">
                    <p className="text-lg font-sans font-bold text-zinc-300 leading-snug">{activeDef.meaning}</p>
                 </div>
+
+                {activeDef.example && activeDef.exampleVi && (
+                  <div className="w-full p-6 bg-white/[0.03] rounded-[32px] border border-white/5 mb-6 space-y-3">
+                    <div className="text-[10px] font-sans font-black text-[#CCFF00]/60 uppercase tracking-[0.3em]">EXAMPLE</div>
+                    <p className="text-sm font-sans font-medium text-white leading-relaxed italic">"{activeDef.example}"</p>
+                    <p className="text-sm font-sans font-medium text-zinc-400 leading-relaxed">"{activeDef.exampleVi}"</p>
+                  </div>
+                )}
 
                 <button
                   onClick={() => playGoogleTTS(activeDef.word)}
