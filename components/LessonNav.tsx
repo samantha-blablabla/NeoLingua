@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LockIcon, BookIcon, PenIcon, MessageIcon } from './Icons';
 import type { Module, Lesson } from '../data/curriculum';
 
 interface LessonNavProps {
@@ -15,6 +16,8 @@ interface LessonNavProps {
   completedLessonIds?: string[];
   onSelectLesson: (lesson: Lesson) => void;
   onClose?: () => void;
+  onReviewAll?: () => void;
+  dueReviewCount?: number;
 }
 
 export default function LessonNav({
@@ -22,7 +25,9 @@ export default function LessonNav({
   currentLessonId,
   completedLessonIds = [],
   onSelectLesson,
-  onClose
+  onClose,
+  onReviewAll,
+  dueReviewCount = 0
 }: LessonNavProps) {
   const [expandedModuleId, setExpandedModuleId] = useState<string>(modules[0]?.id);
 
@@ -47,7 +52,7 @@ export default function LessonNav({
       {/* Header */}
       <div className="sticky top-0 z-50 bg-black/90 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-3">
             <div>
               <div className="text-xs font-sans font-bold text-zinc-500 mb-1 uppercase tracking-wider">LỘ TRÌNH HỌC TẬP</div>
               <h1 className="text-xl font-heading font-black tracking-tight">Giáo trình của bạn</h1>
@@ -55,17 +60,71 @@ export default function LessonNav({
             {onClose && (
               <button
                 onClick={onClose}
-                className="text-zinc-400 hover:text-white transition-colors font-sans"
+                className="text-zinc-400 hover:text-white transition-colors font-sans text-xl"
               >
                 ✕
               </button>
             )}
           </div>
+
+          {/* Progress Stats */}
+          <div className="flex items-center gap-4 pt-3 border-t border-white/10">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-zinc-500"></div>
+              <span className="text-sm font-sans text-zinc-400">
+                Tổng: <span className="font-bold text-white">{modules.reduce((sum, m) => sum + m.lessons.length, 0)}</span> bài
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-[#CCFF00]"></div>
+              <span className="text-sm font-sans text-zinc-400">
+                Hoàn thành: <span className="font-bold text-[#CCFF00]">{completedLessonIds.length}</span> bài
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Module List */}
-      <div className="max-w-4xl mx-auto px-6 py-8 pb-40 space-y-6">
+      <div className="max-w-4xl mx-auto px-6 py-8 pb-48 space-y-6">
+        {/* Review Section */}
+        {dueReviewCount > 0 && onReviewAll && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            onClick={onReviewAll}
+            className="bg-gradient-to-br from-orange-500/20 to-transparent border border-orange-500/30 rounded-[40px] p-8 cursor-pointer hover:border-orange-500/50 transition-all"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-xs font-sans font-bold text-orange-400 uppercase tracking-wider">
+                📚 MỤC ÔN TẬP
+              </div>
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="bg-orange-500 text-white text-xs font-sans font-bold px-3 py-1 rounded-full"
+              >
+                {dueReviewCount} từ
+              </motion.div>
+            </div>
+
+            <h3 className="text-xl font-heading font-black mb-2 text-white">Ôn tập từ vựng</h3>
+            <p className="text-sm font-sans text-zinc-300 mb-4">
+              Bạn có <span className="text-orange-400 font-bold">{dueReviewCount} từ vựng</span> cần ôn tập để ghi nhớ lâu dài
+            </p>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-2 text-xs font-sans text-zinc-400">
+                <span>📝</span>
+                <span>Flashcard nhanh</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs font-sans text-zinc-400">
+                <span>🎯</span>
+                <span>4 kỹ năng toàn diện</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
         {modules.map((module) => {
           const progress = getModuleProgress(module);
           const isExpanded = expandedModuleId === module.id;
@@ -115,7 +174,7 @@ export default function LessonNav({
                     transition={{ duration: 0.3 }}
                     className="border-t border-white/10"
                   >
-                    <div className="p-4 space-y-2">
+                    <div className="p-4 space-y-3">
                       {module.lessons.map((lesson, index) => {
                         const isCompleted = isLessonCompleted(lesson.id);
                         const isCurrent = isLessonCurrent(lesson.id);
@@ -129,7 +188,7 @@ export default function LessonNav({
                             transition={{ delay: index * 0.05 }}
                             onClick={() => !isLocked && onSelectLesson(lesson)}
                             disabled={isLocked}
-                            className={`w-full p-4 rounded-lg text-left transition-all ${
+                            className={`w-full p-6 rounded-[20px] text-left transition-all ${
                               isLocked
                                 ? 'bg-white/5 opacity-50 cursor-not-allowed'
                                 : isCurrent
@@ -141,49 +200,67 @@ export default function LessonNav({
                           >
                             <div className="flex items-start gap-4">
                               {/* Status Icon */}
-                              <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+                              <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
                                 isLocked
                                   ? 'bg-white/10 text-zinc-600'
                                   : isCompleted
-                                  ? 'bg-[#CCFF00] text-black'
+                                  ? 'bg-[#CCFF00] text-black font-bold text-lg'
                                   : isCurrent
-                                  ? 'bg-black text-[#CCFF00]'
-                                  : 'bg-white/10 text-zinc-400'
+                                  ? 'bg-black text-[#CCFF00] font-bold text-base'
+                                  : 'bg-white/10 text-zinc-400 font-bold text-base'
                               }`}>
-                                {isLocked ? '🔒' : isCompleted ? '✓' : index + 1}
+                                {isLocked ? <LockIcon size={18} className="text-zinc-600" /> : isCompleted ? '✓' : index + 1}
                               </div>
 
                               {/* Lesson Info */}
-                              <div className="flex-1">
-                                <div className={`text-xs font-sans font-bold mb-1 uppercase ${
+                              <div className="flex-1 min-w-0">
+                                {/* Meta info */}
+                                <div className={`text-xs font-sans font-bold mb-2 uppercase ${
                                   isCurrent ? 'text-black/60' : 'text-zinc-500'
                                 }`}>
                                   BÀI {index + 1} • {lesson.estimatedMinutes} PHÚT
                                 </div>
-                                <h3 className={`font-heading font-black tracking-tight mb-1 ${
+
+                                {/* Title */}
+                                <h3 className={`text-lg font-heading font-black tracking-tight mb-3 ${
                                   isCurrent ? 'text-black' : 'text-white'
                                 }`}>
                                   {lesson.title}
                                 </h3>
-                                <p className={`text-sm font-sans ${
-                                  isCurrent ? 'text-black/70' : 'text-zinc-400'
+
+                                {/* Description */}
+                                <p className={`text-sm font-sans font-semibold mb-4 leading-relaxed ${
+                                  isCurrent ? 'text-black/80' : 'text-zinc-300'
                                 }`}>
-                                  {lesson.description}
+                                  {lesson.descriptionVi || lesson.description}
                                 </p>
 
-                                {/* Lesson Stats */}
-                                <div className={`flex gap-4 mt-3 text-xs font-sans ${
-                                  isCurrent ? 'text-black/60' : 'text-zinc-500'
-                                }`}>
-                                  <span>📚 {lesson.vocabulary.length} từ vựng</span>
-                                  <span>📝 {lesson.grammar.title}</span>
-                                  <span>💬 {lesson.practice.title}</span>
+                                {/* Lesson Stats - Grid layout for consistency */}
+                                <div className="grid grid-cols-1 gap-2">
+                                  <div className={`flex items-center gap-2 text-xs font-sans font-medium ${
+                                    isCurrent ? 'text-black/70' : 'text-zinc-400'
+                                  }`}>
+                                    <BookIcon size={14} className={isCurrent ? 'text-black/70' : 'text-zinc-400'} />
+                                    <span>{lesson.vocabulary.length} từ vựng</span>
+                                  </div>
+                                  <div className={`flex items-center gap-2 text-xs font-sans font-medium ${
+                                    isCurrent ? 'text-black/70' : 'text-zinc-400'
+                                  }`}>
+                                    <PenIcon size={14} className={isCurrent ? 'text-black/70' : 'text-zinc-400'} />
+                                    <span>{lesson.grammar.title}</span>
+                                  </div>
+                                  <div className={`flex items-center gap-2 text-xs font-sans font-medium ${
+                                    isCurrent ? 'text-black/70' : 'text-zinc-400'
+                                  }`}>
+                                    <MessageIcon size={14} className={isCurrent ? 'text-black/70' : 'text-zinc-400'} />
+                                    <span>{lesson.practice.title}</span>
+                                  </div>
                                 </div>
                               </div>
 
                               {/* Current Indicator */}
                               {isCurrent && (
-                                <div className="flex-shrink-0 text-black text-xs font-sans font-bold">
+                                <div className="flex-shrink-0 text-black text-xs font-sans font-bold ml-2">
                                   HIỆN TẠI
                                 </div>
                               )}
@@ -198,20 +275,6 @@ export default function LessonNav({
             </div>
           );
         })}
-      </div>
-
-      {/* Footer Stats */}
-      <div className="sticky bottom-0 bg-black/90 backdrop-blur-sm border-t border-white/10">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between text-sm font-sans">
-            <div className="text-zinc-400">
-              Tổng: {modules.reduce((sum, m) => sum + m.lessons.length, 0)} bài học
-            </div>
-            <div className="text-[#CCFF00] font-bold">
-              Hoàn thành: {completedLessonIds.length} bài học
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

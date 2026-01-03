@@ -9,7 +9,7 @@
  * - Summary and homework
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Lesson, VocabItem } from '../data/curriculum';
 import { playGoogleTTS, stopSpeech } from '../services/googleTTS';
@@ -19,16 +19,20 @@ interface LessonProps {
   onComplete?: () => void;
   onNext?: () => void;
   onPractice?: (scenarioId: string) => void;
+  onBack?: () => void;
+  onQuizAnswer?: (isCorrect: boolean) => void;
+  onVocabView?: (vocabId: string) => void;
 }
 
 type LessonSection = 'warmup' | 'vocabulary' | 'grammar' | 'practice' | 'summary';
 
-export default function Lesson({ lesson, onComplete, onNext, onPractice }: LessonProps) {
+export default function Lesson({ lesson, onComplete, onNext, onPractice, onBack, onQuizAnswer, onVocabView }: LessonProps) {
   const [currentSection, setCurrentSection] = useState<LessonSection>('warmup');
   const [activeVocab, setActiveVocab] = useState<VocabItem | null>(null);
   const [quizAnswer, setQuizAnswer] = useState<string>('');
   const [quizFeedback, setQuizFeedback] = useState<string>('');
   const [completedSections, setCompletedSections] = useState<Set<LessonSection>>(new Set());
+  const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
 
   const sections: LessonSection[] = ['warmup', 'vocabulary', 'grammar', 'practice', 'summary'];
   const sectionTitles = {
@@ -38,6 +42,35 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
     practice: 'LUYỆN TẬP',
     summary: 'ÔN TẬP'
   };
+
+  // Load section progress from localStorage on mount
+  useEffect(() => {
+    const savedProgress = localStorage.getItem(`neolingua_lesson_${lesson.id}`);
+    if (savedProgress) {
+      const { completedSections: saved, lastSection } = JSON.parse(savedProgress);
+      setCompletedSections(new Set(saved || []));
+
+      // Auto-navigate to first incomplete section or last viewed section
+      if (lastSection && sections.includes(lastSection)) {
+        setCurrentSection(lastSection);
+      } else if (saved && saved.length > 0) {
+        // Find first incomplete section
+        const firstIncomplete = sections.find(s => !saved.includes(s));
+        if (firstIncomplete) {
+          setCurrentSection(firstIncomplete);
+        }
+      }
+    }
+  }, [lesson.id]);
+
+  // Save progress to localStorage whenever completedSections or currentSection changes
+  useEffect(() => {
+    const progress = {
+      completedSections: Array.from(completedSections),
+      lastSection: currentSection
+    };
+    localStorage.setItem(`neolingua_lesson_${lesson.id}`, JSON.stringify(progress));
+  }, [completedSections, currentSection, lesson.id]);
 
   const markSectionComplete = (section: LessonSection) => {
     setCompletedSections(prev => new Set(prev).add(section));
@@ -56,11 +89,14 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
 
   const handlePlayVocab = (vocab: VocabItem) => {
     stopSpeech();
-    playGoogleTTS(vocab.exampleEN);
+    playGoogleTTS(vocab.word);
   };
 
   const handleQuizSubmit = () => {
     const isCorrect = quizAnswer.trim().toLowerCase() === lesson.grammar.quiz.correctAnswer.toLowerCase();
+
+    // Track quiz result in Dashboard stats
+    onQuizAnswer?.(isCorrect);
 
     if (isCorrect) {
       setQuizFeedback('correct');
@@ -71,6 +107,12 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
       }, 2500);
     } else {
       setQuizFeedback('incorrect');
+      // Show incorrect feedback with correct answer for 4 seconds, then move on
+      setTimeout(() => {
+        setQuizFeedback('');
+        setQuizAnswer('');
+        goToNextSection();
+      }, 4000);
     }
   };
 
@@ -79,12 +121,28 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center gap-4">
+            {/* Back Button */}
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                aria-label="Quay lại"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+              </button>
+            )}
+
+            {/* Lesson Info */}
+            <div className="flex-1 min-w-0">
               <div className="text-xs font-sans font-bold text-zinc-500 mb-1 uppercase">{lesson.level} • {lesson.estimatedMinutes} PHÚT</div>
-              <h1 className="text-xl font-heading font-black tracking-tight">{lesson.title}</h1>
+              <h1 className="text-xl font-heading font-black tracking-tight truncate">{lesson.title}</h1>
             </div>
-            <div className="text-[#CCFF00] text-sm font-sans font-bold">
+
+            {/* Progress Counter */}
+            <div className="flex-shrink-0 text-[#CCFF00] text-sm font-sans font-bold">
               {sections.indexOf(currentSection) + 1}/{sections.length}
             </div>
           </div>
@@ -101,25 +159,56 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
         />
       </div>
 
-      {/* Section Navigation */}
+      {/* Section Navigation - Mobile-optimized with proper touch targets */}
       <div className="fixed top-[74px] left-0 right-0 z-30 bg-black/80 backdrop-blur-sm border-b border-white/10">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex gap-3 overflow-x-auto no-scrollbar">
-          {sections.map((section) => (
-            <button
-              key={section}
-              onClick={() => setCurrentSection(section)}
-              className={`text-xs font-sans font-bold whitespace-nowrap px-4 py-2 rounded-[12px] transition-all ${
-                currentSection === section
-                  ? 'bg-[#CCFF00] text-black shadow-lg'
-                  : completedSections.has(section)
-                  ? 'text-[#CCFF00] bg-[#CCFF00]/10'
-                  : 'text-zinc-500 bg-white/5'
-              }`}
-            >
-              {completedSections.has(section) && '✓ '}
-              {sectionTitles[section]}
-            </button>
-          ))}
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          {/* Navigation container - Minimal design */}
+          <div className="relative">
+            {/* Section buttons - Mobile touch-friendly */}
+            <div className="grid grid-cols-5 gap-2">
+              {sections.map((section) => {
+                const isCompleted = completedSections.has(section);
+                const isCurrent = currentSection === section;
+
+                return (
+                  <button
+                    key={section}
+                    onClick={() => setCurrentSection(section)}
+                    className={`relative min-h-[48px] px-2 py-3 rounded-[16px] transition-all flex flex-col items-center justify-center gap-1 ${
+                      isCurrent
+                        ? 'bg-white/10'
+                        : 'hover:bg-white/5'
+                    }`}
+                  >
+                    {/* Active indicator - bottom bar */}
+                    {isCurrent && (
+                      <motion.div
+                        layoutId="activeSection"
+                        className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#CCFF00] rounded-full"
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                      />
+                    )}
+
+                    {/* Completion indicator - top bar */}
+                    {isCompleted && !isCurrent && (
+                      <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#CCFF00]/50 rounded-full" />
+                    )}
+
+                    {/* Text label */}
+                    <span className={`text-[10px] leading-tight text-center font-bold uppercase tracking-wide transition-colors ${
+                      isCurrent
+                        ? 'text-[#CCFF00]'
+                        : isCompleted
+                        ? 'text-[#CCFF00]/70'
+                        : 'text-zinc-500'
+                    }`}>
+                      {sectionTitles[section]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -138,9 +227,22 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
               >
                 <div className="text-xs font-sans font-bold text-zinc-500 mb-2 uppercase tracking-wider">KHỞI ĐỘNG • {lesson.warmup.type.toUpperCase()}</div>
                 <h2 className="text-2xl font-heading font-black tracking-tight mb-4">{lesson.warmup.title}</h2>
-                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8">
-                  <p className="text-lg font-sans leading-relaxed">{lesson.warmup.content}</p>
+
+                {/* Bilingual content card */}
+                <div className="bg-white/5 border border-white/10 rounded-[24px] overflow-hidden">
+                  {/* English version */}
+                  <div className="p-8 border-b border-white/10">
+                    <div className="text-xs font-sans font-bold text-[#CCFF00] mb-3 uppercase tracking-wider">ENGLISH</div>
+                    <p className="text-lg font-sans leading-relaxed text-white">{lesson.warmup.content}</p>
+                  </div>
+
+                  {/* Vietnamese translation */}
+                  <div className="p-8 bg-black/30">
+                    <div className="text-xs font-sans font-bold text-zinc-500 mb-3 uppercase tracking-wider">TIẾNG VIỆT</div>
+                    <p className="text-base font-sans leading-relaxed text-zinc-300">{lesson.warmup.contentVi}</p>
+                  </div>
                 </div>
+
                 <button
                   onClick={goToNextSection}
                   className="w-full bg-[#CCFF00] text-black py-4 rounded-[28px] font-sans font-bold hover:bg-[#CCFF00]/90 transition-colors clay-accent"
@@ -163,23 +265,103 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                 <h2 className="text-2xl font-heading font-black tracking-tight mb-6">Từ vựng quan trọng</h2>
 
                 <div className="grid gap-4">
-                  {lesson.vocabulary.map((vocab, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="bg-white/5 border border-white/10 rounded-[20px] p-6 hover:border-[#CCFF00]/50 transition-colors cursor-pointer"
-                      onClick={() => setActiveVocab(vocab)}
-                    >
-                      <div className="flex items-baseline gap-3 mb-2">
-                        <span className="text-xl font-heading font-black">{vocab.word}</span>
-                        <span className="text-sm font-sans text-zinc-400">{vocab.partOfSpeech}</span>
-                        <span className="text-sm font-mono text-[#CCFF00]">{vocab.pronunciation}</span>
-                      </div>
-                      <p className="font-sans text-zinc-300">{vocab.meaning}</p>
-                    </motion.div>
-                  ))}
+                  {lesson.vocabulary.map((vocab, index) => {
+                    const isExpanded = flippedCards.has(index);
+                    return (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="bg-white/5 border border-white/10 rounded-[20px] overflow-hidden cursor-pointer"
+                        onClick={() => {
+                          setFlippedCards(prev => {
+                            const newSet = new Set(prev);
+                            if (newSet.has(index)) {
+                              newSet.delete(index);
+                            } else {
+                              newSet.add(index);
+                              // Track vocab view when user expands the card
+                              const vocabId = `${lesson.id}_${vocab.word}`;
+                              onVocabView?.(vocabId);
+                            }
+                            return newSet;
+                          });
+                        }}
+                      >
+                        {/* Always visible - English word */}
+                        <div className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-baseline gap-3 mb-2">
+                                <span className="text-2xl font-heading font-black text-white">{vocab.word}</span>
+                                <span className="text-sm font-sans text-zinc-400">{vocab.partOfSpeech}</span>
+                              </div>
+                              <div className="text-base font-mono text-[#CCFF00]">{vocab.pronunciation}</div>
+                            </div>
+
+                            {/* Audio button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePlayVocab(vocab);
+                              }}
+                              className="flex-shrink-0 w-12 h-12 rounded-full bg-[#CCFF00]/20 hover:bg-[#CCFF00]/30 flex items-center justify-center transition-colors"
+                              aria-label="Phát âm"
+                            >
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                              </svg>
+                            </button>
+                          </div>
+
+                          {!isExpanded && (
+                            <div className="flex items-center gap-2 text-xs font-sans text-zinc-500">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M19 9l-7 7-7-7"></path>
+                              </svg>
+                              <span>Nhấp để xem nghĩa tiếng Việt và ví dụ</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Expandable content - Vietnamese meaning & examples */}
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: 'easeInOut' }}
+                              className="border-t border-white/10 bg-gradient-to-br from-[#CCFF00]/10 to-[#CCFF00]/5"
+                            >
+                              <div className="p-6 space-y-4">
+                                <div>
+                                  <div className="text-xs font-sans font-bold text-[#CCFF00] mb-2 uppercase tracking-wider">NGHĨA TIẾNG VIỆT</div>
+                                  <p className="text-xl font-sans font-bold text-white">{vocab.meaning}</p>
+                                </div>
+
+                                <div className="bg-black/30 rounded-[16px] p-4">
+                                  <div className="text-xs font-sans font-bold text-zinc-500 mb-2 uppercase">VÍ DỤ</div>
+                                  <p className="text-sm font-sans text-[#CCFF00] italic mb-2">"{vocab.exampleEN}"</p>
+                                  <p className="text-sm font-sans text-zinc-400">"{vocab.exampleVI}"</p>
+                                </div>
+
+                                <div className="flex items-center justify-center gap-2 text-xs font-sans text-zinc-500 pt-2">
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M5 15l7-7 7 7"></path>
+                                  </svg>
+                                  <span>Nhấp để thu gọn</span>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    );
+                  })}
                 </div>
 
                 <button
@@ -346,11 +528,16 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-red-500/10 border border-red-500/30 rounded-[16px] p-4"
+                      className="bg-red-500/10 border border-red-500/30 rounded-[16px] p-4 space-y-3"
                     >
                       <p className="text-sm font-sans text-red-400">
                         💭 {lesson.grammar.quiz.feedback}
                       </p>
+                      <div className="pt-3 border-t border-red-500/20">
+                        <p className="text-xs font-sans font-bold text-red-300 mb-1">ĐÁP ÁN ĐÚNG:</p>
+                        <p className="text-base font-sans font-bold text-[#CCFF00]">"{lesson.grammar.quiz.correctAnswer}"</p>
+                      </div>
+                      <p className="text-xs font-sans text-zinc-500 italic">Tự động chuyển sang phần tiếp theo sau 4 giây...</p>
                     </motion.div>
                   )}
 
@@ -626,7 +813,7 @@ export default function Lesson({ lesson, onComplete, onNext, onPractice }: Lesso
                 <div className="bg-white/5 rounded-[20px] p-6 space-y-3">
                   <div className="text-xs font-sans font-bold text-zinc-500 mb-2 uppercase tracking-wider">VÍ DỤ</div>
                   <p className="font-sans text-[#CCFF00] italic">"{activeVocab.exampleEN}"</p>
-                  <p className="font-sans text-zinc-400">"{activeVocab.exampleVi}"</p>
+                  <p className="font-sans text-zinc-400">"{activeVocab.exampleVI}"</p>
                 </div>
 
                 <div className="flex gap-4">

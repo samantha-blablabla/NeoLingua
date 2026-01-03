@@ -315,7 +315,7 @@ const App: React.FC = () => {
         {view === 'success' && <SuccessScreen streak={stats.streak} onReturn={() => setView('home')} />}
         {view === 'chat' && <UrbanChat scenario="Coffee shop vibes" context_vi="Học cách gọi cafe cực nghệ" onBack={() => setView('home')} />}
         {view === 'podcast' && currentLesson && <PodcastScreen lesson={currentLesson} favoriteLessons={stats.favoriteLessons} onToggleFavorite={() => {}} onBack={() => setView('home')} onSelectLesson={() => {}} />}
-        {view === 'curriculum' && <Dashboard />}
+        {view === 'curriculum' && <Dashboard onBack={() => setView('home')} />}
       </AnimatePresence>
 
       {/* Subtle fade overlay at bottom - only for scroll aesthetic */}
@@ -323,22 +323,25 @@ const App: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/60 via-transparent to-transparent" />
       </div>
 
-      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[92%] z-[100]">
-        <div className="floating-dock h-24 rounded-[40px] px-8 flex justify-between items-center shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)]">
-          <button onClick={() => setView('home')} className="flex-1 flex flex-col items-center justify-center gap-1.5 active:scale-90 transition-transform">
-            <HomeIcon size={26} color={view === 'home' ? '#CCFF00' : '#444'} />
-            <span className={`text-[9px] font-sans font-black uppercase tracking-[0.15em] ${view === 'home' ? 'text-[#CCFF00]' : 'text-zinc-800'}`}>HUB</span>
-          </button>
-          <button onClick={() => setView('roadmap')} className="flex-1 flex flex-col items-center justify-center gap-1.5 active:scale-90 transition-transform">
-            <MedalIcon size={26} color={view === 'roadmap' ? '#CCFF00' : '#444'} />
-            <span className={`text-[9px] font-sans font-black uppercase tracking-[0.15em] ${view === 'roadmap' ? 'text-[#CCFF00]' : 'text-zinc-800'}`}>PATH</span>
-          </button>
-          <button onClick={() => setView('vault')} className="flex-1 flex flex-col items-center justify-center gap-1.5 active:scale-90 transition-transform">
-            <LibraryIcon size={26} color={view === 'vault' ? '#CCFF00' : '#444'} />
-            <span className={`text-[9px] font-sans font-black uppercase tracking-[0.15em] ${view === 'vault' ? 'text-[#CCFF00]' : 'text-zinc-800'}`}>VAULT</span>
-          </button>
+      {/* Hide bottom navigation when in curriculum/lesson views */}
+      {view !== 'curriculum' && view !== 'lessonDetail' && view !== 'chat' && (
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[92%] z-[100]">
+          <div className="floating-dock h-24 rounded-[40px] px-8 flex justify-between items-center shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)]">
+            <button onClick={() => setView('home')} className="flex-1 flex flex-col items-center justify-center gap-1.5 active:scale-90 transition-transform">
+              <HomeIcon size={26} color={view === 'home' ? '#CCFF00' : '#444'} />
+              <span className={`text-[9px] font-sans font-black uppercase tracking-[0.15em] ${view === 'home' ? 'text-[#CCFF00]' : 'text-zinc-800'}`}>HUB</span>
+            </button>
+            <button onClick={() => setView('roadmap')} className="flex-1 flex flex-col items-center justify-center gap-1.5 active:scale-90 transition-transform">
+              <MedalIcon size={26} color={view === 'roadmap' ? '#CCFF00' : '#444'} />
+              <span className={`text-[9px] font-sans font-black uppercase tracking-[0.15em] ${view === 'roadmap' ? 'text-[#CCFF00]' : 'text-zinc-800'}`}>PATH</span>
+            </button>
+            <button onClick={() => setView('vault')} className="flex-1 flex flex-col items-center justify-center gap-1.5 active:scale-90 transition-transform">
+              <LibraryIcon size={26} color={view === 'vault' ? '#CCFF00' : '#444'} />
+              <span className={`text-[9px] font-sans font-black uppercase tracking-[0.15em] ${view === 'vault' ? 'text-[#CCFF00]' : 'text-zinc-800'}`}>VAULT</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
       
       {loading && (
         <div className="fixed inset-0 bg-[#0A0A0A] backdrop-blur-3xl z-[1000] flex flex-col items-center justify-center">

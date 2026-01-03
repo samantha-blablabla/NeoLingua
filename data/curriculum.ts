@@ -42,7 +42,9 @@ export interface Lesson {
   id: string;
   moduleId: string;
   title: string;
+  titleVi?: string; // Vietnamese title (optional, defaults to English)
   description: string;
+  descriptionVi?: string; // Vietnamese description
   level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
   estimatedMinutes: number;
 
@@ -50,6 +52,7 @@ export interface Lesson {
   warmup: {
     type: 'text' | 'audio' | 'video';
     content: string;
+    contentVi: string; // Vietnamese translation
     title: string;
   };
 
@@ -89,6 +92,7 @@ const lessonA1_1: Lesson = {
   id: 'a1-1',
   moduleId: 'module-a1',
   title: 'Greetings & Introductions',
+  descriptionVi: 'Học cách chào hỏi và tự giới thiệu bản thân bằng tiếng Anh',
   description: 'Learn how to greet people and introduce yourself in English',
   level: 'A1',
   estimatedMinutes: 25,
@@ -96,9 +100,8 @@ const lessonA1_1: Lesson = {
   warmup: {
     type: 'text',
     title: 'Meeting Someone New',
-    content: `Imagine you're entering a coffee shop for the first time.
-    A friendly barista greets you with a smile.
-    How do you respond? Let's learn the basics of English greetings!`
+    content: `Imagine you're entering a coffee shop for the first time. A friendly barista greets you with a smile. How do you respond? Let's learn the basics of English greetings!`,
+    contentVi: `Hãy tưởng tượng bạn đang bước vào một quán cà phê lần đầu tiên. Một barista thân thiện chào bạn với nụ cười. Bạn sẽ phản ứng như thế nào? Cùng học những cách chào hỏi cơ bản trong tiếng Anh nhé!`
   },
 
   vocabulary: [
@@ -240,6 +243,7 @@ const lessonA1_2: Lesson = {
   id: 'a1-2',
   moduleId: 'module-a1',
   title: 'Ordering Food & Drinks',
+  descriptionVi: 'Học cách gọi đồ ăn và đồ uống tại nhà hàng và quán cafe',
   description: 'Learn how to order food and drinks at restaurants and cafes',
   level: 'A1',
   estimatedMinutes: 25,
@@ -247,9 +251,8 @@ const lessonA1_2: Lesson = {
   warmup: {
     type: 'text',
     title: 'At the Coffee Shop',
-    content: `You're at a coffee shop and want to order something.
-    The menu looks great, but how do you order in English?
-    Let's learn the essential phrases!`
+    content: `You're at a coffee shop and want to order something. The menu looks great, but how do you order in English? Let's learn the essential phrases!`,
+    contentVi: `Bạn đang ở quán cà phê và muốn gọi món. Thực đơn trông rất hấp dẫn, nhưng làm sao để gọi món bằng tiếng Anh? Cùng học những cụm từ thiết yếu nhé!`
   },
 
   vocabulary: [
@@ -395,6 +398,7 @@ const lessonA1_3: Lesson = {
   id: 'a1-3',
   moduleId: 'module-a1',
   title: 'Numbers & Shopping',
+  descriptionVi: 'Học số đếm và cách mua sắm bằng tiếng Anh',
   description: 'Learn numbers and how to shop in English',
   level: 'A1',
   estimatedMinutes: 25,
@@ -402,9 +406,8 @@ const lessonA1_3: Lesson = {
   warmup: {
     type: 'text',
     title: 'Shopping Time',
-    content: `You're at a clothing store and found a nice shirt.
-    But wait - how much does it cost? And what's your size?
-    Let's learn numbers and shopping phrases!`
+    content: `You're at a clothing store and found a nice shirt. But wait - how much does it cost? And what's your size? Let's learn numbers and shopping phrases!`,
+    contentVi: `Bạn đang ở cửa hàng quần áo và tìm thấy một chiếc áo đẹp. Nhưng khoan - giá bao nhiêu nhỉ? Và size của bạn là gì? Cùng học số đếm và các cụm từ mua sắm nhé!`
   },
 
   vocabulary: [
@@ -551,6 +554,7 @@ const lessonA1_4: Lesson = {
   id: 'a1-4',
   moduleId: 'module-a1',
   title: 'Asking for Directions',
+  descriptionVi: 'Học cách hỏi đường và chỉ đường đơn giản bằng tiếng Anh',
   description: 'Learn how to ask for and give simple directions in English',
   level: 'A1',
   estimatedMinutes: 25,
@@ -559,7 +563,8 @@ const lessonA1_4: Lesson = {
   warmup: {
     type: 'text',
     title: 'Finding Your Way',
-    content: `You're visiting a new city and need to find the nearest subway station. A local person stops to help you. How do you ask for directions? Let's learn!`
+    content: `You're visiting a new city and need to find the nearest subway station. A local person stops to help you. How do you ask for directions? Let's learn!`,
+    contentVi: `Bạn đang thăm một thành phố mới và cần tìm trạm tàu điện ngầm gần nhất. Một người dân địa phương dừng lại để giúp bạn. Làm sao để hỏi đường? Cùng học nhé!`
   },
 
   vocabulary: [
@@ -702,6 +707,7 @@ const lessonA1_5: Lesson = {
   id: 'a1-5',
   moduleId: 'module-a1',
   title: 'At the Restaurant',
+  descriptionVi: 'Học các cụm từ cần thiết để đi ăn nhà hàng và gọi món',
   description: 'Learn essential phrases for dining out and ordering food',
   level: 'A1',
   estimatedMinutes: 30,
@@ -710,7 +716,8 @@ const lessonA1_5: Lesson = {
   warmup: {
     type: 'text',
     title: 'Dining Out',
-    content: `You're having dinner at a restaurant. The waiter approaches your table with a menu. What do you say? Let's learn restaurant English!`
+    content: `You're having dinner at a restaurant. The waiter approaches your table with a menu. What do you say? Let's learn restaurant English!`,
+    contentVi: `Bạn đang ăn tối ở nhà hàng. Người phục vụ tiến đến bàn của bạn với thực đơn. Bạn sẽ nói gì? Cùng học tiếng Anh trong nhà hàng nhé!`
   },
 
   vocabulary: [
@@ -840,6 +847,7 @@ const lessonA1_6: Lesson = {
   id: 'a1-6',
   moduleId: 'module-a1',
   title: 'Making Small Talk',
+  descriptionVi: 'Học cách trò chuyện nhẹ về thời tiết, sở thích và kế hoạch cuối tuần',
   description: 'Learn casual conversation topics like weather, hobbies, and weekend plans',
   level: 'A1',
   estimatedMinutes: 25,
@@ -848,7 +856,8 @@ const lessonA1_6: Lesson = {
   warmup: {
     type: 'text',
     title: 'Breaking the Ice',
-    content: `You're waiting for the elevator with a colleague. There's an awkward silence. How do you start a friendly conversation? Let's learn small talk!`
+    content: `You're waiting for the elevator with a colleague. There's an awkward silence. How do you start a friendly conversation? Let's learn small talk!`,
+    contentVi: `Bạn đang đợi thang máy cùng một đồng nghiệp. Không khí có chút ngượng ngùng. Làm sao để bắt đầu cuộc trò chuyện thân thiện? Cùng học cách nói chuyện phiếm nhé!`
   },
 
   vocabulary: [
@@ -985,6 +994,7 @@ const lessonA1_7: Lesson = {
   id: 'a1-7',
   moduleId: 'module-a1',
   title: 'Using Public Transport',
+  descriptionVi: 'Học cách mua vé, hỏi về lịch trình và sử dụng phương tiện công cộng',
   description: 'Learn how to buy tickets, ask about schedules, and navigate public transport',
   level: 'A1',
   estimatedMinutes: 30,
@@ -993,7 +1003,8 @@ const lessonA1_7: Lesson = {
   warmup: {
     type: 'text',
     title: 'Taking the Train',
-    content: `You need to catch a train to the airport. You're at the station ticket counter. How do you buy a ticket and ask about the departure time? Let's learn!`
+    content: `You need to catch a train to the airport. You're at the station ticket counter. How do you buy a ticket and ask about the departure time? Let's learn!`,
+    contentVi: `Bạn cần bắt tàu đến sân bay. Bạn đang ở quầy vé ga tàu. Làm sao để mua vé và hỏi về giờ khởi hành? Cùng học nhé!`
   },
 
   vocabulary: [
@@ -1133,6 +1144,7 @@ const lessonA1_8: Lesson = {
   id: 'a1-8',
   moduleId: 'module-a1',
   title: 'Emergency Situations',
+  descriptionVi: 'Các cụm từ cần thiết để xin giúp đỡ khi gặp khó khăn hoặc cần hỗ trợ',
   description: "Essential phrases for asking for help when you're in trouble or need assistance",
   level: 'A1',
   estimatedMinutes: 30,
@@ -1140,7 +1152,8 @@ const lessonA1_8: Lesson = {
   warmup: {
     type: 'text',
     title: 'When You Need Help',
-    content: `You're lost in a foreign city and your phone battery died. You need help finding your hotel. What do you say? Let's learn important emergency phrases!`
+    content: `You're lost in a foreign city and your phone battery died. You need help finding your hotel. What do you say? Let's learn important emergency phrases!`,
+    contentVi: `Bạn bị lạc trong một thành phố xa lạ và pin điện thoại đã hết. Bạn cần giúp đỡ để tìm khách sạn. Bạn sẽ nói gì? Cùng học những cụm từ khẩn cấp quan trọng nhé!`
   },
 
   vocabulary: [
